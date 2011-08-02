@@ -1,0 +1,20 @@
+- Criar função para permitir consultar campos java.util.Date
+- Permitir uso de nome de campo em expressões aritméticas
+- Implementar funções de agregação (count, max, min, sum, etc...)
+
+--------------------------------------------------------
+Para otimizar a consulta
+--------------------------------------------------------
+- Ignorar restrições que tenham resultado já conhecido em função da anterior
+  Ex: Se uma restrição tiver resultado "FALSE" e a próxima possuir operador "AND",
+  	  é certo que o resultado das duas dará "FALSE", então ignora-se a próxima.
+  Ex: Se uma restrição tiver resultado "TRUE" e a próxima possuir operador "OR",
+  	  é certo que o resultado das duas dará "TRUE", então ignora-se a próxima.
+
+- Resolver primeiro as retrições que não fazem produto cartesiano, sendo assim, quando for
+  fazer o produto cartersiano, as fontes/relações menores
+
+- Eliminar as restrições iguais/equivalentes
+
+- Fazer a projeção juntamente com a restrição, assim não será necessário iterar sobre o
+  resultado final
