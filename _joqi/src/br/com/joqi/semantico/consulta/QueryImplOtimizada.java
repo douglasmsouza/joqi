@@ -29,6 +29,7 @@ public class QueryImplOtimizada {
 		System.out.println("-------------------------------");
 		System.out.println("Tempo total : " + time + " ms");
 		System.out.println("-------------------------------");
+		//
 	}
 
 	private void criaReferenciasRelacoes() throws Exception {
