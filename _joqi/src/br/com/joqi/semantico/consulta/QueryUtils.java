@@ -1,7 +1,6 @@
 package br.com.joqi.semantico.consulta;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -58,30 +57,30 @@ public class QueryUtils {
 		Class<?> classe = objeto.getClass();
 
 		/*Se existe o metodo informado, retorna o valor*/
-		Method metodo = obterMetodo(classe, nomeCampo);
+		Method metodo = retornaMetodo(classe, nomeCampo);
 		if (metodo != null) {
-			return invocaMetodo(objeto, metodo);
+			return metodo.invoke(objeto);
 		}
 
 		String nmCampoMetodoGet = String.valueOf(nomeCampo.toCharArray()[0]).toUpperCase() + nomeCampo.substring(1);
 
 		/*Busca pelo metodo "get" */
-		metodo = obterMetodo(classe, "get" + nmCampoMetodoGet);
+		metodo = retornaMetodo(classe, "get" + nmCampoMetodoGet);
 		if (metodo != null) {
-			return invocaMetodo(objeto, metodo);
+			return metodo.invoke(objeto);
 		}
 
 		/*Se nao existir o metodo "get", busca pelo metodo "is" */
-		metodo = obterMetodo(classe, "is" + nmCampoMetodoGet);
+		metodo = retornaMetodo(classe, "is" + nmCampoMetodoGet);
 		if (metodo != null) {
-			return invocaMetodo(objeto, metodo);
+			return metodo.invoke(objeto);
 		}
 
 		/*Caso nao exista nenhum metodo, lanca excecao*/
 		throw new CampoInexistenteException("O campo/método \"" + nomeCampo + "\" não existe na classe \"" + objeto.getClass().getName() + "\"");
 	}
 
-	private static Method obterMetodo(Class<?> classe, String nomeCampo) {
+	private static Method retornaMetodo(Class<?> classe, String nomeCampo) {
 		Method metodo = null;
 		try {
 			metodo = classe.getMethod(nomeCampo);
@@ -89,18 +88,6 @@ public class QueryUtils {
 			return null;
 		}
 		return metodo;
-	}
-
-	private static Object invocaMetodo(Object objeto, Method metodo) {
-		Object obj = null;
-		try {
-			obj = metodo.invoke(objeto);
-		} catch (IllegalAccessException ia) {
-			ia.printStackTrace();
-		} catch (InvocationTargetException it) {
-			it.printStackTrace();
-		}
-		return obj;
 	}
 
 }
