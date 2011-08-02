@@ -1,6 +1,5 @@
 package br.com.joqi.semantico.consulta;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -19,8 +18,17 @@ public class QueryImplOtimizada {
 	}
 
 	public void getResultado() throws Exception {
+		double time = System.currentTimeMillis();
+		//
 		criaReferenciasRelacoes();
+		//
+		time = System.currentTimeMillis() - time;
+		//
 		System.out.println(relacoes);
+		//
+		System.out.println("-------------------------------");
+		System.out.println("Tempo total : " + time + " ms");
+		System.out.println("-------------------------------");
 	}
 
 	private void criaReferenciasRelacoes() throws Exception {
@@ -28,7 +36,6 @@ public class QueryImplOtimizada {
 		//
 		for (Relacao relacao : query.getRelacoes()) {
 			Collection<?> collection = QueryUtils.getColecao(objetoConsulta, relacao.getNome());
-			collection = new ArrayList<Object>(collection);
 			/*Insere a relacao em um HashMap*/
 			if (relacao.getApelido() != null) {
 				relacoes.put(relacao.getApelido(), collection);
@@ -36,6 +43,5 @@ public class QueryImplOtimizada {
 				relacoes.put(relacao.getNome(), collection);
 			}
 		}
-	}
-
+	}	
 }
