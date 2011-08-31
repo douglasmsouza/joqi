@@ -18,3 +18,17 @@ Para otimizar a consulta
 
 - Fazer a projeção juntamente com a restrição, assim não será necessário iterar sobre o
   resultado final
+  
+- Usar o conceito de tabela Hash. 
+  Ex: A(1,2,3,4,5)
+  	  B(2,4,6,8,10)
+  	  ------------------------------------------------------------------
+  	  Sendo a operação AxB:
+  	  Ler a relação A e criar uma tabela Hash com seus valores 
+  	  	Ex: (1,2,3,4,5) ===>> Hash ===>> (A,B,C,D,E)
+  	  Ler a relação B e para cada registro, verificar se ele existe na tabela Hash de A 
+  	  -----------------
+  	  Custo sem Hash: 5 Iterações em A * 5 Iterações em B = 25
+  	  Custo com Hash: 5 Iterações em A + 5 Iterações em B = 5
+  	  
+  	  				   
