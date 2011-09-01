@@ -39,21 +39,21 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 27/07/2011
 	 */
-	private class ObjetoCartesiano extends ResultObject {
+	private class Tupla extends ResultObject {
 
 		private boolean resultadoWhere;
 
-		public ObjetoCartesiano(Map<String, Object> objetos, boolean resultadoWhere) {
-			super(objetos);
+		public Tupla(Map<String, Object> campos, boolean resultadoWhere) {
+			super(campos);
 			setResultadoWhere(resultadoWhere);
 		}
 
-		public ObjetoCartesiano(Map<String, Object> objetos) {
-			super(objetos);
+		public Tupla(Map<String, Object> campos) {
+			super(campos);
 			setResultadoWhere(true);
 		}
 
-		public ObjetoCartesiano() {
+		public Tupla() {
 			this(new HashMap<String, Object>());
 		}
 
@@ -65,19 +65,19 @@ public class QueryImpl {
 			this.resultadoWhere = resultadoWhere;
 		}
 
-		public ObjetoCartesiano copiaObjetos() {
-			return new ObjetoCartesiano(get());
+		public Tupla copiaCampos() {
+			return new Tupla(get());
 		}
 
-		public ObjetoCartesiano copiaTudo() {
-			return new ObjetoCartesiano(get(), isResultadoWhere());
+		public Tupla copiaTudo() {
+			return new Tupla(get(), isResultadoWhere());
 		}
 	}
 
 	private class Relacoes extends HashMap<String, Collection<?>> {
 	}
 
-	private class ProdutoCartesiano extends ArrayList<ObjetoCartesiano> {
+	private class ProdutoCartesiano extends ArrayList<Tupla> {
 	}
 
 	private Query query;
@@ -146,7 +146,7 @@ public class QueryImpl {
 		Iterator<Entry<String, Collection<?>>> iterator = relacoes.entrySet().iterator();
 		Entry<String, Collection<?>> entry = iterator.next();
 		for (Object o1 : entry.getValue()) {
-			ObjetoCartesiano objCartesiano = new ObjetoCartesiano();
+			Tupla objCartesiano = new Tupla();
 			objCartesiano.add(entry.getKey(), o1);
 			resultado.add(objCartesiano);
 		}
@@ -154,11 +154,11 @@ public class QueryImpl {
 		while (iterator.hasNext()) {
 			entry = iterator.next();
 			//
-			Collection<ObjetoCartesiano> resultadoAux = new ArrayList<ObjetoCartesiano>();
+			Collection<Tupla> resultadoAux = new ArrayList<Tupla>();
 			//
 			for (Object o1 : entry.getValue()) {
-				for (ObjetoCartesiano objCartesiano : resultado) {
-					ObjetoCartesiano novoObjCartesiano = objCartesiano.copiaTudo();
+				for (Tupla objCartesiano : resultado) {
+					Tupla novoObjCartesiano = objCartesiano.copiaTudo();
 					novoObjCartesiano.add(entry.getKey(), o1);
 					resultadoAux.add(novoObjCartesiano);
 				}
@@ -177,7 +177,7 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 27/07/2011
 	 */
-	private ResultObject select(ObjetoCartesiano objetoCartesiano) throws Exception {
+	private ResultObject select(Tupla objetoCartesiano) throws Exception {
 		if (query.getProjecoes().size() == 0) {
 			return objetoCartesiano;
 		} else {
@@ -208,7 +208,7 @@ public class QueryImpl {
 		//
 		/*Passa por cada objeto do produto cartesiano, verificando se o objeto*/
 		/*encaixa-se em todas as restricoes do WHERE*/
-		for (ObjetoCartesiano objetoCartesiano : produtoCartesiano) {
+		for (Tupla objetoCartesiano : produtoCartesiano) {
 			if (where(query, objetoCartesiano)) {
 				resultado.add(select(objetoCartesiano));
 			}
@@ -223,7 +223,7 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 26/07/2011
 	 */
-	private boolean where(IPossuiRestricoes conjuntoRestricoes, ObjetoCartesiano objetoCartesiano) throws Exception {
+	private boolean where(IPossuiRestricoes conjuntoRestricoes, Tupla objetoCartesiano) throws Exception {
 		List<Restricao> restricoes = conjuntoRestricoes.getRestricoes();
 		/*Itera em todas as restricoes da clausula WHERE*/
 		for (int i = restricoes.size() - 1; i >= 0; i--) {
@@ -239,7 +239,7 @@ public class QueryImpl {
 				if (conjunto.isNegacao()) {
 					conjunto.negarRestricoes();
 				}
-				resultadoWhere = where(conjunto, objetoCartesiano.copiaObjetos());
+				resultadoWhere = where(conjunto, objetoCartesiano.copiaCampos());
 			}
 
 			/*Verifica se encaixa-se na restricao de acordo com o operador logico*/
@@ -275,7 +275,7 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 26/07/2011
 	 */
-	private boolean where(RestricaoSimples restricao, ObjetoCartesiano objetoCartesiano) throws Exception {
+	private boolean where(RestricaoSimples restricao, Tupla objetoCartesiano) throws Exception {
 		/*Quando existe mais de uma relacao na clausula WHERE, se o nome de um campo*/
 		/*eh utilizado na restricao, deve-se informar junto o nome da relacao */
 		/*da qual o campo pertence*/
@@ -378,7 +378,7 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 27/07/2011
 	 */
-	private Object getValorOperando(Projecao<?> operando, ObjetoCartesiano objetoCartesiano) throws Exception {
+	private Object getValorOperando(Projecao<?> operando, Tupla objetoCartesiano) throws Exception {
 		Object valor = operando.getValor();
 
 		/*Busca o objeto referente ao operando*/
