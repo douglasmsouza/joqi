@@ -1,10 +1,4 @@
-select	filho1.nmPessoa irmao,
-		filho2.nmPessoa pessoa
-from 	pessoas paiMae,
-		pessoas filho1,
-		pessoas filho2
-where	paiMae.cdPessoa = filho1.cdPai and 
-		paiMae.cdPessoa = filho2.cdPai and
-		filho1.cdPessoa <> filho2.cdPessoa and
-		filho2.apareceNaConsulta is true and
-		filho2.dtNascimento >= date('25/02/1989')
+from	pessoas p1,
+		pessoas p2
+where	p1.nmPessoa = 'douglas'
+		
