@@ -66,11 +66,11 @@ public class QueryImpl {
 		}
 
 		public Tupla copiaCampos() {
-			return new Tupla(get());
+			return new Tupla(this);
 		}
 
 		public Tupla copiaTudo() {
-			return new Tupla(get(), isResultadoWhere());
+			return new Tupla(this, isResultadoWhere());
 		}
 	}
 
@@ -147,7 +147,7 @@ public class QueryImpl {
 		Entry<String, Collection<?>> entry = iterator.next();
 		for (Object o1 : entry.getValue()) {
 			Tupla objCartesiano = new Tupla();
-			objCartesiano.add(entry.getKey(), o1);
+			objCartesiano.put(entry.getKey(), o1);
 			resultado.add(objCartesiano);
 		}
 		/*Vai fazendo o produto cartesiano com as seguintes relacoes*/
@@ -159,7 +159,7 @@ public class QueryImpl {
 			for (Object o1 : entry.getValue()) {
 				for (Tupla objCartesiano : resultado) {
 					Tupla novoObjCartesiano = objCartesiano.copiaTudo();
-					novoObjCartesiano.add(entry.getKey(), o1);
+					novoObjCartesiano.put(entry.getKey(), o1);
 					resultadoAux.add(novoObjCartesiano);
 				}
 			}
@@ -187,9 +187,9 @@ public class QueryImpl {
 				Object valorProjecao = getValorOperando(projecao, objetoCartesiano);
 				//
 				if (projecao.getApelido() == null) {
-					joqiObject.add(projecao.getValor().toString(), valorProjecao);
+					joqiObject.put(projecao.getValor().toString(), valorProjecao);
 				} else {
-					joqiObject.add(projecao.getApelido(), valorProjecao);
+					joqiObject.put(projecao.getApelido(), valorProjecao);
 				}
 			}
 			//
@@ -386,7 +386,7 @@ public class QueryImpl {
 		if (operando.getRelacao() != null)
 			objetoOperando = objetoCartesiano.get(operando.getRelacao());
 		else
-			objetoOperando = objetoCartesiano.get().values().iterator().next();
+			objetoOperando = objetoCartesiano.values().iterator().next();
 
 		/*Se o operando fizer referencia a um campo, busca o valor deste campo no objeto*/
 		if (operando.getClass() == ProjecaoCampo.class) {

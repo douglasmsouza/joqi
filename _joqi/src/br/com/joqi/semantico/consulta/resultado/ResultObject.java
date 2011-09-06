@@ -3,29 +3,18 @@ package br.com.joqi.semantico.consulta.resultado;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResultObject {
+public class ResultObject extends HashMap<String, Object> {
 
-	private Map<String, Object> campos;
-
-	public ResultObject(Map<String, Object> objetos) {
-		this.campos = new HashMap<String, Object>(objetos);
+	public ResultObject(Map<String, Object> m) {
+		super(m);
 	}
 
 	public ResultObject() {
-		this(new HashMap<String, Object>());
-	}
-
-	public void add(String campo, Object valor) {
-		campos.put(campo, valor);
-	}
-
-	public Object get(String name) {
-		return campos.get(name);
 	}
 
 	public String getString(String name) {
 		try {
-			return String.valueOf(campos.get(name));
+			return String.valueOf(get(name));
 		} catch (Exception e) {
 			return "";
 		}
@@ -33,7 +22,7 @@ public class ResultObject {
 
 	public int getInt(String name) {
 		try {
-			return Integer.valueOf(campos.get(name).toString());
+			return Integer.valueOf(get(name).toString());
 		} catch (Exception e) {
 			return 0;
 		}
@@ -41,7 +30,7 @@ public class ResultObject {
 
 	public double getDouble(String name) {
 		try {
-			return Double.valueOf(campos.get(name).toString());
+			return Double.valueOf(get(name).toString());
 		} catch (Exception e) {
 			return 0;
 		}
@@ -49,19 +38,10 @@ public class ResultObject {
 
 	public float getFloat(String name) {
 		try {
-			return Float.valueOf(campos.get(name).toString());
+			return Float.valueOf(get(name).toString());
 		} catch (Exception e) {
 			return 0;
 		}
-	}
-
-	public Map<String, Object> get() {
-		return campos;
-	}
-
-	@Override
-	public String toString() {
-		return campos.toString();
 	}
 
 }
