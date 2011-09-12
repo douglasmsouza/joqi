@@ -1,4 +1,5 @@
 from	pessoas p1,
 		pessoas p2
-where	p1.nmPessoa = 'douglas'
+where	p1.nmPessoa = 'douglas' or
+		p1.nmPessoa = 'nathalia'
 		
