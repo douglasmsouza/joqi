@@ -13,6 +13,7 @@ import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
+import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
@@ -36,32 +37,11 @@ public class QueryImplOtimizada {
 	private class Juncao extends ArrayList<Tupla> {
 	}
 
-	private class RelacaoResultante {
-		private Collection<?> tuplas;
-		private OperadorLogico operadorLogico;
-
-		public Collection<?> getTuplas() {
-			return tuplas;
-		}
-
-		public void setTuplas(Collection<?> tuplas) {
-			this.tuplas = tuplas;
-		}
-
-		public OperadorLogico getOperadorLogico() {
-			return operadorLogico;
-		}
-
-		public void setOperadorLogico(OperadorLogico operadorLogico) {
-			this.operadorLogico = operadorLogico;
-		}
-	}
-
 	private Query query;
 	private Object objetoConsulta;
 	//
 	private Map<String, Collection<?>> relacoes;
-	private Map<String, RelacaoResultante> relacoesResultantes;
+	private Map<String, Collection<Object>> relacoesResultantes;
 	private ResultList resultList;
 
 	public QueryImplOtimizada(Query query, Object objetoConsulta) {
@@ -73,6 +53,7 @@ public class QueryImplOtimizada {
 		double time = System.currentTimeMillis();
 		//
 		relacoes = new HashMap<String, Collection<?>>();
+		relacoesResultantes = new HashMap<String, Collection<Object>>();
 		/*Cria as referencias para as relacoes*/
 		for (Relacao relacao : query.getRelacoes()) {
 			Collection<?> collection = QueryUtils.getColecao(objetoConsulta, relacao.getNome());
@@ -107,12 +88,32 @@ public class QueryImplOtimizada {
 				if (restricao.efetuaJuncao()) {
 					juncao(restricao);
 				} else {
+					String relacao = getRelacaoString(restricao);
+					Collection<Object> relacaoAnterior = relacoesResultantes.get(relacao);
+					Collection<Object> relacaoResultante = where(restricao);
 					System.out.println(restricao);
-					System.out.println(where(restricao));
+					System.out.println(relacaoAnterior);
+					System.out.println(relacaoResultante);
 					System.out.println("-------------------");
+					//
+					if (relacaoAnterior == null) {
+						relacoesResultantes.put(relacao, relacaoResultante);
+					} else {
+						if(restricao.getOperadorLogico() != null){
+							if(restricao.getOperadorLogico().getClass() == OperadorLogicoAnd.class){
+								relacaoAnterior.retainAll(relacaoResultante);
+							} else {
+								relacaoAnterior.addAll(relacaoResultante);
+							}
+						} else {
+							relacoesResultantes.put(relacao, relacaoResultante);
+						}
+					}					
 				}
 			}
 		}
+		//
+		System.out.println(relacoesResultantes);
 		//
 		return resultado;
 	}
@@ -141,14 +142,8 @@ public class QueryImplOtimizada {
 			}
 		}
 		/*Relacao que sera pesquisada*/
-		Collection<?> relacao;
-		if (restricao.getOperando1().getRelacao() == null && restricao.getOperando2().getRelacao() == null) {
-			relacao = relacoes.values().iterator().next();
-		} else if (restricao.getOperando1().getRelacao() != null) {
-			relacao = relacoes.get(restricao.getOperando1().getRelacao());
-		} else {
-			relacao = relacoes.get(restricao.getOperando2().getRelacao());
-		}
+		Collection<?> relacao = getRelacaoCollection(restricao);
+
 		/*Tuplas resultantes desta restricao*/
 		Collection<Object> resultListTemp = new ArrayList<Object>();
 		/*Guarda os operandos e o operador da restricao*/
@@ -213,6 +208,26 @@ public class QueryImplOtimizada {
 		}
 		//
 		return resultListTemp;
+	}
+
+	private String getRelacaoString(RestricaoSimples restricao) {
+		if (restricao.getOperando1().getRelacao() == null && restricao.getOperando2().getRelacao() == null) {
+			return relacoes.keySet().iterator().next();
+		} else if (restricao.getOperando1().getRelacao() != null) {
+			return restricao.getOperando1().getRelacao();
+		} else {
+			return restricao.getOperando2().getRelacao();
+		}
+	}
+
+	private Collection<?> getRelacaoCollection(RestricaoSimples restricao) {
+		if (restricao.getOperando1().getRelacao() == null && restricao.getOperando2().getRelacao() == null) {
+			return relacoes.values().iterator().next();
+		} else if (restricao.getOperando1().getRelacao() != null) {
+			return relacoes.get(restricao.getOperando1().getRelacao());
+		} else {
+			return relacoes.get(restricao.getOperando2().getRelacao());
+		}
 	}
 
 	/**
