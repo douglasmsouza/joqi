@@ -11,6 +11,7 @@ public class BancoConsulta {
 	private List<String> strings;
 	private List<Float> floats;
 	private List<Object> todos;
+	private List<Integer> codigos;
 
 	public BancoConsulta() {
 		pessoas = criaListaPessoas();
@@ -18,6 +19,11 @@ public class BancoConsulta {
 		strings = criaListaStrings();
 		floats = criaListaFloats();
 		todos = criaListaTodos();
+		codigos = criaListaCodigos();
+	}
+
+	private List<Integer> criaListaCodigos() {
+		return new ArrayList<Integer>(Arrays.asList(2,4,6,9,7,20,36,54));
 	}
 
 	private List<Object> criaListaTodos() {
