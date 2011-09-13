@@ -12,7 +12,6 @@ import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
-import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
@@ -85,8 +84,11 @@ public class QueryImplOtimizada {
 		for (Restricao r : possuiRestricoes.getRestricoes()) {
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
+				//
+				verificaRestricao(restricao);
+				//
 				if (restricao.efetuaJuncao()) {
-					juncao(restricao);
+					System.out.println(juncao(restricao));
 				} else {
 					String relacao = getRelacaoString(restricao);
 					Collection<Object> relacaoAnterior = relacoesResultantes.get(relacao);
@@ -99,8 +101,8 @@ public class QueryImplOtimizada {
 					if (relacaoAnterior == null) {
 						relacoesResultantes.put(relacao, relacaoResultante);
 					} else {
-						if(restricao.getOperadorLogico() != null){
-							if(restricao.getOperadorLogico().getClass() == OperadorLogicoAnd.class){
+						if (restricao.getOperadorLogico() != null) {
+							if (restricao.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
 								relacaoAnterior.retainAll(relacaoResultante);
 							} else {
 								relacaoAnterior.addAll(relacaoResultante);
@@ -108,7 +110,7 @@ public class QueryImplOtimizada {
 						} else {
 							relacoesResultantes.put(relacao, relacaoResultante);
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -118,29 +120,38 @@ public class QueryImplOtimizada {
 		return resultado;
 	}
 
-	private void juncao(RestricaoSimples restricao) {
+	private Map<String, Collection<Object>> juncao(RestricaoSimples restricao) throws Exception {
+		Collection<Object> resultListTemp1 = new ArrayList<Object>();
+		Collection<Object> resultListTemp2 = new ArrayList<Object>();
+		//
+		Collection<?> relacao1 = relacoes.get(restricao.getOperando1().getRelacao());
+		Collection<?> relacao2 = relacoes.get(restricao.getOperando2().getRelacao());
+		//
+		Map<Object, Object> hashTable = new HashMap<Object, Object>();
+		//
+		for (Object tupla : relacao1) {
+			Object campo = restricao.getOperando1().getValor();
+			Object valor = QueryUtils.getValorDoCampo(tupla, campo.toString());
+			hashTable.put(valor, tupla);
+		}
+		//
+		for (Object tupla2 : relacao2) {
+			Object campo = restricao.getOperando2().getValor();
+			Object valor = QueryUtils.getValorDoCampo(tupla2, campo.toString());
+			Object tupla1 = hashTable.get(valor);
+			if (tupla1 != null) {
+				resultListTemp1.add(tupla1);
+				resultListTemp2.add(tupla2);
+			}
+		}
+		//
+		Map<String, Collection<Object>> relacoesResultantes = new HashMap<String, Collection<Object>>();
+		relacoesResultantes.put(restricao.getOperando1().getRelacao(), resultListTemp1);
+		relacoesResultantes.put(restricao.getOperando2().getRelacao(), resultListTemp2);
+		return relacoesResultantes;
 	}
 
 	private Collection<Object> where(RestricaoSimples restricao) throws Exception {
-		/*Quando existe mais de uma relacao na clausula WHERE, se o nome de um campo*/
-		/*eh utilizado na restricao, deve-se informar junto o nome da relacao */
-		/*da qual o campo pertence*/
-		if (relacoes.size() > 1) {
-			String exception = "Nome da relação obrigatório na cláusula WHERE (" + restricao.toString().trim() + ")";
-			if (restricao.getOperando1().getClass() == ProjecaoCampo.class) {
-				if (restricao.getOperando1().getRelacao() == null) {
-					throw new ClausulaWhereException(exception);
-				}
-			}
-			//
-			if (restricao.getOperando2() != null) {
-				if (restricao.getOperando2().getClass() == ProjecaoCampo.class) {
-					if (restricao.getOperando2().getRelacao() == null) {
-						throw new ClausulaWhereException(exception);
-					}
-				}
-			}
-		}
 		/*Relacao que sera pesquisada*/
 		Collection<?> relacao = getRelacaoCollection(restricao);
 
@@ -208,6 +219,28 @@ public class QueryImplOtimizada {
 		}
 		//
 		return resultListTemp;
+	}
+
+	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
+		/*Quando existe mais de uma relacao na clausula WHERE, se o nome de um campo*/
+		/*eh utilizado na restricao, deve-se informar junto o nome da relacao */
+		/*da qual o campo pertence*/
+		if (relacoes.size() > 1) {
+			String exception = "Nome da relação obrigatório na cláusula WHERE (" + restricao.toString().trim() + ")";
+			if (restricao.getOperando1().getClass() == ProjecaoCampo.class) {
+				if (restricao.getOperando1().getRelacao() == null) {
+					throw new ClausulaWhereException(exception);
+				}
+			}
+			//
+			if (restricao.getOperando2() != null) {
+				if (restricao.getOperando2().getClass() == ProjecaoCampo.class) {
+					if (restricao.getOperando2().getRelacao() == null) {
+						throw new ClausulaWhereException(exception);
+					}
+				}
+			}
+		}
 	}
 
 	private String getRelacaoString(RestricaoSimples restricao) {
