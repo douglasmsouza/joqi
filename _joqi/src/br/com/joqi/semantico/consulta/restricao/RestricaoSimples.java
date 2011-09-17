@@ -86,4 +86,12 @@ public class RestricaoSimples extends Restricao {
 		return operando1.getClass() == ProjecaoCampo.class && operando2.getClass() == ProjecaoCampo.class;
 	}
 
+	@Override
+	public int compareTo(Restricao o) {
+		if (efetuaJuncao()) {
+			return 1;
+		}
+		/*Restricao que nao eh uma juncao deve ser executada primeiro*/
+		return -1;
+	}
 }

@@ -1,3 +1,9 @@
 from	pessoas,
 		codigos
-where	pessoas.cdPessoa = codigos.intValue
+where	pessoas.cdPessoa = codigos.intValue and
+		pessoas.cdPessoa <= 3 
+		 
+		
+		
+		
+		

@@ -3,6 +3,7 @@ package br.com.joqi.semantico.consulta;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -74,12 +75,19 @@ public class QueryImplOtimizada {
 
 		time = System.currentTimeMillis() - time;
 
+		StringBuilder sb = new StringBuilder(relacoesResultantes.toString().replace("], ", "]\n"));
+		System.out.println(sb.replace(0, 1, "").replace(sb.length() - 1, sb.length(), ""));
+
 		System.out.println("-------------------------------");
 		System.out.println("Tempo total : " + time + " ms");
 		System.out.println("-------------------------------");
 	}
 
 	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
+		/*Ordena as restricoes de forma que, as restricoes simples (campo = constante ou vice-versa)
+		 * sejam executadas primeiro e as juncoes sejam executadas depois*/
+		Collections.sort(possuiRestricoes.getRestricoes());
+		//
 		ResultList resultado = new ResultList();
 		//
 		for (Restricao r : possuiRestricoes.getRestricoes()) {
@@ -93,10 +101,10 @@ public class QueryImplOtimizada {
 					Map<String, Collection<Object>> juncao = juncao(restricao);
 					//
 					/*O Map da juncao possui 4 relacoes: As duas relacoes resultantes e as duas relacoes originais*/
-					Iterator<Entry<String,Collection<Object>>> iterator = juncao.entrySet().iterator();
+					Iterator<Entry<String, Collection<Object>>> iterator = juncao.entrySet().iterator();
 					/*Primeiro, pega a relacao resultante do lado esquerdo da restricao e sua relacao original*/
-					Entry<String,Collection<Object>> where = iterator.next();
-					Entry<String,Collection<Object>> relacao = iterator.next();
+					Entry<String, Collection<Object>> where = iterator.next();
+					Entry<String, Collection<Object>> relacao = iterator.next();
 					restringeCollection(restricao.getOperadorLogico(), where.getKey(), relacao.getValue(), where.getValue());
 					/*Depois, pega a relacao resultante do lado direito da restricao e sua relacao original*/
 					where = iterator.next();
@@ -110,17 +118,10 @@ public class QueryImplOtimizada {
 					/*Restringe a relacao "relacaoCollection"*/
 					Collection<Object> where = where(restricao);
 					//
-					System.out.println(restricao);
-					System.out.println(relacao);
-					System.out.println(where);
-					System.out.println("-------------------");
-					//
 					restringeCollection(restricao.getOperadorLogico(), nomeRelacao, relacao, where);
 				}
 			}
 		}
-		//
-		System.out.println(relacoesResultantes);
 		//
 		return resultado;
 	}

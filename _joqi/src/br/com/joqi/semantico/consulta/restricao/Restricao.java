@@ -7,7 +7,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
  * 
  * @author Douglas Matheus de Souza em 20/07/2011
  */
-public class Restricao {
+public class Restricao implements Comparable<Restricao> {
 
 	/*Flag que informa se tem o operador NOT na frente da restricao*/
 	private boolean negacao = false;
@@ -45,10 +45,15 @@ public class Restricao {
 	public void setNegacao(boolean negacao) {
 		this.negacao = negacao;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return super.equals(obj);
+	}
+
+	@Override
+	public int compareTo(Restricao o) {
+		return 0;
 	}
 
 }
