@@ -1,7 +1,8 @@
 from	pessoas,
 		codigos
 where	pessoas.cdPessoa = codigos.intValue and
-		pessoas.cdPessoa <= 3 
+		pessoas.cdPessoa > 3 and
+		pessoas.cdPessoa < 7 
 		 
 		
 		
