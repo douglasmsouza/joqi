@@ -99,7 +99,6 @@ public class QueryImplOtimizada {
 				if (restricao.efetuaJuncao()) {
 					/*Efetua a juncao entre as duas relacoes que estao na restricao*/
 					Map<String, Collection<Object>> juncao = juncao(restricao);
-					//
 					/*O Map da juncao possui 4 relacoes: As duas relacoes resultantes e as duas relacoes originais*/
 					Iterator<Entry<String, Collection<Object>>> iterator = juncao.entrySet().iterator();
 					/*Primeiro, pega a relacao resultante do lado esquerdo da restricao e sua relacao original*/
