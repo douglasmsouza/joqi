@@ -1,5 +1,3 @@
-from	pessoas p,
-		codigos c
-where	p.cdPessoa = c.intValue 
-		
-		
+from	pessoas,
+		codigos
+where	pessoas.cdPessoa = codigos.intValue

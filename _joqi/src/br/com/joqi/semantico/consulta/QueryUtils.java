@@ -22,7 +22,7 @@ public class QueryUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	protected static Collection<?> getColecao(Object objeto, String nome) throws Exception {
+	protected static Collection<Object> getColecao(Object objeto, String nome) throws Exception {
 		Class<?> clazz = objeto.getClass();
 		try {
 			Field atributo = clazz.getDeclaredField(nome);
@@ -37,7 +37,7 @@ public class QueryUtils {
 				atributo.setAccessible(false);
 
 			if (valor instanceof Collection) {
-				return (Collection<?>) valor;
+				return (Collection<Object>) valor;
 			}
 
 			throw new RelacaoInexistenteException("O objeto \"" + nome + "\" deve implementar a interface Collection");
