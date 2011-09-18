@@ -1,3 +1,10 @@
-from	pessoas
-where	dtNascimento between date('24/02/1989') and date('26/02/1989') or
-		not cdPessoa = 2 
+select	filho1.nmPessoa irmao,
+		filho2.nmPessoa pessoa
+from 	pessoas paiMae,
+		pessoas filho1,
+		pessoas filho2
+where	paiMae.cdPessoa = filho1.cdPai and 
+		paiMae.cdPessoa = filho2.cdPai and
+		filho1.cdPessoa <> filho2.cdPessoa and
+		filho2.apareceNaConsulta is true and
+		filho2.dtNascimento >= date('25/02/1989')
