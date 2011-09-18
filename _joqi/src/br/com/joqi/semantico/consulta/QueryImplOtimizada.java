@@ -255,6 +255,16 @@ public class QueryImplOtimizada {
 			if (operadorRelacional.getClass() == Entre.class) {
 				Projecao<?> operandoAux = ((Entre) operadorRelacional).getOperandoEntre();
 				valorOperandoAux = getValorOperando(operandoAux, tupla);
+				//
+				/*Dada a expressao "NOT z between x and y": 
+				 *Caso "z" seja NULO, a expressao eh valida por possuir o NOT na frente*/
+				if (valorOperandoAux == null) {
+					if (restricao.isNegacao()) {
+						resultListTemp.add(tupla);
+					}
+					continue;
+				}
+				//
 				if (!(valorOperandoAux instanceof Comparable<?>))
 					throw new ClausulaWhereException("O valor " + operandoAux.getValor() + " deve implementar a interface Comparable.");
 			}
