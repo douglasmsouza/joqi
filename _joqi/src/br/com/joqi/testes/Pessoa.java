@@ -15,13 +15,17 @@ public class Pessoa {
 	private Date dtNascimento;
 
 	public Pessoa(int cdPessoa, String nmPessoa, int vlIdade, int cdPai, int cdMae, boolean apareceNaConsulta) {
+		this(cdPessoa, nmPessoa, vlIdade, cdPai, cdMae, apareceNaConsulta, null);
+	}
+
+	public Pessoa(int cdPessoa, String nmPessoa, int vlIdade, int cdPai, int cdMae, boolean apareceNaConsulta, Date dtNascimento) {
 		this.cdPessoa = cdPessoa;
 		this.nmPessoa = nmPessoa;
 		this.vlIdade = vlIdade;
 		this.cdPai = cdPai;
 		this.cdMae = cdMae;
 		this.apareceNaConsulta = apareceNaConsulta;
-		this.dtNascimento = JoqiUtil.converteParaDate("25/02/1989");
+		this.dtNascimento = dtNascimento;
 	}
 
 	public int getCdPessoa() {

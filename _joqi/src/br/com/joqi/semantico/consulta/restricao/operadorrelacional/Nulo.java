@@ -7,4 +7,9 @@ public class Nulo extends OperadorRelacional {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return "is";
+	}
+
 }

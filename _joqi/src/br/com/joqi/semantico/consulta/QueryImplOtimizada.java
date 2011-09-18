@@ -20,6 +20,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
@@ -208,8 +209,6 @@ public class QueryImplOtimizada {
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
 		for (Object tupla : relacao) {
-			/*Tupla tupla = transformaEmTupla(objeto);*/
-			//
 			Object valorOperando1 = getValorOperando(operando1, tupla);
 
 			/*Se eh uma instrucao IS TRUE ou IS FALSE, compara logo de cara, uma vez que nao*/
@@ -218,6 +217,7 @@ public class QueryImplOtimizada {
 				if (verificaCondicao(valorOperando1.equals(operando2.getValor()), restricao)) {
 					resultListTemp.add(tupla);
 				}
+				continue;
 			}
 
 			/*Se eh uma instrucao IS NULL, segue o mesmo caminho das instrucoes IS TRUE e IS FALSE*/
@@ -225,10 +225,25 @@ public class QueryImplOtimizada {
 				if (verificaCondicao(valorOperando1 == null, restricao)) {
 					resultListTemp.add(tupla);
 				}
+				continue;
 			}
 
 			Object valorOperando2 = getValorOperando(operando2, tupla);
 			Object valorOperandoAux = null;
+
+			/*Caso o valor do campo na tupla seja NULL, eh um caso "especial" */
+			if (valorOperando1 == null || valorOperando2 == null) {
+				if (operadorRelacional.getClass() == Igual.class) {
+					if (restricao.isNegacao()) {
+						resultListTemp.add(tupla);
+					}
+				} else if (operadorRelacional.getClass() == Diferente.class) {
+					if (!restricao.isNegacao()) {
+						resultListTemp.add(tupla);
+					}
+				}
+				continue;
+			}
 
 			/*Para efetuar a comparacao, eh necessario que os dois valores implementem Comparable*/
 			if (!(valorOperando1 instanceof Comparable<?>))
@@ -259,6 +274,7 @@ public class QueryImplOtimizada {
 
 			if (verificaCondicao(operadorRelacional.compara(valor1Comp, valor2Comp, valorAuxComp), restricao)) {
 				resultListTemp.add(tupla);
+				continue;
 			}
 		}
 		/*A relacao resultante deste where + a ultima relacao resultante do ultimo where*/
@@ -292,22 +308,28 @@ public class QueryImplOtimizada {
 	}
 
 	private String getRelacaoString(RestricaoSimples restricao) {
-		if (restricao.getOperando1().getRelacao() == null && restricao.getOperando2().getRelacao() == null) {
+		Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando2 = restricao.getOperando2();
+		//
+		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
 			return relacoes.keySet().iterator().next();
-		} else if (restricao.getOperando1().getRelacao() != null) {
-			return restricao.getOperando1().getRelacao();
+		} else if (operando1.getRelacao() != null) {
+			return operando1.getRelacao();
 		} else {
-			return restricao.getOperando2().getRelacao();
+			return operando2.getRelacao();
 		}
 	}
 
 	private Collection<?> getRelacaoCollection(RestricaoSimples restricao) {
-		if (restricao.getOperando1().getRelacao() == null && restricao.getOperando2().getRelacao() == null) {
+		Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando2 = restricao.getOperando2();
+		//
+		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
 			return relacoes.values().iterator().next();
-		} else if (restricao.getOperando1().getRelacao() != null) {
-			return relacoes.get(restricao.getOperando1().getRelacao());
+		} else if (operando1.getRelacao() != null) {
+			return relacoes.get(operando1.getRelacao());
 		} else {
-			return relacoes.get(restricao.getOperando2().getRelacao());
+			return relacoes.get(operando2.getRelacao());
 		}
 	}
 
@@ -335,15 +357,6 @@ public class QueryImplOtimizada {
 		}
 		//
 		return valorOperando;
-	}
-
-	private Object getValorOperando(Projecao<?> operando, Tupla tupla) throws Exception {
-		Object valor = operando.getValor();
-		/*Se o operando fizer referencia a um campo, busca o valor deste campo na tupla*/
-		if (operando.getClass() == ProjecaoCampo.class) {
-			valor = tupla.get((String) valor);
-		}
-		return valor;
 	}
 
 	private Object getValorOperando(Projecao<?> operando, Object tupla) throws Exception {
