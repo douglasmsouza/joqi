@@ -1,2 +1,2 @@
 from	pessoas
-where	dtNascimento = date('25/02/1989') 
+where	not dtNascimento between date('24/02/1989') and date('26/02/1989') 
