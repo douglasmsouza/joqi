@@ -20,7 +20,6 @@ import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
@@ -98,29 +97,22 @@ public class QueryImplOtimizada {
 				//
 				verificaRestricao(restricao);
 				//
+				Map<String, Collection<Object>> where;
 				if (restricao.efetuaJuncao()) {
-					/*Efetua a juncao entre as duas relacoes que estao na restricao*/
-					Map<String, Collection<Object>> juncao = juncao(restricao);
-					/*O Map da juncao possui 4 relacoes: As duas relacoes resultantes e as duas relacoes originais*/
-					Iterator<Entry<String, Collection<Object>>> iterator = juncao.entrySet().iterator();
-					/*Primeiro, pega a relacao resultante do lado esquerdo da restricao e sua relacao original*/
-					Entry<String, Collection<Object>> where = iterator.next();
-					Entry<String, Collection<Object>> relacao = iterator.next();
-					restringeCollection(restricao.getOperadorLogico(), where.getKey(), relacao.getValue(), where.getValue());
-					/*Depois, pega a relacao resultante do lado direito da restricao e sua relacao original*/
-					where = iterator.next();
-					relacao = iterator.next();
-					restringeCollection(restricao.getOperadorLogico(), where.getKey(), relacao.getValue(), where.getValue());
+					where = juncao(restricao);
+				} else if (restricao.constante()) {
+					where = where(restricao);
 				} else {
-					/*Nome da relacao*/
-					String nomeRelacao = getRelacaoString(restricao);
-					/*Busca na lista de relacoes resultantes a que tem o nome descoberto anteriormente*/
-					Collection<Object> relacao = relacoesResultantes.get(nomeRelacao);
-					/*Restringe a relacao "relacaoCollection"*/
-					Collection<Object> where = where(restricao);
-					//
-					restringeCollection(restricao.getOperadorLogico(), nomeRelacao, relacao, where);
+					where = where(restricao);
 				}
+				/*Restringe a Collection com base na colecao produzida pela restricao e na 
+				 * colecao produzida pela restricao anterior*/
+				Iterator<Entry<String, Collection<Object>>> iterator = where.entrySet().iterator();
+				do {
+					Entry<String, Collection<Object>> relacaoWhere = iterator.next();
+					Entry<String, Collection<Object>> relacao = iterator.next();
+					restringeCollection(restricao.getOperadorLogico(), relacaoWhere.getKey(), relacao.getValue(), relacaoWhere.getValue());
+				} while (iterator.hasNext());
 			}
 		}
 		//
@@ -140,6 +132,8 @@ public class QueryImplOtimizada {
 					/*Se tem um operador logico OU, usa o addAll*/
 					relacao.addAll(where);
 				}
+				//
+				relacoesResultantes.put(nomeRelacao, relacao);
 			} else {
 				relacoesResultantes.put(nomeRelacao, where);
 			}
@@ -197,7 +191,11 @@ public class QueryImplOtimizada {
 		return relacoesResultantes;
 	}
 
-	private Collection<Object> where(RestricaoSimples restricao) throws Exception {
+	private Map<String, Collection<Object>> where(RestricaoSimples restricao) throws Exception {
+		/*Nome da relacao*/
+		String nomeRelacao = getRelacaoString(restricao);
+		/*Busca na lista de relacoes resultantes a que teve o nome descoberto anteriormente*/
+		Collection<Object> relacaoAnterior = relacoesResultantes.get(nomeRelacao);
 		/*Relacao que sera pesquisada*/
 		Collection<?> relacao = getRelacaoCollection(restricao);
 
@@ -263,8 +261,12 @@ public class QueryImplOtimizada {
 				resultListTemp.add(tupla);
 			}
 		}
+		/*A relacao resultante deste where + a ultima relacao resultante do ultimo where*/
+		Map<String, Collection<Object>> relacoesResultantes = new LinkedHashMap<String, Collection<Object>>();
+		relacoesResultantes.put(nomeRelacao, resultListTemp);
+		relacoesResultantes.put(nomeRelacao + "Anterior", relacaoAnterior);
 		//
-		return resultListTemp;
+		return relacoesResultantes;
 	}
 
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
