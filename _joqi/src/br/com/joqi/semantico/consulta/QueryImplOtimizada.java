@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
@@ -134,7 +136,7 @@ public class QueryImplOtimizada {
 					relacao.addAll(where);
 				}
 				//
-				relacoesResultantes.put(nomeRelacao, relacao);
+				relacoesResultantes.put(nomeRelacao, new HashSet<Object>(relacao));
 			} else {
 				relacoesResultantes.put(nomeRelacao, where);
 			}
