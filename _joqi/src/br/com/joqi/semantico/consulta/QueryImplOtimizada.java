@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
@@ -40,9 +38,6 @@ import br.com.joqi.semantico.exception.OperandosIncompativeisException;
 public class QueryImplOtimizada {
 
 	private class Tupla extends ResultObject {
-	}
-
-	private class Juncao extends ArrayList<Tupla> {
 	}
 
 	private Query query;
@@ -136,7 +131,7 @@ public class QueryImplOtimizada {
 					relacao.addAll(where);
 				}
 				//
-				relacoesResultantes.put(nomeRelacao, new HashSet<Object>(relacao));
+				relacoesResultantes.put(nomeRelacao, relacao);
 			} else {
 				relacoesResultantes.put(nomeRelacao, where);
 			}
@@ -151,11 +146,11 @@ public class QueryImplOtimizada {
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
-		Collection<Object> relacao1 = relacoesResultantes.get(nomeRelacao1);
+		Collection<Object> relacao1 = relacoes.get(nomeRelacao1);
 		if (relacao1 == null) {
 			relacao1 = relacoes.get(nomeRelacao1);
 		}
-		Collection<Object> relacao2 = relacoesResultantes.get(nomeRelacao2);
+		Collection<Object> relacao2 = relacoes.get(nomeRelacao2);
 		if (relacao2 == null) {
 			relacao2 = relacoes.get(nomeRelacao2);
 		}
