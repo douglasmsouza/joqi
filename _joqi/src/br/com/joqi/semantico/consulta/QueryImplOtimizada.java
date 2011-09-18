@@ -18,7 +18,9 @@ import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
@@ -150,6 +152,7 @@ public class QueryImplOtimizada {
 		//
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
 		Collection<Object> relacao1 = relacoesResultantes.get(nomeRelacao1);
 		if (relacao1 == null) {
@@ -161,7 +164,7 @@ public class QueryImplOtimizada {
 		}
 		//
 		Map<Object, Object> hashTable = new HashMap<Object, Object>();
-		//
+		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
 		for (Object tupla : relacao1) {
 			Object campo = restricao.getOperando1().getValor();
 			Object valor = QueryUtils.getValorDoCampo(tupla, campo.toString());
@@ -172,7 +175,15 @@ public class QueryImplOtimizada {
 			Object campo = restricao.getOperando2().getValor();
 			Object valor = QueryUtils.getValorDoCampo(tupla2, campo.toString());
 			Object tupla1 = hashTable.get(valor);
-			if (tupla1 != null) {
+			//
+			/*A condicao para que a restricao esteja OK eh que a tupla recuperada da hashTable exista*/
+			boolean condicao = tupla1 != null;
+			if (operadorRelacional.getClass() == Diferente.class) {
+				/*Se for um operador relacional "DIFERENTE", a condicao passa a ser o contrario*/
+				condicao = tupla1 == null;
+			}
+			//
+			if (verificaCondicao(condicao, restricao)) {
 				resultListTemp1.add(tupla1);
 				resultListTemp2.add(tupla2);
 			}
