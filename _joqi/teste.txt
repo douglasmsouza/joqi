@@ -1,7 +1,2 @@
-from	pessoas,
-		codigos
-where	pessoas.cdPessoa = codigos.intValue and
-		pessoas.cdPessoa = 2 
-		
-		
-		 
+from	pessoas
+where	dtNascimento = date('25/02/1989') 

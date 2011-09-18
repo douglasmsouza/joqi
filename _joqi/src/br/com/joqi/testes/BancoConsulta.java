@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import br.com.joqi.semantico.consulta.util.JoqiUtil;
+
 public class BancoConsulta {
 
 	private List<Pessoa> pessoas;
@@ -23,7 +25,7 @@ public class BancoConsulta {
 	}
 
 	private List<Integer> criaListaCodigos() {
-		return new ArrayList<Integer>(Arrays.asList(2,4,6,9,7,20,36,54));
+		return new ArrayList<Integer>(Arrays.asList(2, 4, 6, 9, 7, 20, 36, 54));
 	}
 
 	private List<Object> criaListaTodos() {
@@ -88,7 +90,7 @@ public class BancoConsulta {
 
 	private List<Pessoa> criaListaPessoas() {
 		return new ArrayList<Pessoa>(Arrays.asList(
-				new Pessoa(1, "Douglas", 22, 4, 3, true),
+				new Pessoa(1, "Douglas", 22, 4, 3, true, JoqiUtil.asDate("25/02/1989")),
 				new Pessoa(2, "Nathalia", 18, 4, 3, true),
 				new Pessoa(3, "Renata", 49, 7, 8, true),
 				new Pessoa(4, "Carlos", 50, 5, 6, true),

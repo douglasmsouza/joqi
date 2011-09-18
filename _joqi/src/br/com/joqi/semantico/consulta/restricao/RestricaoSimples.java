@@ -83,7 +83,7 @@ public class RestricaoSimples extends Restricao {
 	}
 
 	public boolean efetuaJuncao() {
-		return operando1.getClass() == ProjecaoCampo.class && operando2.getClass() == ProjecaoCampo.class;
+		return operando1.getClass() == ProjecaoCampo.class && operando2 != null && operando2.getClass() == ProjecaoCampo.class;
 	}
 
 	public boolean constante() {
