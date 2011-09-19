@@ -146,11 +146,11 @@ public class QueryImplOtimizada {
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
-		Collection<Object> relacao1 = relacoes.get(nomeRelacao1);
+		Collection<Object> relacao1 = relacoesResultantes.get(nomeRelacao1);
 		if (relacao1 == null) {
 			relacao1 = relacoes.get(nomeRelacao1);
 		}
-		Collection<Object> relacao2 = relacoes.get(nomeRelacao2);
+		Collection<Object> relacao2 = relacoesResultantes.get(nomeRelacao2);
 		if (relacao2 == null) {
 			relacao2 = relacoes.get(nomeRelacao2);
 		}
