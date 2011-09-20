@@ -14,7 +14,7 @@ public class ResultObject extends HashMap<String, Object> {
 
 	public String getString(String name) {
 		try {
-			return String.valueOf(get(name));
+			return (String) get(name);
 		} catch (Exception e) {
 			return "";
 		}
@@ -22,7 +22,7 @@ public class ResultObject extends HashMap<String, Object> {
 
 	public int getInt(String name) {
 		try {
-			return Integer.valueOf(get(name).toString());
+			return (Integer) get(name);
 		} catch (Exception e) {
 			return 0;
 		}
@@ -30,7 +30,7 @@ public class ResultObject extends HashMap<String, Object> {
 
 	public double getDouble(String name) {
 		try {
-			return Double.valueOf(get(name).toString());
+			return (Double) get(name);
 		} catch (Exception e) {
 			return 0;
 		}
@@ -38,7 +38,7 @@ public class ResultObject extends HashMap<String, Object> {
 
 	public float getFloat(String name) {
 		try {
-			return Float.valueOf(get(name).toString());
+			return (Float) get(name);
 		} catch (Exception e) {
 			return 0;
 		}
