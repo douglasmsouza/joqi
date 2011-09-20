@@ -105,9 +105,10 @@ public class QueryImpl {
 		//
 		for (ResultObject objeto : resultado) {
 			System.out.println(objeto);
-		}
-		System.out.println("-------------------------------");
+		}		
+		System.out.println("-------------------------------");		
 		System.out.println("Tempo total : " + time + " ms");
+		System.out.println("Registro....: " + resultado.size());
 		System.out.println("-------------------------------");
 	}
 
