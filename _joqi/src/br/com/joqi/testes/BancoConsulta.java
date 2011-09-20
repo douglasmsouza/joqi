@@ -124,16 +124,7 @@ public class BancoConsulta {
 				new Pessoa(32, "Katia", 45, 34, 33, true),
 				new Pessoa(33, "Marilene", 70, 0, 0, true),
 				new Pessoa(34, "Paulo", 70, 0, 0, true),
-				new Pessoa(35, "Dona Neide", 70, 0, 0, true),
-				new Pessoa(36, "Almira", 70, 0, 0, true),
-				new Pessoa(37, "Elza", 70, 0, 0, true),
-				new Pessoa(38, "Diego", 22, 39, 40, true),
-				new Pessoa(39, "Antonio", 70, 0, 0, true),
-				new Pessoa(40, "Joelma", 45, 0, 0, true),
-				new Pessoa(41, "Cruz", 45, 42, 43, true),
-				new Pessoa(42, "Jorge", 45, 0, 0, true),
-				new Pessoa(43, "Maria", 45, 0, 0, true),
-				new Pessoa(44, "Jorginho", 45, 42, 43, true)
+				new Pessoa(35, "Dona Neide", 70, 0, 0, true)
 				));
 	}
 }
