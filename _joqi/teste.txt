@@ -5,5 +5,6 @@ from 	pessoas pai,
 		pessoas filho2
 where	filho1.cdPai = filho2.cdPai  and
 		pai.cdPessoa = filho1.cdPai and
-		filho1.dtNascimento = date('25/02/1989')
+		(filho1.dtNascimento = date('25/02/1989') or
+		 filho1.nmPessoa = 'Carol')
 		
