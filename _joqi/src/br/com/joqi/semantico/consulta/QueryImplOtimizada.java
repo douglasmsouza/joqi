@@ -89,7 +89,8 @@ public class QueryImplOtimizada {
 		//
 		OperadorLogico operadorLogico = null;
 		//
-		for (Restricao r : possuiRestricoes.getRestricoes()) {
+		for (int i = 0; i < possuiRestricoes.getRestricoes().size(); i++) {
+			Restricao r = possuiRestricoes.getRestricoes().get(i);
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
 				//
@@ -114,6 +115,11 @@ public class QueryImplOtimizada {
 				} while (iterator.hasNext());
 				//
 				operadorLogico = restricao.getOperadorLogico();
+				if (operadorLogico == null) {
+					if (i < possuiRestricoes.getRestricoes().size() - 1) {
+						operadorLogico = possuiRestricoes.getRestricoes().get(i + 1).getOperadorLogico();
+					}
+				}
 			} else {
 				RestricaoConjunto restricaoConjunto = (RestricaoConjunto) r;
 				if (r.isNegacao())
