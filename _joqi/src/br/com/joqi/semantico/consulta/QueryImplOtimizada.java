@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -46,6 +47,8 @@ public class QueryImplOtimizada {
 	private Map<String, Collection<Object>> relacoes;
 	private Map<String, Collection<Object>> relacoesResultantes;
 	private ResultList resultList;
+
+	//
 
 	public QueryImplOtimizada(Query query, Object objetoConsulta) {
 		this.query = query;
@@ -89,6 +92,8 @@ public class QueryImplOtimizada {
 		//
 		ResultList resultado = new ResultList();
 		//
+		OperadorLogico operadorLogico = null;
+		//
 		for (Restricao r : possuiRestricoes.getRestricoes()) {
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
@@ -103,14 +108,17 @@ public class QueryImplOtimizada {
 				} else {
 					where = where(restricao);
 				}
+				//
 				/*Restringe a Collection com base na colecao produzida pela restricao e na 
 				 * colecao produzida pela restricao anterior*/
 				Iterator<Entry<String, Collection<Object>>> iterator = where.entrySet().iterator();
 				do {
 					Entry<String, Collection<Object>> relacaoWhere = iterator.next();
 					Entry<String, Collection<Object>> relacao = iterator.next();
-					restringeCollection(restricao.getOperadorLogico(), relacaoWhere.getKey(), relacao.getValue(), relacaoWhere.getValue());
+					restringeCollection(operadorLogico, relacaoWhere.getKey(), relacao.getValue(), relacaoWhere.getValue());
 				} while (iterator.hasNext());
+				//
+				operadorLogico = restricao.getOperadorLogico();
 			}
 		}
 		//
@@ -155,18 +163,23 @@ public class QueryImplOtimizada {
 			relacao2 = relacoes.get(nomeRelacao2);
 		}
 		//
-		Map<Object, Object> hashTable = new HashMap<Object, Object>();
+		Map<Object, List<Object>> hashTable = new HashMap<Object, List<Object>>();
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
 		for (Object tupla : relacao1) {
 			Object campo = restricao.getOperando1().getValor();
 			Object valor = QueryUtils.getValorDoCampo(tupla, campo.toString());
-			hashTable.put(valor, tupla);
+			List<Object> objetos = hashTable.get(valor);
+			if (objetos == null) {
+				objetos = new ArrayList<Object>();
+			}
+			objetos.add(tupla);
+			hashTable.put(valor, objetos);
 		}
 		//
 		for (Object tupla2 : relacao2) {
 			Object campo = restricao.getOperando2().getValor();
 			Object valor = QueryUtils.getValorDoCampo(tupla2, campo.toString());
-			Object tupla1 = hashTable.get(valor);
+			List<Object> tupla1 = hashTable.get(valor);
 			//
 			/*A condicao para que a restricao esteja OK eh que a tupla recuperada da hashTable exista*/
 			boolean condicao = tupla1 != null;
@@ -176,7 +189,7 @@ public class QueryImplOtimizada {
 			}
 			//
 			if (verificaCondicao(condicao, restricao)) {
-				resultListTemp1.add(tupla1);
+				resultListTemp1.addAll(tupla1);
 				resultListTemp2.add(tupla2);
 			}
 		}
