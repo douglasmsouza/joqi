@@ -1,6 +1,7 @@
 package br.com.joqi.semantico.consulta;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,17 @@ import br.com.joqi.semantico.exception.OperandosIncompativeisException;
 public class QueryImplOtimizadaNew {
 
 	private class Tupla extends ResultObject {
+		@Override
+		public Object get(Object key) {
+			Object value = super.get(key);
+			if(value == null){
+				value = super.get("get" + String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1));
+				if(value == null){
+					value = super.get("is" + String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1));	
+				}
+			}
+			return value; 
+		}
 	}
 
 	private Query query;
@@ -71,9 +83,9 @@ public class QueryImplOtimizadaNew {
 
 		/*StringBuilder sb = new StringBuilder(relacoesResultantes.toString().replace("], ", "]\n"));
 		System.out.println(sb.replace(0, 1, "").replace(sb.length() - 1, sb.length(), ""));*/
-		
-		for(ResultObject tupla : resultado)
-			System.out.println(tupla.get("cdPessoa") + " - " + tupla.get("nmPessoa"));
+
+		for (ResultObject tupla : resultado)
+			System.out.println(tupla.get("intValue"));
 
 		System.out.println("-------------------------------");
 		System.out.println("Tempo total : " + time + " ms");
@@ -349,17 +361,15 @@ public class QueryImplOtimizadaNew {
 	private Tupla transformaEmTupla(Object... objetos) throws Exception {
 		Tupla tupla = new Tupla();
 		//
-		for (Object obj : objetos) {
-			for (Field atributo : obj.getClass().getDeclaredFields()) {
-				boolean ehPrivado = !atributo.isAccessible();
-
-				if (ehPrivado)
-					atributo.setAccessible(true);
-
-				tupla.put(atributo.getName(), atributo.get(obj));
-
-				if (ehPrivado)
-					atributo.setAccessible(false);
+		for (Object objeto : objetos) {
+			for (Method metodo : objeto.getClass().getDeclaredMethods()) {
+				if (Modifier.isPublic(metodo.getModifiers())) {
+					if (metodo.getReturnType() != void.class) {
+						if (metodo.getParameterTypes().length == 0) {
+							tupla.put(metodo.getName(), metodo.invoke(objeto));
+						}
+					}
+				}
 			}
 		}
 		//
