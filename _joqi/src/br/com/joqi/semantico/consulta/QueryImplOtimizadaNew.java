@@ -2,6 +2,7 @@ package br.com.joqi.semantico.consulta;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,13 +39,13 @@ public class QueryImplOtimizadaNew {
 		@Override
 		public Object get(Object key) {
 			Object value = super.get(key);
-			if(value == null){
+			if (value == null) {
 				value = super.get("get" + String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1));
-				if(value == null){
-					value = super.get("is" + String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1));	
+				if (value == null) {
+					value = super.get("is" + String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1));
 				}
 			}
-			return value; 
+			return value;
 		}
 	}
 
@@ -97,10 +98,13 @@ public class QueryImplOtimizadaNew {
 		 * sejam executadas primeiro e as juncoes sejam executadas depois*/
 		Collections.sort(possuiRestricoes.getRestricoes());
 		//
-		ResultList resultadoFinal = null;
+		ResultList resultadoFinal = new ResultList();
 		ResultList resultadoWhere = null;
 		//
-		for (Restricao r : possuiRestricoes.getRestricoes()) {
+		OperadorLogico operadorLogico = null;
+		//
+		for (int i = 0; i < possuiRestricoes.getRestricoes().size(); i++) {
+			Restricao r = possuiRestricoes.getRestricoes().get(i);
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
 				//
@@ -114,19 +118,23 @@ public class QueryImplOtimizadaNew {
 					resultadoWhere = where(restricao);
 				}
 				//
-				if (resultadoFinal == null) {
-					resultadoFinal = resultadoWhere;
+				if (operadorLogico != null) {
+					if (operadorLogico.getClass() == OperadorLogicoAnd.class) {
+						/*Se nao eh a primeira restricao (operador logico <> null) ou tem um 
+						 * operador logico AND, entao usa o metodo retainAll para fazer a restricao*/
+						resultadoFinal.retainAll(resultadoWhere);
+					} else {
+						/*Se tem um operador logico OU, usa o addAll*/
+						resultadoFinal.addAll(resultadoWhere);
+					}
 				} else {
-					OperadorLogico operadorLogico = restricao.getOperadorLogico();
-					if (operadorLogico != null) {
-						if (operadorLogico.getClass() == OperadorLogicoAnd.class) {
-							/*Se nao eh a primeira restricao (operador logico <> null) ou tem um 
-							 * operador logico AND, entao usa o metodo retainAll para fazer a restricao*/
-							resultadoFinal.retainAll(resultadoWhere);
-						} else {
-							/*Se tem um operador logico OU, usa o addAll*/
-							resultadoFinal.addAll(resultadoWhere);
-						}
+					resultadoFinal.addAll(resultadoWhere);
+				}
+				//
+				operadorLogico = restricao.getOperadorLogico();
+				if (operadorLogico == null) {
+					if (i < possuiRestricoes.getRestricoes().size() - 1) {
+						operadorLogico = possuiRestricoes.getRestricoes().get(i + 1).getOperadorLogico();
 					}
 				}
 			}
