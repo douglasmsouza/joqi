@@ -100,18 +100,30 @@ public class RestricaoSimples extends Restricao {
 	}
 
 	public boolean isConstante() {
-		return operando1.getClass() != ProjecaoCampo.class && operando2.getClass() != ProjecaoCampo.class;
+		return operando1.getClass() != ProjecaoCampo.class || operando2.getClass() != ProjecaoCampo.class;
 	}
 
 	@Override
 	public int compareTo(Restricao o) {
-		if (isJuncao()) {
-			return 1;
+		RestricaoSimples outra = (RestricaoSimples) o;
+		//
+		if (outra.isJuncao()) {
+			if (isConstante()) {
+				return -1;
+			}
+			if (isProdutoCartesiano()) {
+				return 1;
+			}
+		} else if (outra.isConstante()) {
+			if (!isConstante()) {
+				return 1;
+			}
+		} else if (outra.isProdutoCartesiano()) {
+			if (!isProdutoCartesiano()) {
+				return -1;
+			}
 		}
-		if (isProdutoCartesiano()) {
-			return 2;
-		}
-		/*Restricao que nao eh uma juncao deve ser executada primeiro*/
-		return -1;
+		//
+		return 0;
 	}
 }
