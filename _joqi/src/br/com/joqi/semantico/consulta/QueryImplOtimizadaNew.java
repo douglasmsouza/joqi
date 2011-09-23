@@ -152,9 +152,9 @@ public class QueryImplOtimizadaNew {
 				condicao = objetos1 == null;
 			}
 			//
-			if (verificaCondicao(condicao, restricao)) {
-				Tupla tupla = new Tupla();
+			if (verificaCondicao(condicao, restricao)) {				
 				for (Object objeto1 : objetos1) {
+					Tupla tupla = new Tupla();
 					if (objeto1.getClass() == Tupla.class) {
 						tupla.putAll((Tupla) objeto1);
 					} else {
