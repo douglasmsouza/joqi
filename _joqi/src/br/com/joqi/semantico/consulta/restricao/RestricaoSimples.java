@@ -3,7 +3,9 @@ package br.com.joqi.semantico.consulta.restricao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 
 /**
@@ -82,18 +84,32 @@ public class RestricaoSimples extends Restricao {
 		return false;
 	}
 
-	public boolean efetuaJuncao() {
-		return operando1.getClass() == ProjecaoCampo.class && operando2 != null && operando2.getClass() == ProjecaoCampo.class;
+	public boolean isJuncao() {
+		return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
+				operando2.getClass() == ProjecaoCampo.class &&
+				((operadorRelacional.getClass() == Igual.class && !isNegacao()) ||
+						(operadorRelacional.getClass() == Diferente.class && isNegacao()));
 	}
 
-	public boolean constante() {
+	public boolean isProdutoCartesiano() {
+		return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
+				operando2.getClass() == ProjecaoCampo.class &&
+				((operadorRelacional.getClass() == Igual.class && isNegacao()) ||
+						(operadorRelacional.getClass() == Diferente.class && !isNegacao()) ||
+				 (operadorRelacional.getClass() != Igual.class && operadorRelacional.getClass() != Diferente.class));
+	}
+
+	public boolean isConstante() {
 		return operando1.getClass() != ProjecaoCampo.class && operando2.getClass() != ProjecaoCampo.class;
 	}
 
 	@Override
 	public int compareTo(Restricao o) {
-		if (efetuaJuncao()) {
+		if (isJuncao()) {
 			return 1;
+		}
+		if (isProdutoCartesiano()) {
+			return 2;
 		}
 		/*Restricao que nao eh uma juncao deve ser executada primeiro*/
 		return -1;

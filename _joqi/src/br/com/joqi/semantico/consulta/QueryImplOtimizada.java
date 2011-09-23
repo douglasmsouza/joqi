@@ -97,9 +97,9 @@ public class QueryImplOtimizada {
 				verificaRestricao(restricao);
 				//
 				Map<String, Collection<Object>> where;
-				if (restricao.efetuaJuncao()) {
+				if (restricao.isJuncao()) {
 					where = juncao(relacoesResultantes, restricao);
-				} else if (restricao.constante()) {
+				} else if (restricao.isConstante()) {
 					where = where(relacoesResultantes, restricao);
 				} else {
 					where = where(relacoesResultantes, restricao);
