@@ -21,6 +21,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
@@ -40,6 +41,7 @@ public class QueryImplOtimizadaNew {
 	private Object objetoConsulta;
 	//
 	private Map<String, Collection<Object>> relacoes;
+	private ResultList resultado;
 
 	public QueryImplOtimizadaNew(Query query, Object objetoConsulta) {
 		this.query = query;
@@ -95,7 +97,7 @@ public class QueryImplOtimizadaNew {
 				if (restricao.isJuncao()) {
 					juncao(relacoesResultantes, restricao);
 				} else if (restricao.isProdutoCartesiano()) {
-
+					
 				} else {
 					where(relacoesResultantes, restricao);
 				}
@@ -111,7 +113,7 @@ public class QueryImplOtimizadaNew {
 		return relacoesResultantes;
 	}
 
-	private Map<String, Collection<Object>> juncao(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+	private void juncao(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
 		Collection<Object> resultListTemp = new ArrayList<Object>();
 		//
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
@@ -131,7 +133,7 @@ public class QueryImplOtimizadaNew {
 		for (Object objeto1 : relacao1) {
 			Object campo = restricao.getOperando1().getValor();
 			Object objeto1Temp = objeto1;
-			if (objeto1.getClass() == Tupla.class) {
+			if (objeto1Temp.getClass() == Tupla.class) {
 				objeto1Temp = ((Tupla) objeto1).get(nomeRelacao1);
 			}
 			Object valor = QueryUtils.getValorDoCampo(objeto1Temp, campo.toString());
@@ -145,7 +147,11 @@ public class QueryImplOtimizadaNew {
 		//
 		for (Object objeto2 : relacao2) {
 			Object campo = restricao.getOperando2().getValor();
-			Object valor = QueryUtils.getValorDoCampo(objeto2, campo.toString());
+			Object objeto2Temp = objeto2;
+			if (objeto2Temp.getClass() == Tupla.class) {
+				objeto2Temp = ((Tupla) objeto2).get(nomeRelacao1);
+			}
+			Object valor = QueryUtils.getValorDoCampo(objeto2Temp, campo.toString());
 			List<Object> objetos1 = hashTable.get(valor);
 			//
 			if (verificaCondicao(objetos1 != null, restricao)) {
@@ -162,20 +168,13 @@ public class QueryImplOtimizadaNew {
 			}
 		}
 		//
-		for (String relacao : relacoesResultantes.keySet()) {
-			relacoesResultantes.put(relacao, resultListTemp);
-		}
 		relacoesResultantes.put(nomeRelacao1, resultListTemp);
 		relacoesResultantes.put(nomeRelacao2, resultListTemp);
-		//
-		return null;
 	}
 
-	private Map<String, Collection<Object>> where(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+	private void where(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
 		/*Nome da relacao*/
 		String nomeRelacao = getRelacaoString(restricao);
-		/*Busca na lista de relacoes resultantes a que teve o nome descoberto anteriormente*/
-		Collection<Object> relacaoAnterior = relacoesResultantes.get(nomeRelacao);
 		/*Relacao que sera pesquisada*/
 		Collection<?> relacao = getRelacaoCollection(restricao);
 
@@ -267,8 +266,6 @@ public class QueryImplOtimizadaNew {
 			}
 		}
 		relacoesResultantes.put(nomeRelacao, resultListTemp);
-		//
-		return null;
 	}
 
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
