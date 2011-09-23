@@ -44,4 +44,18 @@ public class ResultObject extends HashMap<String, Object> {
 		}
 	}
 
+	@Override
+	public Object get(Object key) {
+		Object value = super.get(key);
+		//
+		if (value == null) {
+			String nomeCampo = String.valueOf(key.toString().toCharArray()[0]).toUpperCase() + key.toString().substring(1);
+			value = super.get("get" + nomeCampo);
+			if (value == null) {
+				value = super.get("is" + nomeCampo);
+			}
+		}
+		//
+		return value;
+	}
 }
