@@ -1,8 +1,5 @@
-select	filho1.nmPessoa irmao,
-		filho2.nmPessoa pessoa
-from 	pessoas paiMae,
+from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where	paiMae.cdPessoa = filho1.cdPai and 
-		paiMae.cdPessoa = filho2.cdPai and
-		filho2.dtNascimento >= date('25/02/1989')
+where	pai.cdPessoa = filho1.cdPai and	
+		pai.cdPessoa = filho2.cdPai
