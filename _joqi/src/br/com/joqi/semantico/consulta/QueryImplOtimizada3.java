@@ -2,8 +2,10 @@ package br.com.joqi.semantico.consulta;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,22 +110,38 @@ public class QueryImplOtimizada3 {
 						for (Object objeto2 : colecaoAtual) {
 							if (restricaoAtual.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
 								if (objeto1.getClass() == Tupla.class && objeto2.getClass() == Tupla.class) {
-									Projecao<?> operando1Ant = restricaoAnterior.getOperando1();
-									Projecao<?> operando2Ant = restricaoAnterior.getOperando1();
-									Projecao<?> operando1Atual = restricaoAtual.getOperando1();
-									Projecao<?> operando2Atual = restricaoAtual.getOperando1();
+									List<Projecao<?>> operandosAnt = new ArrayList<Projecao<?>>(Arrays.asList(
+											restricaoAnterior.getOperando1(),
+											restricaoAnterior.getOperando2()
+											));
+									List<Projecao<?>> operandosAtuais = new ArrayList<Projecao<?>>(Arrays.asList(
+											restricaoAtual.getOperando1(),
+											restricaoAtual.getOperando2()
+											));
 									//
-									if (operando1Ant.equals(operando1Atual)) {
-										Tupla objeto1Tupla = (Tupla) objeto1;
-										Tupla objeto2Tupla = (Tupla) objeto2;
-										//
-										if (objeto1Tupla.get(operando1Ant.getRelacao()).equals(objeto2Tupla.get(operando1Atual.getRelacao()))) {
-											Tupla tupla = new Tupla();
-											tupla.putAll(objeto1Tupla);
-											tupla.putAll(objeto2Tupla);
-											colecaoResultante.add(tupla);
+									boolean continua = true;
+									//
+									for(Projecao<?> operandoAnt : operandosAnt){
+										for(Projecao<?> operandoAtual : operandosAtuais){
+											if (operandoAnt.equals(operandoAtual)) {
+												Tupla objeto1Tupla = (Tupla) objeto1;
+												Tupla objeto2Tupla = (Tupla) objeto2;
+												//
+												if (objeto1Tupla.get(operandoAnt.getRelacao()).equals(objeto2Tupla.get(operandoAtual.getRelacao()))) {
+													Tupla tupla = new Tupla();
+													tupla.putAll(objeto1Tupla);
+													tupla.putAll(objeto2Tupla);
+													colecaoResultante.add(tupla);
+													//
+													continua = false;
+													break;
+												}
+											}		
 										}
-									}
+										if(!continua){
+											break;
+										}
+									}									
 								} else {
 
 								}
