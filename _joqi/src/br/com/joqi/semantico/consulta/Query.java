@@ -47,9 +47,10 @@ public class Query implements IPossuiRestricoes {
 
 	public void getResultado() {
 		try {
-			/*QueryImplOtimizada queryImpl = new QueryImplOtimizada(this, new BancoConsulta());*/
-			QueryImplOtimizadaNew queryImpl = new QueryImplOtimizadaNew(this, new BancoConsulta());
 			/*QueryImpl queryImpl = new QueryImpl(this, new BancoConsulta());*/
+			/*QueryImplOtimizada queryImpl = new QueryImplOtimizada(this, new BancoConsulta());*/
+			/*QueryImplOtimizada2 queryImpl = new QueryImplOtimizada2(this, new BancoConsulta());*/
+			QueryImplOtimizada3 queryImpl = new QueryImplOtimizada3(this, new BancoConsulta());			
 			queryImpl.getResultado();
 		} catch (Exception e) {
 			e.printStackTrace();

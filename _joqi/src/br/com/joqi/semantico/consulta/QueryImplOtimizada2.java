@@ -32,7 +32,7 @@ import br.com.joqi.semantico.exception.OperandosIncompativeisException;
  * 
  * @author Douglas Matheus de Souza em 26/07/2011
  */
-public class QueryImplOtimizadaNew {
+public class QueryImplOtimizada2 {
 
 	private class Tupla extends ResultObject {
 	}
@@ -43,7 +43,7 @@ public class QueryImplOtimizadaNew {
 	private Map<String, Collection<Object>> relacoes;
 	private ResultList resultado;
 
-	public QueryImplOtimizadaNew(Query query, Object objetoConsulta) {
+	public QueryImplOtimizada2(Query query, Object objetoConsulta) {
 		this.query = query;
 		this.objetoConsulta = objetoConsulta;
 	}
@@ -97,7 +97,7 @@ public class QueryImplOtimizadaNew {
 				if (restricao.isJuncao()) {
 					juncao(relacoesResultantes, restricao);
 				} else if (restricao.isProdutoCartesiano()) {
-					
+
 				} else {
 					where(relacoesResultantes, restricao);
 				}
@@ -119,14 +119,8 @@ public class QueryImplOtimizadaNew {
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
 		//
-		Collection<Object> relacao1 = relacoesResultantes.get(nomeRelacao1);
-		if (relacao1 == null) {
-			relacao1 = relacoes.get(nomeRelacao1);
-		}
-		Collection<Object> relacao2 = relacoesResultantes.get(nomeRelacao2);
-		if (relacao2 == null) {
-			relacao2 = relacoes.get(nomeRelacao2);
-		}
+		Collection<Object> relacao1 = relacoes.get(nomeRelacao1);
+		Collection<Object> relacao2 = relacoes.get(nomeRelacao2);
 		//
 		Map<Object, List<Object>> hashTable = new HashMap<Object, List<Object>>();
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
