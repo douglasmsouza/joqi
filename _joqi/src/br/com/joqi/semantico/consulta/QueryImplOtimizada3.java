@@ -75,7 +75,7 @@ public class QueryImplOtimizada3 {
 		//
 		time = System.currentTimeMillis() - time;
 
-		imprimeResultado(15, time, new String[]{"pessoas","codigos"}, new String[]{"pessoas","codigos"}, resultSet);
+		imprimeResultado(15, time, new String[] { "p1", "p2","int" }, new String[] { "p1", "p2","int" }, resultSet);
 	}
 
 	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
@@ -109,7 +109,17 @@ public class QueryImplOtimizada3 {
 				resultadoFinal = resultadoTemp;
 			else {
 				if (r.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
-					resultadoFinal.retainAll(resultadoTemp);
+					ResultList temp = new ResultList();
+					Map<Object, List<Object>> hashTable = new HashMap<Object, List<Object>>();
+					for (Object objeto1 : resultadoFinal) {
+						hashTable.put(objeto1, null);
+					}
+					for (Object objeto2 : resultadoTemp) {
+						if (hashTable.get(objeto2) != null) {
+							temp.add((Tupla)objeto2);
+						}
+					}
+					resultadoFinal = temp;
 				} else {
 					resultadoFinal.addAll(resultadoTemp);
 				}
@@ -388,8 +398,8 @@ public class QueryImplOtimizada3 {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
 	}
 
-	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, String[] campos,ResultSet resultSet) {
-		for(String h : headers){
+	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, String[] campos, ResultSet resultSet) {
+		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];
 			Arrays.fill(header, ' ');
 			for (int i = 0; i < h.length(); i++) {
@@ -402,14 +412,14 @@ public class QueryImplOtimizada3 {
 		System.out.println("------------------------------------");
 		//
 		for (ResultObject objeto : resultSet) {
-			for(String c : campos){
+			for (String c : campos) {
 				char[] campo = new char[tamanhoColuna];
 				Arrays.fill(campo, ' ');
-				String valor = objeto.get(c).toString(); 
+				String valor = objeto.get(c).toString();
 				for (int i = 0; i < valor.length(); i++) {
 					campo[i] = valor.charAt(i);
 				}
-				System.out.print(campo);	
+				System.out.print(campo);
 			}
 			System.out.println();
 		}
