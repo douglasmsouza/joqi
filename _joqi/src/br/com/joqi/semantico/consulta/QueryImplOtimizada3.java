@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
+import br.com.joqi.semantico.consulta.restricao.RestricaoConjunto;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
@@ -73,53 +75,20 @@ public class QueryImplOtimizada3 {
 		//
 		time = System.currentTimeMillis() - time;
 
-		int tamanhoColuna = 15;		
-		System.out.println("pai            filho1         filho2");
-		System.out.println("------------------------------------");
-		for (ResultObject objeto : resultSet) {
-			char[] pai = new char[tamanhoColuna];
-			Arrays.fill(pai, ' ');
-			String paiStr = objeto.get("pai").toString();
-			for (int i = 0; i < paiStr.length(); i++) {
-				pai[i] = paiStr.charAt(i);
-			}
-			//
-			char[] filho1 = new char[tamanhoColuna];
-			Arrays.fill(filho1, ' ');
-			String filho1Str = objeto.get("filho1").toString();
-			for (int i = 0; i < filho1Str.length(); i++) {
-				filho1[i] = filho1Str.charAt(i);
-			}
-			//
-			char[] filho2 = new char[tamanhoColuna];
-			Arrays.fill(filho2, ' ');
-			String filho2Str = objeto.get("filho2").toString();
-			for (int i = 0; i < filho2Str.length(); i++) {
-				filho2[i] = filho2Str.charAt(i);
-			}
-			//
-			System.out.print(pai);
-			System.out.print(filho1);
-			System.out.print(filho2);
-			System.out.println();
-		}
-
-		System.out.println("-------------------------------");
-		System.out.println("Registro....: " + resultSet.size());
-		System.out.println("Tempo total : " + time + " ms");
-		System.out.println("-------------------------------");
+		imprimeResultado(15, time, new String[]{"pessoas","codigos"}, new String[]{"pessoas","codigos"}, resultSet);
 	}
 
 	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
 		ResultList resultadoFinal = null;
+		ResultList resultadoTemp = null;
+		//
+		/*Collections.sort(possuiRestricoes.getRestricoes());*/
 		//
 		for (Restricao r : possuiRestricoes.getRestricoes()) {
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
 				//
 				verificaRestricao(restricao);
-				//
-				ResultList resultadoTemp = null;
 				//
 				if (restricao.isJuncao()) {
 					resultadoTemp = juncao(restricao);
@@ -128,15 +97,21 @@ public class QueryImplOtimizada3 {
 				} else {
 					resultadoTemp = where(restricao);
 				}
+			} else {
+				RestricaoConjunto restricao = (RestricaoConjunto) r;
+				if (restricao.isNegacao())
+					restricao.negarRestricoes();
 				//
-				if (resultadoFinal == null)
-					resultadoFinal = resultadoTemp;
-				else {
-					if (restricao.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
-						resultadoFinal.retainAll(resultadoTemp);
-					} else {
-						resultadoFinal.addAll(resultadoTemp);
-					}
+				resultadoTemp = where(restricao);
+			}
+			//
+			if (resultadoFinal == null)
+				resultadoFinal = resultadoTemp;
+			else {
+				if (r.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
+					resultadoFinal.retainAll(resultadoTemp);
+				} else {
+					resultadoFinal.addAll(resultadoTemp);
 				}
 			}
 		}
@@ -145,7 +120,7 @@ public class QueryImplOtimizada3 {
 	}
 
 	private ResultList juncao(RestricaoSimples restricao) throws Exception {
-		Collection<Object> resultListTemp = new ArrayList<Object>();
+		ResultList resultListTemp = new ResultList();
 		//
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
@@ -157,11 +132,7 @@ public class QueryImplOtimizada3 {
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
 		for (Object objeto1 : relacao1) {
 			Object campo = restricao.getOperando1().getValor();
-			Object objeto1Temp = objeto1;
-			if (objeto1Temp.getClass() == Tupla.class) {
-				objeto1Temp = ((Tupla) objeto1).get(nomeRelacao1);
-			}
-			Object valor = QueryUtils.getValorDoCampo(objeto1Temp, campo.toString());
+			Object valor = QueryUtils.getValorDoCampo(objeto1, campo.toString());
 			List<Object> objetos = hashTable.get(valor);
 			if (objetos == null) {
 				objetos = new ArrayList<Object>();
@@ -172,47 +143,44 @@ public class QueryImplOtimizada3 {
 		//
 		for (Object objeto2 : relacao2) {
 			Object campo = restricao.getOperando2().getValor();
-			Object objeto2Temp = objeto2;
-			if (objeto2Temp.getClass() == Tupla.class) {
-				objeto2Temp = ((Tupla) objeto2).get(nomeRelacao1);
-			}
-			Object valor = QueryUtils.getValorDoCampo(objeto2Temp, campo.toString());
+			Object valor = QueryUtils.getValorDoCampo(objeto2, campo.toString());
 			List<Object> objetos1 = hashTable.get(valor);
 			//
 			if (verificaCondicao(objetos1 != null, restricao)) {
 				for (Object objeto1 : objetos1) {
 					Tupla tupla = new Tupla();
-					if (objeto1.getClass() == Tupla.class) {
-						tupla.putAll((Tupla) objeto1);
-					} else {
-						tupla.put(nomeRelacao1, objeto1);
-					}
+					tupla.put(nomeRelacao1, objeto1);
 					tupla.put(nomeRelacao2, objeto2);
 					resultListTemp.add(tupla);
 				}
 			}
 		}
 		//
-		ResultList resultList = new ResultList();
-		//
-		for (Entry<String, Collection<Object>> relacao : relacoes.entrySet()) {
-			if (!relacao.getKey().equals(nomeRelacao1)) {
-				if (!relacao.getKey().equals(nomeRelacao2)) {
-					for (Object objeto1 : resultListTemp) {
-						for (Object objeto2 : relacao.getValue()) {
-							Tupla tupla = new Tupla();
-							tupla.putAll((Tupla) objeto1);
-							tupla.put(relacao.getKey(), objeto2);
-							resultList.add(tupla);
+		if (relacoes.size() > 2) {
+			ResultList resultList = new ResultList();
+			//
+			for (Entry<String, Collection<Object>> relacao : relacoes.entrySet()) {
+				if (!relacao.getKey().equals(nomeRelacao1)) {
+					if (!relacao.getKey().equals(nomeRelacao2)) {
+						for (Object objeto1 : resultListTemp) {
+							for (Object objeto2 : relacao.getValue()) {
+								Tupla tupla = new Tupla();
+								tupla.putAll((Tupla) objeto1);
+								tupla.put(relacao.getKey(), objeto2);
+								resultList.add(tupla);
+							}
 						}
+						//
+						resultListTemp = new ResultList();
+						resultListTemp.addAll(resultList);
 					}
-					//
-					resultListTemp = new ArrayList<Object>(resultList);
 				}
 			}
+			//
+			return resultList;
+		} else {
+			return resultListTemp;
 		}
-		//
-		return resultList;
 	}
 
 	private ResultList where(RestricaoSimples restricao) throws Exception {
@@ -308,10 +276,11 @@ public class QueryImplOtimizada3 {
 		}
 		String nomeRelacao = getRelacaoString(restricao);
 		//
-		ResultList resultList = new ResultList();
+		ResultList resultList = null;
 		//
 		for (Entry<String, Collection<Object>> relacaoOutra : relacoes.entrySet()) {
 			if (!relacaoOutra.getKey().equals(nomeRelacao)) {
+				resultList = new ResultList();
 				for (Object objeto1 : resultListTemp) {
 					for (Object objeto2 : relacaoOutra.getValue()) {
 						Tupla tupla = new Tupla();
@@ -419,21 +388,35 @@ public class QueryImplOtimizada3 {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
 	}
 
-	private Tupla transformaEmTupla(Object objeto) throws Exception {
-		Tupla tupla = new Tupla();
-		//
-		for (Field atributo : objeto.getClass().getDeclaredFields()) {
-			boolean ehPrivado = !atributo.isAccessible();
-
-			if (ehPrivado)
-				atributo.setAccessible(true);
-
-			tupla.put(atributo.getName(), atributo.get(objeto));
-
-			if (ehPrivado)
-				atributo.setAccessible(false);
+	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, String[] campos,ResultSet resultSet) {
+		for(String h : headers){
+			char[] header = new char[tamanhoColuna];
+			Arrays.fill(header, ' ');
+			for (int i = 0; i < h.length(); i++) {
+				header[i] = h.charAt(i);
+			}
+			System.out.print(header);
 		}
 		//
-		return tupla;
+		System.out.println();
+		System.out.println("------------------------------------");
+		//
+		for (ResultObject objeto : resultSet) {
+			for(String c : campos){
+				char[] campo = new char[tamanhoColuna];
+				Arrays.fill(campo, ' ');
+				String valor = objeto.get(c).toString(); 
+				for (int i = 0; i < valor.length(); i++) {
+					campo[i] = valor.charAt(i);
+				}
+				System.out.print(campo);	
+			}
+			System.out.println();
+		}
+
+		System.out.println("-------------------------------");
+		System.out.println("Registros...: " + resultSet.size());
+		System.out.println("Tempo total : " + tempo + " ms");
+		System.out.println("-------------------------------");
 	}
 }
