@@ -1,5 +1,5 @@
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where	filho1.cdPai = pai.cdPessoa and
+where	filho1.cdPai = pai.cdPessoa or
 		filho2.cdPai = pai.cdPessoa 
