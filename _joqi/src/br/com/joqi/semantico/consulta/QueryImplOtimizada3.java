@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
@@ -69,8 +69,8 @@ public class QueryImplOtimizada3 {
 
 		time = System.currentTimeMillis() - time;
 
-		StringBuilder sb = new StringBuilder(relacoesResultantes.toString().replace("], ", "]\n"));
-		System.out.println(sb.replace(0, 1, "").replace(sb.length() - 1, sb.length(), ""));
+		/*StringBuilder sb = new StringBuilder(relacoesResultantes.toString().replace("], ", "]\n"));
+		System.out.println(sb.replace(0, 1, "").replace(sb.length() - 1, sb.length(), ""));*/
 
 		System.out.println("-------------------------------");
 		System.out.println("Tempo total : " + time + " ms");
@@ -105,49 +105,58 @@ public class QueryImplOtimizada3 {
 				if (restricaoAnterior != null) {
 					Collection<Object> colecaoAnterior = relacoesResultantes.get(restricaoAnterior);
 					Collection<Object> colecaoAtual = relacoesResultantes.get(r);
-					Collection<Object> colecaoResultante = new ArrayList<Object>();
+					Collection<Object> colecaoResultante = new ArrayList<Object>(colecaoAnterior);
+					//
+					if (restricaoAtual.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
+						colecaoAnterior.retainAll(colecaoAtual);
+					} else {
+						colecaoAnterior.addAll(colecaoAtual);
+					}
+					/*List<Projecao<?>> operandosAnt = new ArrayList<Projecao<?>>(Arrays.asList(
+							restricaoAnterior.getOperando1(),
+							restricaoAnterior.getOperando2()
+							));
+					List<Projecao<?>> operandosAtuais = new ArrayList<Projecao<?>>(Arrays.asList(
+							restricaoAtual.getOperando1(),
+							restricaoAtual.getOperando2()
+							));
+					//
 					for (Object objeto1 : colecaoAnterior) {
 						for (Object objeto2 : colecaoAtual) {
 							if (restricaoAtual.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
-								if (objeto1.getClass() == Tupla.class && objeto2.getClass() == Tupla.class) {
-									List<Projecao<?>> operandosAnt = new ArrayList<Projecao<?>>(Arrays.asList(
-											restricaoAnterior.getOperando1(),
-											restricaoAnterior.getOperando2()
-											));
-									List<Projecao<?>> operandosAtuais = new ArrayList<Projecao<?>>(Arrays.asList(
-											restricaoAtual.getOperando1(),
-											restricaoAtual.getOperando2()
-											));
-									//
-									boolean continua = true;
-									//
-									for(Projecao<?> operandoAnt : operandosAnt){
-										for(Projecao<?> operandoAtual : operandosAtuais){
-											if (operandoAnt.equals(operandoAtual)) {
-												Tupla objeto1Tupla = (Tupla) objeto1;
-												Tupla objeto2Tupla = (Tupla) objeto2;
+								boolean continua = true;
+								//
+								for (Projecao<?> operandoAnt : operandosAnt) {
+									for (Projecao<?> operandoAtual : operandosAtuais) {
+										if (operandoAnt.equals(operandoAtual)) {
+											Tupla objeto1Tupla = (Tupla) objeto1;
+											Tupla objeto2Tupla = (Tupla) objeto2;
+											//
+											if (objeto1Tupla.get(operandoAnt.getRelacao()).equals(objeto2Tupla.get(operandoAtual.getRelacao()))) {
+												Tupla tupla = new Tupla();
+												tupla.putAll(objeto1Tupla);
+												tupla.putAll(objeto2Tupla);
+												colecaoResultante.add(tupla);
 												//
-												if (objeto1Tupla.get(operandoAnt.getRelacao()).equals(objeto2Tupla.get(operandoAtual.getRelacao()))) {
-													Tupla tupla = new Tupla();
-													tupla.putAll(objeto1Tupla);
-													tupla.putAll(objeto2Tupla);
-													colecaoResultante.add(tupla);
-													//
-													continua = false;
-													break;
-												}
-											}		
+												continua = false;
+												break;
+											}
 										}
-										if(!continua){
-											break;
-										}
-									}									
-								} else {
-
+									}
+									if (!continua) {
+										break;
+									}
+								}
+							} else {
+								if (objeto1.getClass() == Tupla.class && objeto2.getClass() == Tupla.class) {
+									Tupla tupla = new Tupla();
+									tupla.putAll((Tupla) objeto1);
+									tupla.putAll((Tupla) objeto2);
+									colecaoResultante.add(tupla);
 								}
 							}
 						}
-					}
+					}*/
 					//
 					System.out.println(colecaoResultante.size());
 					relacoesResultantes.put(restricaoAnterior, colecaoResultante);
@@ -210,7 +219,24 @@ public class QueryImplOtimizada3 {
 			}
 		}
 		//
-		relacoesResultantes.put(restricao, resultListTemp);
+		Collection<Object> resultList = new ArrayList<Object>();
+		//
+		for (Entry<String, Collection<Object>> relacao : relacoes.entrySet()) {
+			if (!relacao.getKey().equals(nomeRelacao1)) {
+				if (!relacao.getKey().equals(nomeRelacao2)) {
+					for (Object objeto1 : resultListTemp) {
+						for (Object objeto2 : relacao.getValue()) {
+							Tupla tupla = new Tupla();
+							tupla.putAll((Tupla) objeto1);
+							tupla.put(relacao.getKey(), objeto2);
+							resultList.add(tupla);
+						}
+					}
+				}
+			}
+		}
+		//
+		relacoesResultantes.put(restricao, resultList);
 	}
 
 	private void where(Map<Restricao, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {

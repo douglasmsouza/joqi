@@ -93,8 +93,8 @@ public class BancoConsulta {
 				new Pessoa(1, "Douglas", 22, 4, 3, true, JoqiUtil.asDate("25/02/1989")),
 				new Pessoa(2, "Nathalia", 18, 4, 3, true),
 				new Pessoa(3, "Renata", 49, 7, 8, true),
-				new Pessoa(4, "Carlos", 50, 5, 6, true),
-				new Pessoa(5, "Assis", 75, 0, 0, true),
+				new Pessoa(4, "Carlos", 50, 5, 6, true)
+				/*new Pessoa(5, "Assis", 75, 0, 0, true),
 				new Pessoa(6, "Juracy", 75, 0, 0, true),
 				new Pessoa(7, "Luna", 75, 0, 0, true),
 				new Pessoa(8, "Neide", 75, 0, 0, true),
@@ -124,7 +124,7 @@ public class BancoConsulta {
 				new Pessoa(32, "Katia", 45, 34, 33, true),
 				new Pessoa(33, "Marilene", 70, 0, 0, true),
 				new Pessoa(34, "Paulo", 70, 0, 0, true),
-				new Pessoa(35, "Dona Neide", 70, 0, 0, true)
+				new Pessoa(35, "Dona Neide", 70, 0, 0, true)*/
 				));
 	}
 }
