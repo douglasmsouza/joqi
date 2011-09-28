@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,7 +42,6 @@ public class QueryImplOtimizada3 {
 	private Object objetoConsulta;
 	//
 	private Map<String, Collection<Object>> relacoes;
-	private ResultList resultado;
 
 	public QueryImplOtimizada3(Query query, Object objetoConsulta) {
 		this.query = query;
@@ -65,112 +63,81 @@ public class QueryImplOtimizada3 {
 		}
 
 		/*Faz as restricoes*/
-		Map<Restricao, Collection<Object>> relacoesResultantes = where(query);
+		ResultList resultado = where(query);
 
 		time = System.currentTimeMillis() - time;
 
-		/*StringBuilder sb = new StringBuilder(relacoesResultantes.toString().replace("], ", "]\n"));
-		System.out.println(sb.replace(0, 1, "").replace(sb.length() - 1, sb.length(), ""));*/
+		System.out.println("pai            filho1         filho2");
+		System.out.println("------------------------------------");
+		for (ResultObject objeto : resultado) {
+			char[] pai = new char[15];
+			Arrays.fill(pai, ' ');
+			String paiStr = objeto.get("pai").toString(); 
+			for(int i = 0; i < paiStr.length(); i++){
+				pai[i] = paiStr.charAt(i);
+			}
+			//
+			char[] filho1 = new char[15];
+			Arrays.fill(filho1, ' ');
+			String filho1Str = objeto.get("filho1").toString(); 
+			for(int i = 0; i < filho1Str.length(); i++){
+				filho1[i] = filho1Str.charAt(i);
+			}
+			//
+			char[] filho2 = new char[15];
+			Arrays.fill(filho2, ' ');
+			String filho2Str = objeto.get("filho2").toString(); 
+			for(int i = 0; i < filho2Str.length(); i++){
+				filho2[i] = filho2Str.charAt(i);
+			}
+			//
+			System.out.print(pai);
+			System.out.print(filho1);
+			System.out.print(filho2);
+			System.out.println();
+		}		
 
 		System.out.println("-------------------------------");
-		System.out.println("Tempo total : " + time + " ms");
+		System.out.println("Registro....: " + resultado.size());
+		System.out.println("Tempo total : " + time + " ms");		
 		System.out.println("-------------------------------");
 	}
 
-	private Map<Restricao, Collection<Object>> where(IPossuiRestricoes possuiRestricoes) throws Exception {
-		/*Cada restricao ira ter como resultado uma relacao, que sera armazenada neste Map*/
-		Map<Restricao, Collection<Object>> relacoesResultantes = new LinkedHashMap<Restricao, Collection<Object>>();
+	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
+		ResultList resultadoFinal = null;
 		//
-		/*Ordena as restricoes de forma que, as restricoes simples (campo = constante ou vice-versa)
-		 * sejam executadas primeiro e as juncoes sejam executadas depois*/
-		/*Collections.sort(possuiRestricoes.getRestricoes());*/
-		RestricaoSimples restricaoAnterior = null;
-		//
-		for (int i = 0; i < possuiRestricoes.getRestricoes().size(); i++) {
-			Restricao r = possuiRestricoes.getRestricoes().get(i);
-			//
+		for (Restricao r : possuiRestricoes.getRestricoes()) {
 			if (r.getClass() == RestricaoSimples.class) {
-				RestricaoSimples restricaoAtual = (RestricaoSimples) r;
+				RestricaoSimples restricao = (RestricaoSimples) r;
 				//
-				verificaRestricao(restricaoAtual);
+				verificaRestricao(restricao);
 				//
-				if (restricaoAtual.isJuncao()) {
-					juncao(relacoesResultantes, restricaoAtual);
-				} else if (restricaoAtual.isProdutoCartesiano()) {
+				ResultList resultadoTemp = null;
+				//
+				if (restricao.isJuncao()) {
+					resultadoTemp = juncao(restricao);
+				} else if (restricao.isProdutoCartesiano()) {
 
 				} else {
-					where(relacoesResultantes, restricaoAtual);
+					resultadoTemp = where(restricao);
 				}
 				//
-				if (restricaoAnterior != null) {
-					Collection<Object> colecaoAnterior = relacoesResultantes.get(restricaoAnterior);
-					Collection<Object> colecaoAtual = relacoesResultantes.get(r);
-					Collection<Object> colecaoResultante = new ArrayList<Object>(colecaoAnterior);
-					//
-					if (restricaoAtual.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
-						colecaoAnterior.retainAll(colecaoAtual);
+				if (resultadoFinal == null)
+					resultadoFinal = resultadoTemp;
+				else {
+					if (restricao.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
+						resultadoFinal.retainAll(resultadoTemp);
 					} else {
-						colecaoAnterior.addAll(colecaoAtual);
+						resultadoFinal.addAll(resultadoTemp);
 					}
-					/*List<Projecao<?>> operandosAnt = new ArrayList<Projecao<?>>(Arrays.asList(
-							restricaoAnterior.getOperando1(),
-							restricaoAnterior.getOperando2()
-							));
-					List<Projecao<?>> operandosAtuais = new ArrayList<Projecao<?>>(Arrays.asList(
-							restricaoAtual.getOperando1(),
-							restricaoAtual.getOperando2()
-							));
-					//
-					for (Object objeto1 : colecaoAnterior) {
-						for (Object objeto2 : colecaoAtual) {
-							if (restricaoAtual.getOperadorLogico().getClass() == OperadorLogicoAnd.class) {
-								boolean continua = true;
-								//
-								for (Projecao<?> operandoAnt : operandosAnt) {
-									for (Projecao<?> operandoAtual : operandosAtuais) {
-										if (operandoAnt.equals(operandoAtual)) {
-											Tupla objeto1Tupla = (Tupla) objeto1;
-											Tupla objeto2Tupla = (Tupla) objeto2;
-											//
-											if (objeto1Tupla.get(operandoAnt.getRelacao()).equals(objeto2Tupla.get(operandoAtual.getRelacao()))) {
-												Tupla tupla = new Tupla();
-												tupla.putAll(objeto1Tupla);
-												tupla.putAll(objeto2Tupla);
-												colecaoResultante.add(tupla);
-												//
-												continua = false;
-												break;
-											}
-										}
-									}
-									if (!continua) {
-										break;
-									}
-								}
-							} else {
-								if (objeto1.getClass() == Tupla.class && objeto2.getClass() == Tupla.class) {
-									Tupla tupla = new Tupla();
-									tupla.putAll((Tupla) objeto1);
-									tupla.putAll((Tupla) objeto2);
-									colecaoResultante.add(tupla);
-								}
-							}
-						}
-					}*/
-					//
-					System.out.println(colecaoResultante.size());
-					relacoesResultantes.put(restricaoAnterior, colecaoResultante);
-					relacoesResultantes.put(r, colecaoResultante);
 				}
-				//
-				restricaoAnterior = restricaoAtual;
 			}
-		}
+		}		
 		//
-		return relacoesResultantes;
+		return resultadoFinal;
 	}
 
-	private void juncao(Map<Restricao, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+	private ResultList juncao(RestricaoSimples restricao) throws Exception {
 		Collection<Object> resultListTemp = new ArrayList<Object>();
 		//
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
@@ -219,7 +186,7 @@ public class QueryImplOtimizada3 {
 			}
 		}
 		//
-		Collection<Object> resultList = new ArrayList<Object>();
+		ResultList resultList = new ResultList();
 		//
 		for (Entry<String, Collection<Object>> relacao : relacoes.entrySet()) {
 			if (!relacao.getKey().equals(nomeRelacao1)) {
@@ -232,14 +199,16 @@ public class QueryImplOtimizada3 {
 							resultList.add(tupla);
 						}
 					}
+					//
+					resultListTemp = new ArrayList<Object>(resultList);
 				}
 			}
 		}
 		//
-		relacoesResultantes.put(restricao, resultList);
+		return resultList;
 	}
 
-	private void where(Map<Restricao, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+	private ResultList where(RestricaoSimples restricao) throws Exception {
 		/*Relacao que sera pesquisada*/
 		Collection<?> relacao = getRelacaoCollection(restricao);
 
@@ -330,7 +299,30 @@ public class QueryImplOtimizada3 {
 				continue;
 			}
 		}
-		relacoesResultantes.put(restricao, resultListTemp);
+		String nomeRelacao = getRelacaoString(restricao);
+		//
+		ResultList resultList = new ResultList();
+		//
+		for (Entry<String, Collection<Object>> relacaoOutra : relacoes.entrySet()) {
+			if (!relacaoOutra.getKey().equals(nomeRelacao)) {
+				for (Object objeto1 : resultListTemp) {
+					for (Object objeto2 : relacaoOutra.getValue()) {
+						Tupla tupla = new Tupla();
+						if (objeto1.getClass() == Tupla.class) {
+							tupla.putAll((Tupla) objeto1);
+						} else {
+							tupla.put(nomeRelacao, objeto1);
+						}
+						tupla.put(relacaoOutra.getKey(), objeto2);
+						resultList.add(tupla);
+					}
+				}
+				//
+				resultListTemp = new ArrayList<Object>(resultList);
+			}
+		}
+		//
+		return resultList;
 	}
 
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
