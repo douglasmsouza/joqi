@@ -169,7 +169,6 @@ public class QueryImpl {
 			resultado.addAll(resultadoAux);
 		}
 		//
-
 		return resultado;
 	}
 
