@@ -21,7 +21,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
-import br.com.joqi.semantico.consulta.resultado.ResultList;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
@@ -41,7 +41,7 @@ public class QueryImplOtimizada2 {
 	private Object objetoConsulta;
 	//
 	private Map<String, Collection<Object>> relacoes;
-	private ResultList resultado;
+	private ResultSet resultado;
 
 	public QueryImplOtimizada2(Query query, Object objetoConsulta) {
 		this.query = query;
