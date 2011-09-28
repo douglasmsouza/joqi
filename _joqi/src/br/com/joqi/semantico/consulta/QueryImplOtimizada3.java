@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -63,7 +65,8 @@ public class QueryImplOtimizada3 {
 		}
 
 		/*Faz as restricoes*/
-		ResultList resultado = where(query);
+		ResultList resultadoTemp = where(query);
+		Set<ResultObject> resultado = new HashSet<ResultObject>(resultadoTemp);
 
 		time = System.currentTimeMillis() - time;
 
