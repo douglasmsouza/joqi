@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -24,8 +22,8 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
-import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.OperandosIncompativeisException;
@@ -40,6 +38,9 @@ public class QueryImplOtimizada3 {
 	private class Tupla extends ResultObject {
 	}
 
+	private class ResultList extends ArrayList<Tupla> {
+	}
+
 	private Query query;
 	private Object objetoConsulta;
 	//
@@ -50,7 +51,7 @@ public class QueryImplOtimizada3 {
 		this.objetoConsulta = objetoConsulta;
 	}
 
-	public void getResultado() throws Exception {
+	public void getResultSet() throws Exception {
 		double time = System.currentTimeMillis();
 
 		/*Cria as referencias para as relacoes*/
@@ -66,31 +67,34 @@ public class QueryImplOtimizada3 {
 
 		/*Faz as restricoes*/
 		ResultList resultadoTemp = where(query);
-		Set<ResultObject> resultado = new HashSet<ResultObject>(resultadoTemp);
-
+		//
+		ResultSet resultSet = new ResultSet();
+		resultSet.addAll(resultadoTemp);
+		//
 		time = System.currentTimeMillis() - time;
 
+		int tamanhoColuna = 15;		
 		System.out.println("pai            filho1         filho2");
 		System.out.println("------------------------------------");
-		for (ResultObject objeto : resultado) {
-			char[] pai = new char[15];
+		for (ResultObject objeto : resultSet) {
+			char[] pai = new char[tamanhoColuna];
 			Arrays.fill(pai, ' ');
-			String paiStr = objeto.get("pai").toString(); 
-			for(int i = 0; i < paiStr.length(); i++){
+			String paiStr = objeto.get("pai").toString();
+			for (int i = 0; i < paiStr.length(); i++) {
 				pai[i] = paiStr.charAt(i);
 			}
 			//
-			char[] filho1 = new char[15];
+			char[] filho1 = new char[tamanhoColuna];
 			Arrays.fill(filho1, ' ');
-			String filho1Str = objeto.get("filho1").toString(); 
-			for(int i = 0; i < filho1Str.length(); i++){
+			String filho1Str = objeto.get("filho1").toString();
+			for (int i = 0; i < filho1Str.length(); i++) {
 				filho1[i] = filho1Str.charAt(i);
 			}
 			//
-			char[] filho2 = new char[15];
+			char[] filho2 = new char[tamanhoColuna];
 			Arrays.fill(filho2, ' ');
-			String filho2Str = objeto.get("filho2").toString(); 
-			for(int i = 0; i < filho2Str.length(); i++){
+			String filho2Str = objeto.get("filho2").toString();
+			for (int i = 0; i < filho2Str.length(); i++) {
 				filho2[i] = filho2Str.charAt(i);
 			}
 			//
@@ -98,11 +102,11 @@ public class QueryImplOtimizada3 {
 			System.out.print(filho1);
 			System.out.print(filho2);
 			System.out.println();
-		}		
+		}
 
 		System.out.println("-------------------------------");
-		System.out.println("Registro....: " + resultado.size());
-		System.out.println("Tempo total : " + time + " ms");		
+		System.out.println("Registro....: " + resultSet.size());
+		System.out.println("Tempo total : " + time + " ms");
 		System.out.println("-------------------------------");
 	}
 
@@ -135,7 +139,7 @@ public class QueryImplOtimizada3 {
 					}
 				}
 			}
-		}		
+		}
 		//
 		return resultadoFinal;
 	}

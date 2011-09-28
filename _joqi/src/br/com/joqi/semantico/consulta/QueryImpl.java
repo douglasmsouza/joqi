@@ -22,7 +22,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
-import br.com.joqi.semantico.consulta.resultado.ResultList;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.OperandosIncompativeisException;
@@ -99,7 +99,7 @@ public class QueryImpl {
 		relacoes = getRelacoes();
 		produtoCartesiano = getProdutoCartesiano();
 		//
-		ResultList resultado = where(produtoCartesiano);
+		ResultSet resultado = where(produtoCartesiano);
 		//
 		time = System.currentTimeMillis() - time;
 		//
@@ -203,8 +203,8 @@ public class QueryImpl {
 	 * 
 	 * @author Douglas Matheus de Souza em 26/07/2011
 	 */
-	private ResultList where(ProdutoCartesiano produtoCartesiano) throws Exception {
-		ResultList resultado = new ResultList();
+	private ResultSet where(ProdutoCartesiano produtoCartesiano) throws Exception {
+		ResultSet resultado = new ResultSet();
 		//
 		/*Passa por cada objeto do produto cartesiano, verificando se o objeto*/
 		/*encaixa-se em todas as restricoes do WHERE*/
