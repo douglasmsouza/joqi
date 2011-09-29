@@ -1,6 +1,8 @@
 from	pessoas p1,
 		pessoas p2,
 		inteiros int
-where	p1.cdPessoa = int.intValue and
-		p2.cdPessoa = int.intValue
+where	p1.vlIdade = 22 and
+		p1.cdPessoa = int.intValue and
+		p2.cdPessoa = int.intValue 
+		
 		
