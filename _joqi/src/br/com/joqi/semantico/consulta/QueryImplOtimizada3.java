@@ -75,7 +75,7 @@ public class QueryImplOtimizada3 {
 		//
 		time = System.currentTimeMillis() - time;
 
-		imprimeResultado(15, time, new String[] { "p1", "p2","int" }, new String[] { "p1", "p2","int" }, resultSet);
+		imprimeResultado(15, time, new String[] { "p1", "p2" }, resultSet);
 	}
 
 	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
@@ -115,8 +115,8 @@ public class QueryImplOtimizada3 {
 						hashTable.put(objeto1, null);
 					}
 					for (Object objeto2 : resultadoTemp) {
-						if (hashTable.get(objeto2) != null) {
-							temp.add((Tupla)objeto2);
+						if (hashTable.containsKey(objeto2)) {
+							temp.add((Tupla) objeto2);
 						}
 					}
 					resultadoFinal = temp;
@@ -285,6 +285,7 @@ public class QueryImplOtimizada3 {
 			}
 		}
 		String nomeRelacao = getRelacaoString(restricao);
+		relacoes.put(nomeRelacao, resultListTemp);
 		//
 		ResultList resultList = null;
 		//
@@ -337,12 +338,20 @@ public class QueryImplOtimizada3 {
 		Projecao<?> operando1 = restricao.getOperando1();
 		Projecao<?> operando2 = restricao.getOperando2();
 		//
-		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
-			return relacoes.keySet().iterator().next();
-		} else if (operando1.getRelacao() != null) {
-			return operando1.getRelacao();
+		if (restricao.getOperadorRelacional().getClass() != Entre.class) {
+			if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
+				return relacoes.keySet().iterator().next();
+			} else if (operando1.getRelacao() != null) {
+				return operando1.getRelacao();
+			} else {
+				return operando2.getRelacao();
+			}
 		} else {
-			return operando2.getRelacao();
+			Entre entre = (Entre) restricao.getOperadorRelacional();
+			if (entre.getOperandoEntre().getRelacao() != null)
+				return entre.getOperandoEntre().getRelacao();
+			else
+				return relacoes.keySet().iterator().next();
 		}
 	}
 
@@ -350,12 +359,20 @@ public class QueryImplOtimizada3 {
 		Projecao<?> operando1 = restricao.getOperando1();
 		Projecao<?> operando2 = restricao.getOperando2();
 		//
-		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
-			return relacoes.values().iterator().next();
-		} else if (operando1.getRelacao() != null) {
-			return relacoes.get(operando1.getRelacao());
+		if (restricao.getOperadorRelacional().getClass() != Entre.class) {
+			if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
+				return relacoes.values().iterator().next();
+			} else if (operando1.getRelacao() != null) {
+				return relacoes.get(operando1.getRelacao());
+			} else {
+				return relacoes.get(operando2.getRelacao());
+			}
 		} else {
-			return relacoes.get(operando2.getRelacao());
+			Entre entre = (Entre) restricao.getOperadorRelacional();
+			if (entre.getOperandoEntre().getRelacao() != null)
+				return relacoes.get(entre.getOperandoEntre().getRelacao());
+			else
+				return relacoes.values().iterator().next();
 		}
 	}
 
@@ -398,7 +415,7 @@ public class QueryImplOtimizada3 {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
 	}
 
-	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, String[] campos, ResultSet resultSet) {
+	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];
 			Arrays.fill(header, ' ');
@@ -412,7 +429,7 @@ public class QueryImplOtimizada3 {
 		System.out.println("------------------------------------");
 		//
 		for (ResultObject objeto : resultSet) {
-			for (String c : campos) {
+			for (String c : headers) {
 				char[] campo = new char[tamanhoColuna];
 				Arrays.fill(campo, ' ');
 				String valor = objeto.get(c).toString();
