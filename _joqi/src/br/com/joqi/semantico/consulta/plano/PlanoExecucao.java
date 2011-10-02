@@ -11,5 +11,13 @@ public class PlanoExecucao {
 	public ArvoreConsulta getArvore() {
 		return arvore;
 	}
+	
+	private void descerRestricoes(NoArvore raiz){
+		
+	}
+
+	public void executarOtimizacoes() {
+		descerRestricoes(arvore.getRaiz());		
+	}
 
 }
