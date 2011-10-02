@@ -27,6 +27,10 @@ public class ArvoreConsulta {
 		return ultimoInserido;
 	}
 	
+	public NoArvore getRaiz() {
+		return raiz;
+	}
+	
 	public void imprime(){
 		imprime(raiz, 0);
 	}
