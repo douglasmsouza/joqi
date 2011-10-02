@@ -74,6 +74,7 @@ public class Query implements IPossuiRestricoes {
 				planoExecucao.getArvore().insere(ultimo,relacao);
 			}
 			//
+			planoExecucao.executarOtimizacoes();
 			planoExecucao.getArvore().imprime();
 		} catch (Exception e) {
 			e.printStackTrace();
