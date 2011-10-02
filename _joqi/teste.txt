@@ -1,6 +1,7 @@
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where	pai.cdPessoa = filho1.cdPai and	
-		pai.cdPessoa = filho2.cdPai and
-		filho2.cdPessoa = 1
+where	filho2.cdPessoa = 1 and
+		pai.cdPessoa = filho1.cdPai and	
+		pai.cdPessoa = filho2.cdPai
+		
