@@ -87,6 +87,7 @@ public class RestricaoSimples extends Restricao {
 	public boolean isJuncao() {
 		return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
 				operando2.getClass() == ProjecaoCampo.class &&
+				!operando1.getRelacao().equals(operando2.getRelacao()) &&
 				((operadorRelacional.getClass() == Igual.class && !isNegacao()) ||
 						(operadorRelacional.getClass() == Diferente.class && isNegacao()));
 	}
@@ -100,7 +101,10 @@ public class RestricaoSimples extends Restricao {
 	}
 
 	public boolean isConstante() {
-		return operando1.getClass() != ProjecaoCampo.class || operando2.getClass() != ProjecaoCampo.class;
+		return (operando1.getClass() != ProjecaoCampo.class || operando2.getClass() != ProjecaoCampo.class) || 
+			   (operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
+				operando2.getClass() == ProjecaoCampo.class &&
+				operando1.getRelacao().equals(operando2.getRelacao()));
 	}
 
 	@Override

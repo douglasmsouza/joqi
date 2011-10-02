@@ -1,5 +1,7 @@
 package br.com.joqi.semantico.consulta.relacao;
 
+import java.util.Collection;
+
 /**
  * Guarda as informacoes de um objeto que sera consultado
  * 
@@ -9,6 +11,8 @@ public class Relacao {
 
 	private String apelido;
 	private String nome;
+	//
+	private Collection<Object> colecao;
 
 	public Relacao(String nome) {
 		super();
@@ -44,6 +48,14 @@ public class Relacao {
 		if (apelido != null)
 			s.append(" as ").append(apelido);
 		return s.toString();
+	}
+
+	public void setColecao(Collection<Object> colecao) {
+		this.colecao = colecao;
+	}
+
+	public Collection<Object> getColecao() {
+		return colecao;
 	}
 
 }
