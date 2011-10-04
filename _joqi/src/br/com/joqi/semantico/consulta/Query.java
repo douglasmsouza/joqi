@@ -67,14 +67,9 @@ public class Query implements IPossuiRestricoes {
 			/*QueryImplOtimizada2 queryImpl = new QueryImplOtimizada2(this, new BancoConsulta());*/
 			/*QueryImplOtimizada3 queryImpl = new QueryImplOtimizada3(this, new BancoConsulta());			
 			queryImpl.getResultSet();*/
-
-			NoArvore ultimo = planoExecucao.getArvore().getUltimoInserido();
-			for (Relacao relacao : relacoes) {
-				relacao.setColecao(QueryUtils.getColecao(bancoConsulta, relacao.getNome()));
-				planoExecucao.getArvore().insere(ultimo,relacao);
-			}
 			//
-			planoExecucao.executarOtimizacoes();
+			planoExecucao.inserirRelacoes(relacoes);
+			planoExecucao.organizarRestricoes();
 			planoExecucao.getArvore().imprime();
 		} catch (Exception e) {
 			e.printStackTrace();

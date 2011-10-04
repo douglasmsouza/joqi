@@ -43,11 +43,14 @@ public class Relacao {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder();
+		/*StringBuilder s = new StringBuilder();
 		s.append(nome);
 		if (apelido != null)
 			s.append(" as ").append(apelido);
-		return s.toString();
+		return s.toString();*/
+		if(apelido != null)
+			return apelido;
+		return nome;
 	}
 
 	public void setColecao(Collection<Object> colecao) {
