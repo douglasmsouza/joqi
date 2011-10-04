@@ -11,10 +11,9 @@ public class ArvoreConsulta {
 			raiz = new NoArvore(valor);
 			return raiz;
 		} else {
-			NoArvore filho = new NoArvore(valor);
-			filho.setIrmao(pai.getFilho());
-			pai.setFilho(filho);
-			return filho;
+			NoArvore esquerda = new NoArvore(valor);
+			pai.setEsquerda(esquerda);
+			return esquerda;
 		}
 	}
 
@@ -26,26 +25,25 @@ public class ArvoreConsulta {
 	public NoArvore getUltimoInserido() {
 		return ultimoInserido;
 	}
-	
+
 	public NoArvore getRaiz() {
 		return raiz;
 	}
-	
-	public void imprime(){
+
+	public void imprime() {
 		imprime(raiz, 0);
 	}
-	
-	private void imprime(NoArvore raiz, int profundidade){
-		for(int i = 0; i < profundidade-1; i++){
-			System.out.print("\t");
-		}
-		if(profundidade > 0)
-			System.out.print("|-----> ");
-		System.out.println(raiz);
-		NoArvore no = raiz.getFilho();
-		while (no != null) {
-			imprime(no, profundidade+1);
-			no = no.getIrmao();
+
+	private void imprime(NoArvore raiz, int profundidade) {
+		if (raiz != null) {
+			for (int i = 0; i < profundidade - 1; i++) {
+				System.out.print("\t");
+			}
+			if (profundidade > 0)
+				System.out.print("|-----> ");
+			System.out.println(raiz);
+			imprime(raiz.getEsquerda(), profundidade + 1);
+			imprime(raiz.getDireita(), profundidade + 1);
 		}
 	}
 
