@@ -39,10 +39,14 @@ public class PlanoExecucao {
 					filho1 = filho1.getFilho();
 				}
 				//
-				NoArvore ultimo = arvore.insere(filho1, new ProdutoCartesiano());
-				for (Relacao relacao : relacoes) {
-					relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
-					arvore.insere(ultimo, relacao);
+				while(filho1 != null){ 
+    				NoArvore ultimo = arvore.insere(filho1, new ProdutoCartesiano());
+    				for (Relacao relacao : relacoes) {
+    					relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
+    					arvore.insere(ultimo, relacao);
+    				}
+    				//
+    				filho1 = filho1.getIrmao();
 				}
 				//
 				filho = filho.getIrmao();
