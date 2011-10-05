@@ -1,19 +1,28 @@
 package br.com.joqi.semantico.consulta.plano;
 
-
 public class ArvoreConsulta {
 
 	private NoArvore raiz;
 	private NoArvore ultimoInserido;
+	private NoArvore raizRestricoes;
+
+	public NoArvore getRaizRestricoes() {
+		return raizRestricoes;
+	}
+
+	public void setRaizRestricoes(NoArvore raizRestricoes) {
+		this.raizRestricoes = raizRestricoes;
+	}
 
 	public NoArvore insere(NoArvore pai, Object valor) {
 		if (pai == null) {
 			raiz = new NoArvore(valor);
 			return raiz;
 		} else {
-			NoArvore esquerda = new NoArvore(valor);
-			pai.setEsquerda(esquerda);
-			return esquerda;
+			NoArvore novo = new NoArvore(valor);
+			novo.setIrmao(pai.getFilho());
+			pai.setFilho(novo);
+			return novo;
 		}
 	}
 
@@ -42,8 +51,8 @@ public class ArvoreConsulta {
 			if (profundidade > 0)
 				System.out.print("|-----> ");
 			System.out.println(raiz);
-			imprime(raiz.getEsquerda(), profundidade + 1);
-			imprime(raiz.getDireita(), profundidade + 1);
+			imprime(raiz.getFilho(), profundidade + 1);
+			imprime(raiz.getIrmao(), profundidade);
 		}
 	}
 

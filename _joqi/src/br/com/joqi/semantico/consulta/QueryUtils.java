@@ -4,6 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
+import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MaiorIgual;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 
@@ -20,9 +25,12 @@ public class QueryUtils {
 	 * @param objeto
 	 * @param nome
 	 * @return
+	 * @throws
+	 * @throws
+	 * @throws RelacaoInexistenteException
 	 * @throws Exception
 	 */
-	protected static Collection<Object> getColecao(Object objeto, String nome) throws Exception {
+	public static Collection<Object> getColecao(Object objeto, String nome) throws RelacaoInexistenteException {
 		Class<?> clazz = objeto.getClass();
 		try {
 			Field atributo = clazz.getDeclaredField(nome);
@@ -43,7 +51,10 @@ public class QueryUtils {
 			throw new RelacaoInexistenteException("O objeto \"" + nome + "\" deve implementar a interface Collection");
 		} catch (NoSuchFieldException e) {
 			throw new RelacaoInexistenteException("A coleção \"" + nome + "\" não existe na classe \"" + clazz.getName() + "\"");
+		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException e) {			
 		}
+		return null;
 	}
 
 	/**
@@ -53,7 +64,7 @@ public class QueryUtils {
 	 * @param nomeCampo
 	 * @return
 	 */
-	protected static Object getValorDoCampo(Object objeto, String nomeCampo) throws Exception {
+	public static Object getValorDoCampo(Object objeto, String nomeCampo) throws Exception {
 		Class<?> classe = objeto.getClass();
 
 		/*Se existe o metodo informado, retorna o valor*/
@@ -88,6 +99,18 @@ public class QueryUtils {
 			return null;
 		}
 		return metodo;
+	}
+	
+	public static RestricaoSimples[] divideRestricaoBetween(RestricaoSimples restricao){
+		RestricaoSimples[] restricoes = new RestricaoSimples[2];
+		//
+		Entre operadorBetween = (Entre) restricao.getOperadorRelacional();
+		restricoes[0] = new RestricaoSimples(restricao.isNegacao(), operadorBetween.getOperandoEntre(),
+				restricao.getOperando1(), new MaiorIgual(), restricao.getOperadorLogico());
+		restricoes[1] = new RestricaoSimples(restricao.isNegacao(), operadorBetween.getOperandoEntre(),
+				restricao.getOperando2(), new MenorIgual(), new OperadorLogicoAnd());
+		//
+		return restricoes;
 	}
 
 }

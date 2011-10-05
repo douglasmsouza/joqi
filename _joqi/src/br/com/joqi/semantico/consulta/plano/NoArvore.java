@@ -1,16 +1,15 @@
 package br.com.joqi.semantico.consulta.plano;
 
-import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
 
 public class NoArvore {
 
 	private Object operacao;
-	private NoArvore esquerda;
-	private NoArvore direita;
+	private NoArvore filho;
+	private NoArvore irmao;
 
-	public NoArvore(Object operacao, NoArvore direita) {
+	public NoArvore(Object operacao, NoArvore filho) {
 		this.operacao = operacao;
-		this.direita = direita;
+		this.filho = filho;
 	}
 
 	public NoArvore(Object operacao) {
@@ -25,32 +24,29 @@ public class NoArvore {
 		this.operacao = operacao;
 	}
 
-	public NoArvore getEsquerda() {
-		return esquerda;
+	public NoArvore getFilho() {
+		return filho;
 	}
 
-	public void setEsquerda(NoArvore esquerda) {
-		this.esquerda = esquerda;
+	public void setFilho(NoArvore filho) {
+		this.filho = filho;
 	}
 
-	public NoArvore getDireita() {
-		return direita;
+	public NoArvore getIrmao() {
+		return irmao;
 	}
 
-	public void setDireita(NoArvore direita) {
-		this.direita = direita;
+	public void setIrmao(NoArvore irmao) {
+		this.irmao = irmao;
 	}
 
 	@Override
 	public String toString() {
-		if (operacao.getClass() == ProdutoCartesiano.class) {
-			return esquerda + " X " + direita;
-		}
 		return operacao.toString();
 	}
 
 	public boolean isFolha() {
-		return esquerda == null && direita == null;
+		return filho == null;
 	}
 
 }

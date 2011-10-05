@@ -4,7 +4,9 @@ select	pai.nmPessoa,
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where	filho2.cdPessoa = 1 and
+where	filho2.cdPessoa = 1 or
+		filho1.cdPessoa = 3 or
 		pai.cdPessoa = filho1.cdPai and	
-		pai.cdPessoa = filho2.cdPai
+		pai.cdPessoa = filho2.cdPai or
+		not filho1.vlIdade between 10 and 20
 		
