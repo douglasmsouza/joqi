@@ -26,34 +26,27 @@ public class PlanoExecucao {
 		tamanhosColecoes = new HashMap<String, Integer>();
 	}
 
-	private void inserirRelacoes(Object objetoConsulta, List<Relacao> relacoes) throws RelacaoInexistenteException {
-		inserirRelacoes(objetoConsulta, arvore.getRaizRestricoes(), relacoes);
-	}
-
-	private void inserirRelacoes(Object objetoConsulta, NoArvore raizRestricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
-		if (raizRestricoes != null) {
-			NoArvore filho = raizRestricoes.getFilho();
-			while (filho != null) {
-				if(filho.getOperacao().getClass() == ArvoreConsulta.class){
-					inserirRelacoes(objetoConsulta, ((ArvoreConsulta) filho.getOperacao()).getRaizRestricoes(), relacoes);
+	private void inserirRelacoes(Object objetoConsulta, NoArvore no, List<Relacao> relacoes) throws RelacaoInexistenteException {
+		if (no != null) {
+			no = no.getFilho();
+			if (no != null) {
+				if (no.getOperacao().getClass() == ArvoreConsulta.class) {
+					inserirRelacoes(objetoConsulta, ((ArvoreConsulta) no.getOperacao()).getRaizRestricoes(), relacoes);
 				}
-				//
-				NoArvore filho1 = filho;
-				while (filho1.getFilho() != null) {
-					filho1 = filho1.getFilho();
+				/*Desce ate a ultima restricao*/
+				while (no.getFilho() != null) {
+					no = no.getFilho();
 				}
-				//
-				while(filho1 != null){ 
-    				NoArvore ultimo = arvore.insere(filho1, new ProdutoCartesiano());
-    				for (Relacao relacao : relacoes) {
-    					relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
-    					arvore.insere(ultimo, relacao);
-    				}
-    				//
-    				filho1 = filho1.getIrmao();
+				/*Insere as relacoes no proprio noh e nos irmaos*/
+				while (no != null) {
+					NoArvore ultimo = arvore.insere(no, new ProdutoCartesiano());
+					for (Relacao relacao : relacoes) {
+						relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
+						arvore.insere(ultimo, relacao);
+					}
+					//
+					no = no.getIrmao();
 				}
-				//
-				filho = filho.getIrmao();
 			}
 		} else {
 			NoArvore ultimo = arvore.insere(new ProdutoCartesiano());
@@ -81,16 +74,16 @@ public class PlanoExecucao {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
-			NoArvore noInserir = noRestricao;			
+			NoArvore noInserir = noRestricao;
 			if (r.getOperadorLogico() == null || r.getOperadorLogico().getClass() == OperadorLogicoOr.class) {
 				noInserir = no;
 			}
 			//
-			if(r.getClass() == RestricaoSimples.class){    			
-    			noRestricao = arvore.insere(noInserir, r);
+			if (r.getClass() == RestricaoSimples.class) {
+				noRestricao = arvore.insere(noInserir, r);
 			} else {
-				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto)r).getRestricoes());
-				noRestricao = arvore.insere(noInserir, subArvore);	
+				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
+				noRestricao = arvore.insere(noInserir, subArvore);
 			}
 		}
 	}
@@ -98,16 +91,50 @@ public class PlanoExecucao {
 	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) {
 		if (restricoes.size() > 0) {
 			NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
-			inserirRestricoes(raizRestricoes, restricoes);			
+			inserirRestricoes(raizRestricoes, restricoes);
 			arvore.setRaizRestricoes(raizRestricoes);
 		}
 		//
 		return arvore;
 	}
 
+	private void organizarRestricoes(NoArvore noRestricao) {
+		if (noRestricao != null) {
+			NoArvore anterior = noRestricao;
+			noRestricao = noRestricao.getFilho();
+			while (noRestricao != null) {
+				Object operacao1 = noRestricao.getOperacao();
+				if (operacao1.getClass() == ArvoreConsulta.class) {
+					organizarRestricoes(((ArvoreConsulta) operacao1).getRaizRestricoes());
+				} else if (noRestricao.getFilho() != null) {
+					Object operacao2 = noRestricao.getFilho().getOperacao();
+					if (operacao2.getClass() == ArvoreConsulta.class) {
+						organizarRestricoes(((ArvoreConsulta) operacao2).getRaizRestricoes());
+					} else {
+						RestricaoSimples r1 = (RestricaoSimples) operacao1;
+						RestricaoSimples r2 = (RestricaoSimples) operacao2;
+						//
+						if(r1.isConstante() && r2.isJuncao()){
+							NoArvore temp = noRestricao;
+							NoArvore tempFilho = temp.getFilho().getFilho();
+							//
+							noRestricao = noRestricao.getFilho();
+							noRestricao.setFilho(temp);
+							temp.setFilho(tempFilho);
+							anterior.setFilho(noRestricao);
+						}
+					}
+				}
+				//
+				noRestricao = noRestricao.getFilho();
+			}
+		}
+	}
+
 	public void montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		inserirRestricoes(arvore, restricoes);
-		inserirRelacoes(objetoConsulta, relacoes);
+		organizarRestricoes(arvore.getRaizRestricoes());
+		inserirRelacoes(objetoConsulta, arvore.getRaizRestricoes(), relacoes);
 	}
 
 	public void imprimirArvore() {
@@ -117,7 +144,6 @@ public class PlanoExecucao {
 
 	public void insereOperacao(Object operacao) {
 		arvore.insere(operacao);
-
 	}
 
 }
