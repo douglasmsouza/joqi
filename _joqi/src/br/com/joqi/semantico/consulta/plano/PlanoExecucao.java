@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import br.com.joqi.semantico.consulta.QueryUtils;
-import br.com.joqi.semantico.consulta.disjuncao.DisjuncaoRestricoes;
+import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -77,33 +77,35 @@ public class PlanoExecucao {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
-			if(r.getClass() == RestricaoSimples.class){
-    			NoArvore noInserir = noRestricao;			
-    			if (r.getOperadorLogico() == null || r.getOperadorLogico().getClass() == OperadorLogicoOr.class) {
-    				noInserir = no;
-    			}
+			NoArvore noInserir = noRestricao;			
+			if (r.getOperadorLogico() == null || r.getOperadorLogico().getClass() == OperadorLogicoOr.class) {
+				noInserir = no;
+			}
+			//
+			if(r.getClass() == RestricaoSimples.class){    			
     			noRestricao = arvore.insere(noInserir, r);
 			} else {
-				if(noRestricao == null)
-					noRestricao = inserirRestricoes(no, ((RestricaoConjunto)r).getRestricoes());
-				else
-					noRestricao = inserirRestricoes(noRestricao, ((RestricaoConjunto)r).getRestricoes());
+				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto)r).getRestricoes());
+				noRestricao = arvore.insere(noInserir, subArvore);	
+				/*noRestricao = inserirRestricoes(noInserir, ((RestricaoConjunto)r).getRestricoes());*/
 			}
 		}
 		//
-		return no;
+		return noRestricao;
 	}
 
-	private void inserirRestricoes(List<Restricao> restricoes) {
+	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) {
 		if (restricoes.size() > 0) {
-			NoArvore raizRestricoes = arvore.insere(new DisjuncaoRestricoes());
+			NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
 			arvore.setRaizRestricoes(inserirRestricoes(raizRestricoes, restricoes));
 		}
+		//
+		return arvore;
 	}
 
 	public void montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
-		inserirRestricoes(restricoes);
-		inserirRelacoes(objetoConsulta, relacoes);
+		inserirRestricoes(arvore, restricoes);
+		/*inserirRelacoes(objetoConsulta, relacoes);*/
 	}
 
 	public void imprimirArvore() {

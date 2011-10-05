@@ -4,7 +4,7 @@ select	pai.nmPessoa,
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where  (pai.cdPessoa = 2 or pai.cdPessoa = 4 or (pai.nmPessoa = 'douglas' or pai.nmPessoa = 'carlos')) and	
+where  (pai.cdPessoa = 2 or (pai.cdPessoa = 4)) and	
 		filho1.cdPessoa = 2 and
 		filho1.vlIdade between 20 and 30 and
 		filho1.nmPessoa like '%douglas%' and

@@ -1,5 +1,8 @@
 package br.com.joqi.semantico.consulta.plano;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ArvoreConsulta {
 
 	private NoArvore raiz;
@@ -39,9 +42,19 @@ public class ArvoreConsulta {
 		return raiz;
 	}
 
+	private List<ArvoreConsulta> arvoreInternasAux = new ArrayList<ArvoreConsulta>();
+	
 	public void imprime() {
 		imprime(raiz, 0);
-	}
+		//		
+		for(ArvoreConsulta arvoreConsulta : arvoreInternasAux){
+			System.out.println();
+			System.out.println("-------------------------------------------------------------------------------------------");
+			System.out.println(arvoreConsulta);
+			System.out.println("-------------------------------------------------------------------------------------------");
+			arvoreConsulta.imprime();			
+		}
+	}		
 
 	private void imprime(NoArvore raiz, int profundidade) {
 		if (raiz != null) {
@@ -49,10 +62,14 @@ public class ArvoreConsulta {
 				System.out.print("\t");
 			}
 			if (profundidade > 0)
-				System.out.print("|-----> ");
+				System.out.print("|-----> ");			
 			System.out.println(raiz);
 			imprime(raiz.getFilho(), profundidade + 1);
 			imprime(raiz.getIrmao(), profundidade);
+			//
+			if(raiz.getOperacao().getClass() == ArvoreConsulta.class){
+				arvoreInternasAux.add((ArvoreConsulta) raiz.getOperacao());
+			}
 		}
 	}
 
