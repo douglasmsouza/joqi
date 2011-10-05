@@ -99,7 +99,7 @@ public class PlanoExecucao {
 
 	public void montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		inserirRestricoes(restricoes);
-		/*inserirRelacoes(objetoConsulta, relacoes);*/
+		inserirRelacoes(objetoConsulta, relacoes);
 	}
 
 	public void imprimirArvore() {
