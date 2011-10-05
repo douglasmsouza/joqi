@@ -34,6 +34,10 @@ public class PlanoExecucao {
 		if (raizRestricoes != null) {
 			NoArvore filho = raizRestricoes.getFilho();
 			while (filho != null) {
+				if(filho.getOperacao().getClass() == ArvoreConsulta.class){
+					inserirRelacoes(objetoConsulta, ((ArvoreConsulta) filho.getOperacao()).getRaizRestricoes(), relacoes);
+				}
+				//
 				NoArvore filho1 = filho;
 				while (filho1.getFilho() != null) {
 					filho1 = filho1.getFilho();
@@ -73,7 +77,7 @@ public class PlanoExecucao {
 		}
 	}
 
-	private NoArvore inserirRestricoes(NoArvore no, List<Restricao> restricoes) {
+	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
@@ -87,17 +91,15 @@ public class PlanoExecucao {
 			} else {
 				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto)r).getRestricoes());
 				noRestricao = arvore.insere(noInserir, subArvore);	
-				/*noRestricao = inserirRestricoes(noInserir, ((RestricaoConjunto)r).getRestricoes());*/
 			}
 		}
-		//
-		return noRestricao;
 	}
 
 	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) {
 		if (restricoes.size() > 0) {
 			NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
-			arvore.setRaizRestricoes(inserirRestricoes(raizRestricoes, restricoes));
+			inserirRestricoes(raizRestricoes, restricoes);			
+			arvore.setRaizRestricoes(raizRestricoes);
 		}
 		//
 		return arvore;
@@ -105,7 +107,7 @@ public class PlanoExecucao {
 
 	public void montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		inserirRestricoes(arvore, restricoes);
-		/*inserirRelacoes(objetoConsulta, relacoes);*/
+		inserirRelacoes(objetoConsulta, relacoes);
 	}
 
 	public void imprimirArvore() {
