@@ -4,9 +4,9 @@ select	pai.nmPessoa,
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where  (pai.cdPessoa = 2 or pai.cdPessoa = 4) and	
-		filho1.cdPessoa = 2 and
+where   filho1.cdPessoa = 2 and		
 		filho1.vlIdade between 20 and 30 and
 		filho1.nmPessoa like '%douglas%' and
-		not filho1.apareceNaConsulta is false			   
+		not filho1.apareceNaConsulta is false and
+		filho1.cdPessoa <> filho2.cdPessoa			   
 		
