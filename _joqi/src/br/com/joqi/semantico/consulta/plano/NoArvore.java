@@ -1,9 +1,9 @@
 package br.com.joqi.semantico.consulta.plano;
 
-
 public class NoArvore {
 
 	private Object operacao;
+	private NoArvore pai;
 	private NoArvore filho;
 	private NoArvore irmao;
 
@@ -30,6 +30,7 @@ public class NoArvore {
 
 	public void setFilho(NoArvore filho) {
 		this.filho = filho;
+		this.filho.pai = this;
 	}
 
 	public NoArvore getIrmao() {
@@ -40,6 +41,10 @@ public class NoArvore {
 		this.irmao = irmao;
 	}
 
+	public NoArvore getPai() {
+		return pai;
+	}
+
 	@Override
 	public String toString() {
 		return operacao.toString();
@@ -48,5 +53,4 @@ public class NoArvore {
 	public boolean isFolha() {
 		return filho == null;
 	}
-
 }
