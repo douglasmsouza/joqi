@@ -8,12 +8,7 @@ where   filho1.cdPessoa = 2 and
 		filho1.vlIdade between 20 and 30 and
 		filho1.cdPessoa <> filho2.cdPessoa and
 		filho1.nmPessoa like '%douglas%' and
-		filho1.cdPessoa > filho2.cdPessoa or
-		(filho1.cdPessoa = 2 and		
-		filho1.vlIdade between 20 and 30 and
-		filho1.cdPessoa <> filho2.cdPessoa and
-		filho1.nmPessoa like '%douglas%' and
-		filho1.cdPessoa > filho2.cdPessoa) and		 
+		filho1.cdPessoa > filho2.cdPessoa or		 
 		not filho1.apareceNaConsulta is false
 					   
 		

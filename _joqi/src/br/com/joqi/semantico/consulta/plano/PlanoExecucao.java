@@ -125,7 +125,7 @@ public class PlanoExecucao {
 
 	public void montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		inserirRestricoes(arvore, restricoes);
-		inserirRelacoes(objetoConsulta, arvore.getRaizRestricoes(), relacoes);
+		/*inserirRelacoes(objetoConsulta, arvore.getRaizRestricoes(), relacoes);*/
 	}
 
 	public void imprimirArvore() {
