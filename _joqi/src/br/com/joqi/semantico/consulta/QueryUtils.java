@@ -4,11 +4,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MaiorIgual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 
@@ -52,7 +58,7 @@ public class QueryUtils {
 		} catch (NoSuchFieldException e) {
 			throw new RelacaoInexistenteException("A coleção \"" + nome + "\" não existe na classe \"" + clazz.getName() + "\"");
 		} catch (IllegalAccessException e) {
-		} catch (IllegalArgumentException e) {			
+		} catch (IllegalArgumentException e) {
 		}
 		return null;
 	}
@@ -100,8 +106,8 @@ public class QueryUtils {
 		}
 		return metodo;
 	}
-	
-	public static RestricaoSimples[] divideRestricaoBetween(RestricaoSimples restricao){
+
+	public static RestricaoSimples[] divideRestricaoBetween(RestricaoSimples restricao) {
 		RestricaoSimples[] restricoes = new RestricaoSimples[2];
 		//
 		Entre operadorBetween = (Entre) restricao.getOperadorRelacional();
@@ -111,6 +117,30 @@ public class QueryUtils {
 				restricao.getOperando2(), new MenorIgual(), new OperadorLogicoAnd());
 		//
 		return restricoes;
+	}
+
+	public static void setTipoBusca(RestricaoSimples restricao) {
+		Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando2 = restricao.getOperando2();
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
+		//
+		if (operando1.getClass() == ProjecaoCampo.class) {
+			if (operando2 != null && operando2.getClass() == ProjecaoCampo.class) {
+				if (!operando1.getRelacao().equals(operando2.getRelacao())) {
+					if (operadorRelacional.getClass() == Igual.class || operadorRelacional.getClass() == Diferente.class) {
+						restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+					} else {
+						restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+					}
+				} else {
+					restricao.setTipoBusca(TipoBusca.LINEAR);
+				}
+			} else {
+				restricao.setTipoBusca(TipoBusca.LINEAR);
+			}
+		} else {
+			restricao.setTipoBusca(TipoBusca.LINEAR);
+		}
 	}
 
 }

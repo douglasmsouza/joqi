@@ -1,5 +1,6 @@
 package br.com.joqi.semantico.consulta.restricao;
 
+import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
@@ -16,6 +17,8 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelac
  */
 public class RestricaoSimples extends Restricao {
 
+	private TipoBusca tipoBusca;
+	//
 	private Projecao<?> operando1;
 	private Projecao<?> operando2;
 	private OperadorRelacional operadorRelacional;
@@ -68,6 +71,8 @@ public class RestricaoSimples extends Restricao {
 			s.append(operando1).append(" ").append(operadorRelacional).append(" ").append(operando2).append(" ");;
 		}
 		//
+		s.append(" [").append(tipoBusca).append("]");
+		//
 		return s.toString();
 	}
 
@@ -108,6 +113,14 @@ public class RestricaoSimples extends Restricao {
 				(operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
 						operando2.getClass() == ProjecaoCampo.class &&
 				operando1.getRelacao().equals(operando2.getRelacao()));
+	}
+
+	public TipoBusca getTipoBusca() {
+		return tipoBusca;
+	}
+
+	public void setTipoBusca(TipoBusca tipoBusca) {
+		this.tipoBusca = tipoBusca;
 	}
 
 	@Override
