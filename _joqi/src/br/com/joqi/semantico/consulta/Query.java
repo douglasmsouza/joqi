@@ -73,8 +73,7 @@ public class Query implements IPossuiRestricoes {
 			queryImpl.getResultSet();*/
 			//
 			//
-			ArvoreConsulta arvore = planoExecucao.montarArvore(bancoConsulta, restricoes, relacoes);
-			arvore.imprime();
+			planoExecucao.montarArvore(bancoConsulta, restricoes, relacoes);			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

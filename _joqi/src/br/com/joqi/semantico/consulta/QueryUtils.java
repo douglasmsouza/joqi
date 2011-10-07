@@ -127,7 +127,7 @@ public class QueryUtils {
 		if (operando1.getClass() == ProjecaoCampo.class) {
 			if (operando2 != null && operando2.getClass() == ProjecaoCampo.class) {
 				if (!operando1.getRelacao().equals(operando2.getRelacao())) {
-					if (operadorRelacional.getClass() == Igual.class || operadorRelacional.getClass() == Diferente.class) {
+					if (operadorRelacional.getClass() == Igual.class) {
 						restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
 					} else {
 						restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
