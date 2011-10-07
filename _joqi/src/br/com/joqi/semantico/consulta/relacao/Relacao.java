@@ -48,16 +48,16 @@ public class Relacao {
 		if (apelido != null)
 			s.append(" as ").append(apelido);
 		return s.toString();*/
-		String toString = nome; 
-		if(apelido != null)
+		String toString = nome;
+		if (apelido != null)
 			toString = apelido;
-		if(colecao != null)
+		if (colecao != null)
 			toString += "[" + colecao.size() + "]";
 		return toString;
 	}
-	
-	public String getNomeNaConsulta(){
-		if(apelido != null)
+
+	public String getNomeNaConsulta() {
+		if (apelido != null)
 			return apelido;
 		return nome;
 	}
