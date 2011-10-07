@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
+import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
@@ -72,8 +73,8 @@ public class Query implements IPossuiRestricoes {
 			queryImpl.getResultSet();*/
 			//
 			//
-			planoExecucao.montarArvore(bancoConsulta, restricoes, relacoes);
-			planoExecucao.imprimirArvore();
+			ArvoreConsulta arvore = planoExecucao.montarArvore(bancoConsulta, restricoes, relacoes);
+			arvore.imprime();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
