@@ -32,6 +32,11 @@ public class NoArvore {
 		this.filho = filho;
 		this.filho.pai = this;
 	}
+	
+	public void setPai(NoArvore pai) {
+		this.pai = pai;
+		this.pai.filho = this;
+	}
 
 	public NoArvore getIrmao() {
 		return irmao;

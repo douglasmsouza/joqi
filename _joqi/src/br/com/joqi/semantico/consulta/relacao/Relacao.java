@@ -52,7 +52,7 @@ public class Relacao {
 		if (apelido != null)
 			toString = apelido;
 		if (colecao != null)
-			toString += "[" + colecao.size() + "]";
+			toString += " [" + colecao.size() + "]";
 		return toString;
 	}
 
@@ -68,6 +68,13 @@ public class Relacao {
 
 	public Collection<Object> getColecao() {
 		return colecao;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Relacao))
+			return false;
+		return ((Relacao) obj).getNomeNaConsulta().equals(this.getNomeNaConsulta());
 	}
 
 }

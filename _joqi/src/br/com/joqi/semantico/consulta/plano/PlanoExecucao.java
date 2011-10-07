@@ -5,6 +5,8 @@ import java.util.List;
 import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
+import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoConjunto;
@@ -15,12 +17,15 @@ import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 public class PlanoExecucao {
 
 	private ArvoreConsulta arvore;
+	//
+	private Object objetoConsulta;
+	private List<Relacao> relacoes;
 
 	public PlanoExecucao() {
 		arvore = new ArvoreConsulta();
 	}
 
-	private void inserirRestricoes(NoArvore no, Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes)
+	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes)
 			throws RelacaoInexistenteException {
 		NoArvore noRestricao = null;
 		//
@@ -30,31 +35,24 @@ public class PlanoExecucao {
 				noInserir = no;
 				//
 				if (noRestricao != null) {
-					inserirRelacoes(noRestricao, objetoConsulta, relacoes);
+					inserirRelacoes(noRestricao);
 				}
 			}
 			//
 			if (r.getClass() == RestricaoSimples.class) {
 				noRestricao = arvore.insere(noInserir, r);
 				//
-				ordenarRestricoes(noRestricao);
+				descerRestricoes(noRestricao);
 			} else {
-				ArvoreConsulta subArvore = montarArvore(new ArvoreConsulta(), objetoConsulta, ((RestricaoConjunto) r).getRestricoes(), relacoes);
+				ArvoreConsulta subArvore = montarArvore(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
 				noRestricao = arvore.insere(noInserir, subArvore);
 			}
 		}
 		//
-		inserirRelacoes(noRestricao, objetoConsulta, relacoes);
+		inserirRelacoes(noRestricao);
 	}
 
-	private void inserirRelacoes(NoArvore no, Object objetoConsulta, List<Relacao> relacoes) throws RelacaoInexistenteException {
-		for (Relacao relacao : relacoes) {
-			relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
-			arvore.insere(no, relacao);
-		}
-	}
-
-	private void ordenarRestricoes(NoArvore no) {
+	private void descerRestricoes(NoArvore no) {
 		NoArvore pai = no.getPai();
 		while (pai != null && pai.getOperacao().getClass() == RestricaoSimples.class) {
 			RestricaoSimples r1 = (RestricaoSimples) pai.getOperacao();
@@ -79,23 +77,95 @@ public class PlanoExecucao {
 		}
 	}
 
-	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes)
-			throws RelacaoInexistenteException {
+	private void ordenarRestricoes(NoArvore raizRestricoes) {
+		NoArvore filho = raizRestricoes.getFilho();
+		while (filho != null) {
+			NoArvore noRestricao = filho;
+			while (noRestricao.getFilho() != null && !noRestricao.getFilho().isFolha()) {
+				noRestricao = noRestricao.getFilho();
+			}
+			while (true) {				
+				RestricaoSimples restricao = (RestricaoSimples) noRestricao.getOperacao();
+				if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
+					NoArvore no = noRestricao.getFilho();
+					while (no != null) {
+						NoArvore noRelacao = no;
+						while (noRelacao.getOperacao().getClass() != Relacao.class) {
+							noRelacao = noRelacao.getFilho();
+						}
+						if (((Relacao) noRelacao.getOperacao()).getNomeNaConsulta().equals(getRelacaoString(restricao))) {
+							Object temp = noRelacao.getOperacao();
+							noRelacao.setOperacao(noRestricao.getOperacao());
+							noRelacao.setFilho(new NoArvore(temp));
+
+							NoArvore filhoTemp = noRestricao.getFilho();
+							NoArvore paiTemp = noRestricao.getPai();
+							if (paiTemp.getOperacao().getClass() != UniaoRestricoes.class) {
+								paiTemp.setFilho(filhoTemp);
+							} else {
+								noRestricao.setOperacao(new ProdutoCartesiano());
+							}
+						}
+						no = no.getIrmao();
+					}
+				}
+				noRestricao = noRestricao.getPai();
+				if(noRestricao.getOperacao().getClass() != RestricaoSimples.class){
+					break;	
+				} else if(((RestricaoSimples)noRestricao.getOperacao()).getTipoBusca() != TipoBusca.LINEAR){
+					break;	
+				}				
+			}
+			//
+			filho = filho.getIrmao();
+		}
+	}
+
+	private void inserirRelacoes(NoArvore no) throws RelacaoInexistenteException {
+		for (Relacao relacao : relacoes) {
+			relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
+			arvore.insere(no, relacao);
+		}
+	}
+
+	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, List<Restricao> restricoes) throws RelacaoInexistenteException {
 		if (restricoes.size() > 0) {
 			NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
-			inserirRestricoes(raizRestricoes, objetoConsulta, restricoes, relacoes);
+			inserirRestricoes(raizRestricoes, restricoes);
+			ordenarRestricoes(raizRestricoes);
 			arvore.setRaizRestricoes(raizRestricoes);
+		} else {
+			NoArvore no = arvore.insere(new ProdutoCartesiano());
+			inserirRelacoes(no);
 		}
 		//
 		return arvore;
 	}
 
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
-		return montarArvore(arvore, objetoConsulta, restricoes, relacoes);
+		this.objetoConsulta = objetoConsulta;
+		this.relacoes = relacoes;
+		//
+		montarArvore(arvore, restricoes).imprime();
+		//
+		return null;
 	}
 
 	public void insereOperacao(Object operacao) {
 		arvore.insere(operacao);
+	}
+
+	private String getRelacaoString(RestricaoSimples restricao) {
+		Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando2 = restricao.getOperando2();
+		//
+		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
+			return relacoes.get(0).getNomeNaConsulta();
+		} else if (operando1.getRelacao() != null) {
+			return operando1.getRelacao();
+		} else {
+			return operando2.getRelacao();
+		}
 	}
 
 }

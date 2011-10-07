@@ -42,19 +42,43 @@ public class ArvoreConsulta {
 		return raiz;
 	}
 
+	/*public NoArvore busca(NoArvore partindoDe, Object operacao) {
+		NoArvore no = partindoDe.getFilho();
+		while (no != null) {
+			NoArvore irmao = no.getIrmao();
+			while (irmao != null) {
+				if (irmao.getOperacao().equals(operacao)) {
+					return irmao;
+				}
+				NoArvore retorno = busca(irmao, operacao);
+				if (retorno != null) {
+					return retorno;
+				}
+				irmao = irmao.getIrmao();
+			}
+			//
+			if (no.getOperacao().equals(operacao)) {
+				return no;
+			}
+			no = no.getFilho();
+		}
+		//
+		return null;
+	}*/
+
 	private List<ArvoreConsulta> arvoreInternasAux = new ArrayList<ArvoreConsulta>();
-	
+
 	public void imprime() {
 		imprime(raiz, 0);
-		//		
-		for(ArvoreConsulta arvoreConsulta : arvoreInternasAux){
+		//
+		for (ArvoreConsulta arvoreConsulta : arvoreInternasAux) {
 			System.out.println();
 			System.out.println("-------------------------------------------------------------------------------------------");
 			System.out.println(arvoreConsulta);
 			System.out.println("-------------------------------------------------------------------------------------------");
-			arvoreConsulta.imprime();			
+			arvoreConsulta.imprime();
 		}
-	}		
+	}
 
 	private void imprime(NoArvore raiz, int profundidade) {
 		if (raiz != null) {
@@ -62,12 +86,12 @@ public class ArvoreConsulta {
 				System.out.print("\t");
 			}
 			if (profundidade > 0)
-				System.out.print("|-----> ");			
+				System.out.print("|-----> ");
 			System.out.println(raiz);
 			imprime(raiz.getFilho(), profundidade + 1);
 			imprime(raiz.getIrmao(), profundidade);
 			//
-			if(raiz.getOperacao().getClass() == ArvoreConsulta.class){
+			if (raiz.getOperacao().getClass() == ArvoreConsulta.class) {
 				arvoreInternasAux.add((ArvoreConsulta) raiz.getOperacao());
 			}
 		}
