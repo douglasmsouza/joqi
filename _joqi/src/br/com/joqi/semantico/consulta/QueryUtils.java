@@ -128,7 +128,18 @@ public class QueryUtils {
 			if (operando2 != null && operando2.getClass() == ProjecaoCampo.class) {
 				if (!operando1.getRelacao().equals(operando2.getRelacao())) {
 					if (operadorRelacional.getClass() == Igual.class) {
-						restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+						if (restricao.isNegacao()) {
+							restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+						} else {
+							restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+						}
+					}
+					if (operadorRelacional.getClass() == Diferente.class) {
+						if (restricao.isNegacao()) {
+							restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+						} else {
+							restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+						}
 					} else {
 						restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
 					}
