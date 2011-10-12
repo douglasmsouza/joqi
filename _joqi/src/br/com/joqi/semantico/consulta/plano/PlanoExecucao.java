@@ -34,7 +34,7 @@ public class PlanoExecucao {
 		for (Restricao r : restricoes) {
 			NoArvore noInserir = noRestricao;
 			if (r.getOperadorLogico() == null || r.getOperadorLogico().getClass() == OperadorLogicoOr.class) {
-				noInserir = no;
+				noInserir = arvore.insere(no,new ProdutoCartesiano());
 				//
 				if (noRestricao != null) {
 					inserirRelacoes(noRestricao);
@@ -79,84 +79,59 @@ public class PlanoExecucao {
 		}
 	}
 
-	/*private void ordenarRestricoes(NoArvore raizRestricoes) {
-		if (raizRestricoes != null) {
-			NoArvore filho = raizRestricoes.getFilho();
-			while (filho != null) {
-				NoArvore noRestricao = filho;
-				while (noRestricao.getFilho() != null && !noRestricao.getFilho().isFolha()) {
-					noRestricao = noRestricao.getFilho();
-				}
-				while (true) {
-					Object operacao = noRestricao.getOperacao();
-					if (operacao.getClass() == ArvoreConsulta.class) {
-						ordenarRestricoes(((ArvoreConsulta) operacao).getRaiz());
-					} else {
-						RestricaoSimples restricao = (RestricaoSimples) operacao;
-						if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
-							NoArvore no = noRestricao.getFilho();
-							while (no != null) {
-								NoArvore noRelacao = no;
-								while (noRelacao.getOperacao().getClass() != Relacao.class) {
-									noRelacao = noRelacao.getFilho();
-								}
-								if (((Relacao) noRelacao.getOperacao()).getNomeNaConsulta().equals(getRelacaoString(restricao))) {
-									Object temp = noRelacao.getOperacao();
-									noRelacao.setOperacao(noRestricao.getOperacao());
-									noRelacao.setFilho(new NoArvore(temp));
+	private Set<RestricaoSimples> restricoesJaOrdenadas;
 
-									NoArvore filhoTemp = noRestricao.getFilho();
-									NoArvore paiTemp = noRestricao.getPai();
-									if (paiTemp.getOperacao().getClass() != UniaoRestricoes.class) {
-										paiTemp.setFilho(filhoTemp);
-									} else {
-										noRestricao.setOperacao(new ProdutoCartesiano());
-									}
-								}
-								no = noRelacao.getIrmao();
-							}
-						} else {
-							System.out.println("NÃO LINEAR: " + restricao);
+	private void ordenarRestricoesLineares(NoArvore raiz) {
+		if (raiz != null) {
+			Object operacao = raiz.getOperacao();
+			if (operacao.getClass() == ArvoreConsulta.class) {
+				ordenarRestricoesLineares(((ArvoreConsulta) operacao).getRaiz().getFilho());
+			} else {
+				if (operacao.getClass() == RestricaoSimples.class) {
+					RestricaoSimples restricao = (RestricaoSimples) operacao;
+					if (!restricoesJaOrdenadas.contains(restricao)) {
+						if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
+							restricoesJaOrdenadas.add(restricao);
+							NoArvore noRelacao = encontraRelacao(raiz, getRelacaoString(restricao));
+							Object relacao = noRelacao.getOperacao();
+							noRelacao.setOperacao(operacao);
+							noRelacao.setFilho(new NoArvore(relacao));
+							raiz.getPai().setFilho(raiz.getFilho());
 						}
-					}
-					//
-					noRestricao = noRestricao.getPai();
-					if (noRestricao.getOperacao().getClass() != RestricaoSimples.class) {
-						break;
-					} else if (((RestricaoSimples) noRestricao.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
-						break;
 					}
 				}
 				//
-				filho = filho.getIrmao();
+				ordenarRestricoesLineares(raiz.getFilho());
+				ordenarRestricoesLineares(raiz.getIrmao());
 			}
 		}
-	}*/
-	
-	private Set<RestricaoSimples> restricoesOrdenadasAux;
+	}
 
-	private void ordenarRestricoes(NoArvore raiz) {
+	private void ordenarRestricoesJuncoes(NoArvore raiz) {
 		if (raiz != null) {
-			Object operacao = raiz.getOperacao();
-			if(operacao.getClass() == ArvoreConsulta.class){
-				ordenarRestricoes(((ArvoreConsulta) operacao).getRaiz().getFilho());
-			} else {
-    			if (operacao.getClass() == RestricaoSimples.class) {
-    				RestricaoSimples restricao = (RestricaoSimples) operacao;
-    				if(!restricoesOrdenadasAux.contains(restricao)){
-    					restricoesOrdenadasAux.add(restricao);
-        				if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
-        					NoArvore noRelacao = encontraRelacao(raiz, getRelacaoString(restricao));
-        					Object relacao = noRelacao.getOperacao();
-        					noRelacao.setOperacao(operacao);
-        					noRelacao.setFilho(new NoArvore(relacao));
-        					raiz.getPai().setFilho(raiz.getFilho());
-        				}
-    				}
-    			}
-    			//
-    			ordenarRestricoes(raiz.getFilho());
-				ordenarRestricoes(raiz.getIrmao());
+			RestricaoSimples restricaoJuncao = (RestricaoSimples) raiz.getOperacao();
+			/*raiz.getFilho() retorna um ProdutoCartesiano*/
+			NoArvore filho = raiz.getFilho();
+			while (filho != null) {				
+				String relacaoFilho = null;
+				//
+				Object operacao = filho.getOperacao();
+				if (operacao.getClass() == RestricaoSimples.class) {
+					relacaoFilho = getRelacaoString((RestricaoSimples) operacao);
+				} else if (operacao.getClass() == Relacao.class) {
+					relacaoFilho = ((Relacao) operacao).getNomeNaConsulta();
+				}
+				//
+				if(relacaoFilho != null){
+					if (!restricaoJuncao.getOperando1().getRelacao().equals(relacaoFilho)) {
+						if (!restricaoJuncao.getOperando2().getRelacao().equals(relacaoFilho)) {
+							raiz.removeFilho(filho);
+							raiz.getPai().addFilho(filho);
+						}
+					}
+				} 
+				//
+				filho = filho.getIrmao();
 			}
 		}
 	}
@@ -211,10 +186,11 @@ public class PlanoExecucao {
 		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
 		//
-		restricoesOrdenadasAux = new HashSet<RestricaoSimples>();
+		restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
 		//
 		montarArvore(arvore, restricoes);
-		ordenarRestricoes(arvore.getRaizRestricoes().getFilho());
+		ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
+		ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho().getFilho());
 		arvore.imprime();
 		//
 		return null;

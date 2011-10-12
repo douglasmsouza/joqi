@@ -17,20 +17,17 @@ public class ArvoreConsulta {
 		this.raizRestricoes = raizRestricoes;
 	}
 
-	public NoArvore insere(NoArvore pai, Object valor) {
+	public NoArvore insere(NoArvore pai, Object operacao) {
 		if (pai == null) {
-			raiz = new NoArvore(valor);
+			raiz = new NoArvore(operacao);
 			return raiz;
 		} else {
-			NoArvore novo = new NoArvore(valor);
-			novo.setIrmao(pai.getFilho());
-			pai.setFilho(novo);
-			return novo;
+			return pai.addFilho(operacao);
 		}
 	}
 
-	public NoArvore insere(Object valor) {
-		ultimoInserido = insere(ultimoInserido, valor);
+	public NoArvore insere(Object operacao) {
+		ultimoInserido = insere(ultimoInserido, operacao);
 		return ultimoInserido;
 	}
 
@@ -41,30 +38,6 @@ public class ArvoreConsulta {
 	public NoArvore getRaiz() {
 		return raiz;
 	}
-
-	/*public NoArvore busca(NoArvore partindoDe, Object operacao) {
-		NoArvore no = partindoDe.getFilho();
-		while (no != null) {
-			NoArvore irmao = no.getIrmao();
-			while (irmao != null) {
-				if (irmao.getOperacao().equals(operacao)) {
-					return irmao;
-				}
-				NoArvore retorno = busca(irmao, operacao);
-				if (retorno != null) {
-					return retorno;
-				}
-				irmao = irmao.getIrmao();
-			}
-			//
-			if (no.getOperacao().equals(operacao)) {
-				return no;
-			}
-			no = no.getFilho();
-		}
-		//
-		return null;
-	}*/
 
 	private List<ArvoreConsulta> arvoreInternasAux = new ArrayList<ArvoreConsulta>();
 
