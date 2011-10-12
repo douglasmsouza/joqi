@@ -6,10 +6,11 @@ from 	pessoas pai,
 		pessoas filho2
 where   filho1.cdPessoa = 2 and		
 		filho2.vlIdade between 20 and 30 and
-		not filho1.cdPessoa <> filho2.cdPessoa and
 		filho1.nmPessoa like '%douglas%' and 
-		pai.vlIdade = 20 and		 
-		not pai.apareceNaConsulta is false and
-		(pai.cdPessoa = 1 or pai.cdPessoa = 2)
+		pai.vlIdade = 20 and
+		not pai.apareceNaConsulta is false or
+		not filho1.cdPessoa <> filho2.cdPessoa
+		
+		
 					   
 		

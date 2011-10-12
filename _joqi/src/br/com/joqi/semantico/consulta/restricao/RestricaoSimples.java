@@ -59,8 +59,8 @@ public class RestricaoSimples extends Restricao {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		//
-		if (getOperadorLogico() != null)
-			s.append(getOperadorLogico()).append(" ");
+		/*if (getOperadorLogico() != null)
+			s.append(getOperadorLogico()).append(" ");*/
 		if (isNegacao())
 			s.append("not ");
 		//

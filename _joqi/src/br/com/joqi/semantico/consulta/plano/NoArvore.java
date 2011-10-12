@@ -50,6 +50,36 @@ public class NoArvore {
 		return pai;
 	}
 
+	public NoArvore addFilho(NoArvore no) {
+		if (this.filho != null) {
+			this.filho.setIrmao(no);
+		} else {
+			this.filho = no;
+		}
+		return no;
+	}
+
+	public NoArvore addFilho(Object operacao) {
+		NoArvore novoFilho = new NoArvore(operacao);
+		novoFilho.setIrmao(this.filho);
+		this.setFilho(novoFilho);
+		return novoFilho;
+	}
+
+	public void removeFilho(NoArvore noRemover) {
+		NoArvore no = this.filho;
+		if (no.getIrmao() != null) {
+			NoArvore anterior = no;
+			while (no != noRemover) {
+				anterior = no;
+				no = no.getIrmao();
+			}
+			anterior.setIrmao(no.getIrmao());
+		} else if (no == noRemover) {
+			this.filho = null;
+		}
+	}
+
 	@Override
 	public String toString() {
 		return operacao.toString();
