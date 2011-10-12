@@ -80,7 +80,7 @@ public class ArvoreConsulta {
 		}
 	}
 
-	private void imprime(NoArvore raiz, int profundidade) {
+	public void imprime(NoArvore raiz, int profundidade) {
 		if (raiz != null) {
 			for (int i = 0; i < profundidade - 1; i++) {
 				System.out.print("\t");
