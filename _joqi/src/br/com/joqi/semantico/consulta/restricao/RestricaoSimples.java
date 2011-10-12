@@ -64,12 +64,7 @@ public class RestricaoSimples extends Restricao {
 		if (isNegacao())
 			s.append("not ");
 		//
-		if (operadorRelacional instanceof Entre) {
-			Entre entre = (Entre) operadorRelacional;
-			s.append(entre.getOperandoEntre()).append(" between ").append(operando1).append(" and ").append(operando2).append(" ");
-		} else {
-			s.append(operando1).append(" ").append(operadorRelacional).append(" ").append(operando2).append(" ");;
-		}
+		s.append(operando1).append(" ").append(operadorRelacional).append(" ").append(operando2);
 		//
 		s.append(" [").append(tipoBusca).append("]");
 		//

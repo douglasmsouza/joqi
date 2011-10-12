@@ -133,8 +133,7 @@ public class QueryUtils {
 						} else {
 							restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
 						}
-					}
-					if (operadorRelacional.getClass() == Diferente.class) {
+					} else if (operadorRelacional.getClass() == Diferente.class) {
 						if (restricao.isNegacao()) {
 							restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
 						} else {
