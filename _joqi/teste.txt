@@ -1,16 +1,6 @@
-select	pai.nmPessoa,
-		filho1.nmPessoa,
-		filho2.nmPessoa
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
-where   filho1.cdPessoa = 2 and		
-		filho2.vlIdade between 20 and 30 and
-		filho1.nmPessoa like '%douglas%' and 
-		pai.vlIdade = 20 and
-		not pai.apareceNaConsulta is false or
-		not filho1.cdPessoa <> filho2.cdPessoa
-		
-		
-					   
-		
+where	pai.cdPessoa = filho1.cdPai and	
+		pai.cdPessoa = filho2.cdPai and
+		filho2.cdPessoa = 1

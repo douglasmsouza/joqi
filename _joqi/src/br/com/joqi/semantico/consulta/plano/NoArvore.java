@@ -68,15 +68,16 @@ public class NoArvore {
 
 	public void removeFilho(NoArvore noRemover) {
 		NoArvore no = this.filho;
-		if (no.getIrmao() != null) {
-			NoArvore anterior = no;
-			while (no != noRemover) {
-				anterior = no;
-				no = no.getIrmao();
-			}
+		NoArvore anterior = null;
+		while (no != noRemover) {
+			anterior = no;
+			no = no.getIrmao();
+		}
+		//
+		if(anterior != null){
 			anterior.setIrmao(no.getIrmao());
-		} else if (no == noRemover) {
-			this.filho = null;
+		} else {
+			setFilho(no.getIrmao());
 		}
 	}
 
