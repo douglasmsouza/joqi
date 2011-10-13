@@ -109,13 +109,19 @@ public class PlanoExecucao {
 
 	private void ordenarRestricoesJuncoes(NoArvore raiz) {
 		if (raiz != null) {
+			Object operacao = raiz.getOperacao();
+			while(operacao.getClass() == RestricaoSimples.class && ((RestricaoSimples) operacao).getTipoBusca() != TipoBusca.LINEAR){
+				raiz = raiz.getFilho();
+				operacao = raiz.getOperacao();
+			}
+			raiz = raiz.getPai();
 			RestricaoSimples restricaoJuncao = (RestricaoSimples) raiz.getOperacao();
 			/*raiz.getFilho() retorna um ProdutoCartesiano*/
 			NoArvore filho = raiz.getFilho();
 			while (filho != null) {				
 				String relacaoFilho = null;
 				//
-				Object operacao = filho.getOperacao();
+				operacao = filho.getOperacao();
 				if (operacao.getClass() == RestricaoSimples.class) {
 					relacaoFilho = getRelacaoString((RestricaoSimples) operacao);
 				} else if (operacao.getClass() == Relacao.class) {
@@ -126,7 +132,7 @@ public class PlanoExecucao {
 					if (!restricaoJuncao.getOperando1().getRelacao().equals(relacaoFilho)) {
 						if (!restricaoJuncao.getOperando2().getRelacao().equals(relacaoFilho)) {
 							raiz.removeFilho(filho);
-							raiz.getPai().addFilho(filho);
+							raiz.getPai().addFilho(new NoArvore(filho.getOperacao()));
 						}
 					}
 				} 
