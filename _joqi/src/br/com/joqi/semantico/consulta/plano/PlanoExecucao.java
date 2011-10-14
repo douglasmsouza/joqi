@@ -218,7 +218,7 @@ public class PlanoExecucao {
 					//
 					if (trocarPosicao) {
 						raiz.removeFilho(filho);
-						raiz.getPai().addFilho(filho.getOperacao());
+						raiz.addIrmao(filho.getOperacao());
 					}
 					//
 					filho = filho.getIrmao();
