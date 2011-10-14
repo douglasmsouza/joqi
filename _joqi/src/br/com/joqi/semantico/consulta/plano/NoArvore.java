@@ -57,6 +57,10 @@ public class NoArvore {
 		return novoFilho;
 	}
 
+	public NoArvore addIrmao(Object operacao) {
+		return this.pai.addFilho(operacao);
+	}
+
 	public void removeFilho(NoArvore noRemover) {
 		NoArvore no = this.filho;
 		NoArvore anterior = null;
