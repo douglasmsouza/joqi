@@ -277,6 +277,8 @@ public class PlanoExecucao {
 	 *         13/10/2011
 	 */
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
+		double time = System.currentTimeMillis();
+		
 		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
 		//
@@ -286,6 +288,8 @@ public class PlanoExecucao {
 		ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
 		ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho().getFilho());
 		arvore.imprime();
+		//
+		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
 		//
 		return null;
 	}
