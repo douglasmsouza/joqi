@@ -32,7 +32,7 @@ public class NoArvore {
 		this.filho = filho;
 		this.filho.pai = this;
 	}
-	
+
 	public void setPai(NoArvore pai) {
 		this.pai = pai;
 		this.pai.filho = this;
@@ -50,15 +50,6 @@ public class NoArvore {
 		return pai;
 	}
 
-	public NoArvore addFilho(NoArvore no) {
-		if (this.filho != null) {
-			this.filho.setIrmao(no);
-		} else {
-			this.filho = no;
-		}
-		return no;
-	}
-
 	public NoArvore addFilho(Object operacao) {
 		NoArvore novoFilho = new NoArvore(operacao);
 		novoFilho.setIrmao(this.filho);
@@ -74,7 +65,7 @@ public class NoArvore {
 			no = no.getIrmao();
 		}
 		//
-		if(anterior != null){
+		if (anterior != null) {
 			anterior.setIrmao(no.getIrmao());
 		} else {
 			setFilho(no.getIrmao());
