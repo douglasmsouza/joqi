@@ -1,6 +1,3 @@
-from 	pessoas avo,
-		pessoas paiMae,
-		pessoas filho		
-where	paiMae.cdPessoa = 1 or 
-		(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
-		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		
+select	(x+y-(z*y))
+from	strings str1,
+		strings str2
