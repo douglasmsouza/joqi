@@ -176,57 +176,61 @@ public class PlanoExecucao {
 	}
 
 	private void ordenarRestricoesJuncoes(NoArvore raiz) {
-		if (raiz != null) {
-			/*Procura na arvore a ultima restricao que faz juncao*/
-			while (raiz.getOperacao().getClass() == RestricaoSimples.class
-					&& ((RestricaoSimples) raiz.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
-				raiz = raiz.getFilho();
-			}
+		/*if (raiz != null) {*/
+			while (raiz != null) {
+				NoArvore no = raiz.getFilho();
+				/*Procura na arvore a ultima restricao que faz juncao*/
+				while (no.getOperacao().getClass() == RestricaoSimples.class
+						&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
+					no = no.getFilho();
+				}
 
-			raiz = raiz.getPai();
-			while (raiz.getOperacao().getClass() != ProdutoCartesiano.class) {
-				RestricaoSimples restricaoJuncao = (RestricaoSimples) raiz.getOperacao();
-				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
-				String relacao2 = restricaoJuncao.getOperando2().getRelacao();
-				/*Uma vez encontrada a restricao, percorre os filhos e 
-				 * verifica qual nao tem relacao alguma com a mesma*/
-				NoArvore filho = raiz.getFilho();
-				while (filho != null) {
-					boolean trocarPosicao = false;
-					//
-					if (filho.getOperacao().getClass() == RestricaoSimples.class) {
-						RestricaoSimples restricaoFilho = (RestricaoSimples) filho.getOperacao();
-						if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
-							String relacaoFilho = getRelacaoString((RestricaoSimples) filho.getOperacao());
+				no = no.getPai();
+				while (no.getOperacao().getClass() != ProdutoCartesiano.class) {
+					RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
+					String relacao1 = restricaoJuncao.getOperando1().getRelacao();
+					String relacao2 = restricaoJuncao.getOperando2().getRelacao();
+					/*Uma vez encontrada a restricao, percorre os filhos e 
+					 * verifica qual nao tem relacao alguma com a mesma*/
+					NoArvore filho = no.getFilho();
+					while (filho != null) {
+						boolean trocarPosicao = false;
+						//
+						if (filho.getOperacao().getClass() == RestricaoSimples.class) {
+							RestricaoSimples restricaoFilho = (RestricaoSimples) filho.getOperacao();
+							if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
+								String relacaoFilho = getRelacaoString((RestricaoSimples) filho.getOperacao());
+								if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
+									trocarPosicao = true;
+								}
+							} else {
+								String relacao1Filho = restricaoFilho.getOperando1().getRelacao();
+								String relacao2Filho = restricaoFilho.getOperando2().getRelacao();
+								if (!relacao1Filho.equals(relacao1) && !relacao2Filho.equals(relacao2) &&
+										!relacao2Filho.equals(relacao1) && !relacao1Filho.equals(relacao2)) {
+									trocarPosicao = true;
+								}
+							}
+						} else if (filho.getOperacao().getClass() == Relacao.class) {
+							String relacaoFilho = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
 							if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
 								trocarPosicao = true;
 							}
-						} else {
-							String relacao1Filho = restricaoFilho.getOperando1().getRelacao();
-							String relacao2Filho = restricaoFilho.getOperando2().getRelacao();
-							if (!relacao1Filho.equals(relacao1) && !relacao2Filho.equals(relacao2) &&
-									!relacao2Filho.equals(relacao1) && !relacao1Filho.equals(relacao2)) {
-								trocarPosicao = true;
-							}
 						}
-					} else if (filho.getOperacao().getClass() == Relacao.class) {
-						String relacaoFilho = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
-						if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
-							trocarPosicao = true;
+						//
+						if (trocarPosicao) {
+							no.removeFilho(filho);
+							no.addIrmao(filho.getOperacao());
 						}
+						//
+						filho = filho.getIrmao();
 					}
 					//
-					if (trocarPosicao) {
-						raiz.removeFilho(filho);
-						raiz.addIrmao(filho.getOperacao());
-					}
-					//
-					filho = filho.getIrmao();
+					no = no.getPai();
 				}
-				//
-				raiz = raiz.getPai();
-			}
-		}
+				raiz = raiz.getIrmao();
+			}			
+		/*}*/
 	}
 
 	/**
@@ -278,7 +282,7 @@ public class PlanoExecucao {
 	 */
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		double time = System.currentTimeMillis();
-		
+
 		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
 		//
@@ -286,7 +290,7 @@ public class PlanoExecucao {
 		//
 		montarArvore(arvore, restricoes);
 		ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
-		ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho().getFilho());
+		ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
 		arvore.imprime();
 		//
 		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
