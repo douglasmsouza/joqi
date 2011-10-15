@@ -140,7 +140,7 @@ public class PlanoExecucao {
 			Object operacao = raiz.getOperacao();
 			if (operacao.getClass() == ArvoreConsulta.class) {
 				ordenarRestricoesLineares(((ArvoreConsulta) operacao).getRaiz().getFilho());
-			} else {
+			} else {				
 				if (operacao.getClass() == RestricaoSimples.class) {
 					RestricaoSimples restricao = (RestricaoSimples) operacao;
 					if (!restricoesJaOrdenadas.contains(restricao)) {
@@ -157,11 +157,11 @@ public class PlanoExecucao {
 							raiz.getPai().setFilho(raiz.getFilho());
 						}
 					}
-				}
-				//
-				ordenarRestricoesLineares(raiz.getFilho());
-				ordenarRestricoesLineares(raiz.getIrmao());
+				}				
 			}
+			//
+			ordenarRestricoesLineares(raiz.getFilho());
+			ordenarRestricoesLineares(raiz.getIrmao());
 		}
 	}
 
@@ -194,7 +194,7 @@ public class PlanoExecucao {
 		while (raiz != null) {
 			NoArvore no = raiz.getFilho();
 			//
-			while (no.getOperacao().getClass() == ArvoreConsulta.class) {
+			while(no.getOperacao().getClass() == ArvoreConsulta.class){
 				ordenarRestricoesJuncoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes().getFilho());
 				no = no.getFilho();
 			}
@@ -206,7 +206,7 @@ public class PlanoExecucao {
 
 			/*Vai subindo na arvore e montando as juncoes*/
 			no = no.getPai();
-			while (no.getOperacao().getClass() == RestricaoSimples.class &&
+			while (no.getOperacao().getClass() == RestricaoSimples.class && 
 					((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
 				RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
 				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
