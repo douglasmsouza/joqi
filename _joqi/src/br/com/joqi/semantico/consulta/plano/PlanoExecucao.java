@@ -194,10 +194,14 @@ public class PlanoExecucao {
 		while (raiz != null) {
 			NoArvore no = raiz.getFilho();
 			//
-			while(no.getOperacao().getClass() == ArvoreConsulta.class){
+			while(no != null && no.getOperacao().getClass() == ArvoreConsulta.class){
 				ordenarRestricoesJuncoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes().getFilho());
 				no = no.getFilho();
 			}
+			
+			if(no == null)
+				break;
+			
 			/*Vai descendo na arvore arvore ateh achar a ultima restricao que faz juncao*/
 			while (no.getOperacao().getClass() == RestricaoSimples.class
 					&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
