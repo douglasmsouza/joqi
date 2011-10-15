@@ -55,16 +55,31 @@ public class PlanoExecucao {
 			/*Caso seja apenas uma restricao simples, vai inserindo os nos filhos*/
 			if (r.getClass() == RestricaoSimples.class) {
 				noRestricao = arvore.insere(noInserir, r);
-				descerRestricoes(noRestricao);
+				descerRestricoesSimples(noRestricao);
 			} else {
 				/*Caso seja um conjunto de restricoes entre parenteses, eh necessario criar uma subarvore*/
 				ArvoreConsulta subArvore = montarArvore(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
 				noRestricao = arvore.insere(noInserir, subArvore);
+				subirSubarvore(noRestricao);
 			}
 		}
 
 		/*Insere as relacoes no fim de arvore*/
 		inserirRelacoes(noRestricao);
+	}
+
+	private void subirSubarvore(NoArvore no) {
+		NoArvore pai = no.getPai();
+		while (pai != null && pai.getOperacao().getClass() != ProdutoCartesiano.class) {
+			Object o1 = pai.getOperacao();
+			Object o2 = no.getOperacao();
+			//
+			pai.setOperacao(o2);
+			no.setOperacao(o1);
+			//
+			no = no.getPai();
+			pai = no.getPai();
+		}
 	}
 
 	/**
@@ -78,7 +93,7 @@ public class PlanoExecucao {
 	 * @author Douglas Matheus de Souza em
 	 *         13/10/2011
 	 */
-	private void descerRestricoes(NoArvore no) {
+	private void descerRestricoesSimples(NoArvore no) {
 		NoArvore pai = no.getPai();
 		while (pai != null && pai.getOperacao().getClass() == RestricaoSimples.class) {
 			/*Para cada duas restricoes proximas, verifica qual deve ficar mais abaixo*/
@@ -176,61 +191,67 @@ public class PlanoExecucao {
 	}
 
 	private void ordenarRestricoesJuncoes(NoArvore raiz) {
-		/*if (raiz != null) {*/
-			while (raiz != null) {
-				NoArvore no = raiz.getFilho();
-				/*Procura na arvore a ultima restricao que faz juncao*/
-				while (no.getOperacao().getClass() == RestricaoSimples.class
-						&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
-					no = no.getFilho();
-				}
+		while (raiz != null) {
+			NoArvore no = raiz.getFilho();
+			//
+			while (no.getOperacao().getClass() == ArvoreConsulta.class) {
+				ordenarRestricoesJuncoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes().getFilho());
+				no = no.getFilho();
+			}
+			/*Vai descendo na arvore arvore ateh achar a ultima restricao que faz juncao*/
+			while (no.getOperacao().getClass() == RestricaoSimples.class
+					&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
+				no = no.getFilho();
+			}
 
-				no = no.getPai();
-				while (no.getOperacao().getClass() != ProdutoCartesiano.class) {
-					RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
-					String relacao1 = restricaoJuncao.getOperando1().getRelacao();
-					String relacao2 = restricaoJuncao.getOperando2().getRelacao();
-					/*Uma vez encontrada a restricao, percorre os filhos e 
-					 * verifica qual nao tem relacao alguma com a mesma*/
-					NoArvore filho = no.getFilho();
-					while (filho != null) {
-						boolean trocarPosicao = false;
-						//
-						if (filho.getOperacao().getClass() == RestricaoSimples.class) {
-							RestricaoSimples restricaoFilho = (RestricaoSimples) filho.getOperacao();
-							if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
-								String relacaoFilho = getRelacaoString((RestricaoSimples) filho.getOperacao());
-								if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
-									trocarPosicao = true;
-								}
-							} else {
-								String relacao1Filho = restricaoFilho.getOperando1().getRelacao();
-								String relacao2Filho = restricaoFilho.getOperando2().getRelacao();
-								if (!relacao1Filho.equals(relacao1) && !relacao2Filho.equals(relacao2) &&
-										!relacao2Filho.equals(relacao1) && !relacao1Filho.equals(relacao2)) {
-									trocarPosicao = true;
-								}
-							}
-						} else if (filho.getOperacao().getClass() == Relacao.class) {
-							String relacaoFilho = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
+			/*Vai subindo na arvore e montando as juncoes*/
+			no = no.getPai();
+			while (no.getOperacao().getClass() == RestricaoSimples.class &&
+					((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
+				RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
+				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
+				String relacao2 = restricaoJuncao.getOperando2().getRelacao();
+				/*Uma vez encontrada a restricao, percorre os filhos e 
+				 * verifica qual nao tem relacao alguma com a mesma*/
+				NoArvore filho = no.getFilho();
+				while (filho != null) {
+					boolean trocarPosicao = false;
+					//
+					if (filho.getOperacao().getClass() == RestricaoSimples.class) {
+						RestricaoSimples restricaoFilho = (RestricaoSimples) filho.getOperacao();
+						if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
+							String relacaoFilho = getRelacaoString((RestricaoSimples) filho.getOperacao());
 							if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
 								trocarPosicao = true;
 							}
+						} else {
+							String relacao1Filho = restricaoFilho.getOperando1().getRelacao();
+							String relacao2Filho = restricaoFilho.getOperando2().getRelacao();
+							if (!relacao1Filho.equals(relacao1) && !relacao2Filho.equals(relacao2) &&
+									!relacao2Filho.equals(relacao1) && !relacao1Filho.equals(relacao2)) {
+								trocarPosicao = true;
+							}
 						}
-						//
-						if (trocarPosicao) {
-							no.removeFilho(filho);
-							no.addIrmao(filho.getOperacao());
+					} else if (filho.getOperacao().getClass() == Relacao.class) {
+						String relacaoFilho = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
+						if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
+							trocarPosicao = true;
 						}
-						//
-						filho = filho.getIrmao();
 					}
 					//
-					no = no.getPai();
+					if (trocarPosicao) {
+						no.removeFilho(filho);
+						no.addIrmao(filho.getOperacao());
+					}
+					//
+					filho = filho.getIrmao();
 				}
-				raiz = raiz.getIrmao();
-			}			
-		/*}*/
+				//
+				no = no.getPai();
+			}
+			//
+			raiz = raiz.getIrmao();
+		}
 	}
 
 	/**
@@ -242,9 +263,11 @@ public class PlanoExecucao {
 	 *         13/10/2011
 	 */
 	private void inserirRelacoes(NoArvore no) throws RelacaoInexistenteException {
-		for (Relacao relacao : relacoes) {
-			relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
-			arvore.insere(no, relacao);
+		if (no.getOperacao().getClass() != ArvoreConsulta.class) {
+			for (Relacao relacao : relacoes) {
+				relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
+				arvore.insere(no, relacao);
+			}
 		}
 	}
 

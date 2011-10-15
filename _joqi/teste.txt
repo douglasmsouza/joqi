@@ -1,10 +1,6 @@
-from	pessoas p1,
-		pessoas p2,
-		pessoas p3,
-		pessoas p4,
-		pessoas p5,
-		pessoas p6
-where	p1.cdPessoa = p2.cdPessoa or
-		p1.cdPessoa > 1 and p5.cdPessoa = p3.cdPessoa and p5.cdPessoa > p1.cdPessoa
-		
-		
+from 	pessoas avo,
+		pessoas paiMae,
+		pessoas filho		
+where	paiMae.cdPessoa = 1 and 
+		(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
+		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		
