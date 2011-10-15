@@ -1,16 +1,18 @@
 package br.com.joqi.semantico.consulta.projecao;
 
-public class ProjecaoAritmetica extends Projecao<Double> {
+import br.com.joqi.semantico.consulta.projecao.aritmetica.ExpressaoAritmetica;
+
+public class ProjecaoAritmetica extends Projecao<ExpressaoAritmetica> {
 
 	public ProjecaoAritmetica() {
 		super();
 	}
 
-	public ProjecaoAritmetica(Double valor) {
+	public ProjecaoAritmetica(ExpressaoAritmetica valor) {
 		super(valor);
 	}
 
-	public ProjecaoAritmetica(String apelido, Double valor) {
+	public ProjecaoAritmetica(String apelido, ExpressaoAritmetica valor) {
 		super(apelido, valor);
 	}
 

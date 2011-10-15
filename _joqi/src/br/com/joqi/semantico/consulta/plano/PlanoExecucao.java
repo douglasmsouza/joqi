@@ -140,7 +140,7 @@ public class PlanoExecucao {
 			Object operacao = raiz.getOperacao();
 			if (operacao.getClass() == ArvoreConsulta.class) {
 				ordenarRestricoesLineares(((ArvoreConsulta) operacao).getRaiz().getFilho());
-			} else {				
+			} else {
 				if (operacao.getClass() == RestricaoSimples.class) {
 					RestricaoSimples restricao = (RestricaoSimples) operacao;
 					if (!restricoesJaOrdenadas.contains(restricao)) {
@@ -157,7 +157,7 @@ public class PlanoExecucao {
 							raiz.getPai().setFilho(raiz.getFilho());
 						}
 					}
-				}				
+				}
 			}
 			//
 			ordenarRestricoesLineares(raiz.getFilho());
@@ -194,14 +194,14 @@ public class PlanoExecucao {
 		while (raiz != null) {
 			NoArvore no = raiz.getFilho();
 			//
-			while(no != null && no.getOperacao().getClass() == ArvoreConsulta.class){
+			while (no != null && no.getOperacao().getClass() == ArvoreConsulta.class) {
 				ordenarRestricoesJuncoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes().getFilho());
 				no = no.getFilho();
 			}
-			
-			if(no == null)
+
+			if (no == null)
 				break;
-			
+
 			/*Vai descendo na arvore arvore ateh achar a ultima restricao que faz juncao*/
 			while (no.getOperacao().getClass() == RestricaoSimples.class
 					&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
@@ -210,7 +210,7 @@ public class PlanoExecucao {
 
 			/*Vai subindo na arvore e montando as juncoes*/
 			no = no.getPai();
-			while (no.getOperacao().getClass() == RestricaoSimples.class && 
+			while (no.getOperacao().getClass() == RestricaoSimples.class &&
 					((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
 				RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
 				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
@@ -284,15 +284,9 @@ public class PlanoExecucao {
 	 *         13/10/2011
 	 */
 	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, List<Restricao> restricoes) throws RelacaoInexistenteException {
-		if (restricoes.size() > 0) {
-			NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
-			inserirRestricoes(raizRestricoes, restricoes);
-			arvore.setRaizRestricoes(raizRestricoes);
-		} else {
-			NoArvore no = arvore.insere(new ProdutoCartesiano());
-			inserirRelacoes(no);
-		}
-		//
+		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
+		inserirRestricoes(raizRestricoes, restricoes);
+		arvore.setRaizRestricoes(raizRestricoes);
 		return arvore;
 	}
 
@@ -309,15 +303,20 @@ public class PlanoExecucao {
 	 */
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		double time = System.currentTimeMillis();
-
+		//
 		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
 		//
-		restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
-		//
-		montarArvore(arvore, restricoes);
-		ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
-		ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
+		if (restricoes.size() > 0) {
+			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
+			//
+			montarArvore(arvore, restricoes);
+			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
+			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
+		} else {
+			NoArvore no = arvore.insere(new ProdutoCartesiano());
+			inserirRelacoes(no);
+		}
 		arvore.imprime();
 		//
 		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
