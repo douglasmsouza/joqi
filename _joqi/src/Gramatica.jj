@@ -158,7 +158,7 @@ double expressaoAritmeticaAux() :
     {
       retorno = Double.valueOf(token.image);
     }
-  | < ABRE_PARENTESE > retorno = expressaoAritmetica() < FECHA_PARENTESE >
+//  | < ABRE_PARENTESE > retorno = expressaoAritmetica() < FECHA_PARENTESE >
   )
   //
   {
