@@ -110,8 +110,8 @@ public class PlanoExecucao {
 					no.setOperacao(r1);
 				}
 			}/* else {
-				break;
-			}*/
+			 break;
+			 }*/
 			//
 			no = no.getPai();
 			pai = no.getPai();
@@ -240,7 +240,7 @@ public class PlanoExecucao {
 					//
 					if (trocarPosicao) {
 						no.removeFilho(filho);
-						no.addIrmao(filho.getOperacao());
+						no.addIrmao(filho);
 					}
 					//
 					filho = filho.getIrmao();
@@ -334,4 +334,7 @@ public class PlanoExecucao {
 		}
 	}
 
+	public Object getObjetoConsulta() {
+		return objetoConsulta;
+	}
 }
