@@ -566,14 +566,7 @@ void restricoesAux(OperadorLogico operadorLogico, RestricaoConjunto restricaoCon
         else
         {
           QueryUtils.setTipoBusca(restricaoSimples);
-          if (restricaoSimples.getOperadorRelacional().getClass() == Igual.class)
-          {
-            if (!restricaoSimples.getOperando1().equals(restricaoSimples.getOperando2()))
-            {
-              listaRestricoes.addRestricao(restricaoSimples);
-            }
-          }
-          else listaRestricoes.addRestricao(restricaoSimples);
+          listaRestricoes.addRestricao(restricaoSimples);
         }
       }
     )
