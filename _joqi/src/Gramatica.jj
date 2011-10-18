@@ -557,15 +557,11 @@ void restricoesAux(OperadorLogico operadorLogico, RestricaoConjunto restricaoCon
         {
           RestricaoSimples [ ] betweenSeparado = QueryUtils.divideRestricaoBetween(restricaoSimples);
           //
-          QueryUtils.setTipoBusca(betweenSeparado [ 0 ]);
-          QueryUtils.setTipoBusca(betweenSeparado [ 1 ]);
-          //
           listaRestricoes.addRestricao(betweenSeparado [ 0 ]);
           listaRestricoes.addRestricao(betweenSeparado [ 1 ]);
         }
         else
         {
-          QueryUtils.setTipoBusca(restricaoSimples);
           listaRestricoes.addRestricao(restricaoSimples);
         }
       }

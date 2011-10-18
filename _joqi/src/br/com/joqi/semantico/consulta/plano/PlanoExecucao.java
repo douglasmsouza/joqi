@@ -9,11 +9,16 @@ import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoConjunto;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoOr;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
+import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 
 public class PlanoExecucao {
@@ -35,8 +40,7 @@ public class PlanoExecucao {
 	 * @throws RelacaoInexistenteException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes)
-			throws RelacaoInexistenteException {
+	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) throws ClausulaWhereException, RelacaoInexistenteException {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
@@ -53,6 +57,8 @@ public class PlanoExecucao {
 
 			/*Caso seja apenas uma restricao simples, vai inserindo os nos filhos*/
 			if (r.getClass() == RestricaoSimples.class) {
+				setTipoBusca((RestricaoSimples) r);
+				//
 				noRestricao = arvore.insere(noInserir, r);
 				descerRestricoesSimples(noRestricao);
 			} else {
@@ -65,6 +71,81 @@ public class PlanoExecucao {
 
 		/*Insere as relacoes no fim de arvore*/
 		inserirRelacoes(noRestricao);
+	}
+
+	/**
+	 * Determina qual algoritmo sera utilizado para efetuar a busca nas relacoes
+	 * de entrada da restricao.
+	 * 
+	 * @param restricao
+	 * @author Douglas Matheus de Souza em 18/10/2011
+	 * @throws ClausulaWhereException
+	 */
+	private void setTipoBusca(RestricaoSimples restricao) throws ClausulaWhereException {
+		if (relacoes.size() == 1) {
+			restricao.setTipoBusca(TipoBusca.LINEAR);
+		} else {
+			verificaRestricao(restricao);
+			//
+			Projecao<?> operando1 = restricao.getOperando1();
+			Projecao<?> operando2 = restricao.getOperando2();
+			OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
+			//
+			if (operando1.getClass() == ProjecaoCampo.class) {
+				if (operando2 != null && operando2.getClass() == ProjecaoCampo.class) {
+					if (!operando1.getRelacao().equals(operando2.getRelacao())) {
+						if (operadorRelacional.getClass() == Igual.class) {
+							if (restricao.isNegacao()) {
+								restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+							} else {
+								restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+							}
+						} else if (operadorRelacional.getClass() == Diferente.class) {
+							if (restricao.isNegacao()) {
+								restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
+							} else {
+								restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+							}
+						} else {
+							restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+						}
+					} else {
+						restricao.setTipoBusca(TipoBusca.LINEAR);
+					}
+				} else {
+					restricao.setTipoBusca(TipoBusca.LINEAR);
+				}
+			} else {
+				restricao.setTipoBusca(TipoBusca.LINEAR);
+			}
+		}
+	}
+
+	/**
+	 * Verifica se as restricoes possuem apelidos, caso exista mais de uma
+	 * relacao na clausula FROM.
+	 * 
+	 * @param restricao
+	 * @throws ClausulaWhereException
+	 * @author Douglas Matheus de Souza em 18/10/2011
+	 */
+	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
+		if (relacoes.size() > 1) {
+			String exception = "Nome da relação obrigatório na cláusula WHERE (" + restricao.getRestricaoString() + ")";
+			if (restricao.getOperando1().getClass() == ProjecaoCampo.class) {
+				if (restricao.getOperando1().getRelacao() == null) {
+					throw new ClausulaWhereException(exception);
+				}
+			}
+			//
+			if (restricao.getOperando2() != null) {
+				if (restricao.getOperando2().getClass() == ProjecaoCampo.class) {
+					if (restricao.getOperando2().getRelacao() == null) {
+						throw new ClausulaWhereException(exception);
+					}
+				}
+			}
+		}
 	}
 
 	private void subirSubarvore(NoArvore no) {
@@ -274,10 +355,11 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param restricoes
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @throws RelacaoInexistenteException
+	 * @throws ClausulaWhereException
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, List<Restricao> restricoes) throws RelacaoInexistenteException {
+	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException, RelacaoInexistenteException {
 		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
 		inserirRestricoes(raizRestricoes, restricoes);
 		arvore.setRaizRestricoes(raizRestricoes);
@@ -290,11 +372,12 @@ public class PlanoExecucao {
 	 * @param objetoConsulta
 	 * @param restricoes
 	 * @param relacoes
-	 * @return
+	 * @throws ClausulaWhereException
 	 * @throws RelacaoInexistenteException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
+	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws ClausulaWhereException,
+			RelacaoInexistenteException {
 		double time = System.currentTimeMillis();
 		//
 		this.objetoConsulta = objetoConsulta;
