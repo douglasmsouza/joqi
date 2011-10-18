@@ -33,8 +33,7 @@ public class PlanoExecucao {
 	 * @param no
 	 * @param restricoes
 	 * @throws RelacaoInexistenteException
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
 	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes)
 			throws RelacaoInexistenteException {
@@ -83,21 +82,19 @@ public class PlanoExecucao {
 	}
 
 	/**
-	 * Metodo que "desce" as restricoes, colocando
-	 * as que nao fazem produto
-	 * cartesiano na parte mais baixa da arvore.
-	 * Este metodo tem o funcionamente
-	 * semelhante ao de um comparator.
+	 * Metodo que "desce" as restricoes, colocando as que nao fazem produto
+	 * cartesiano na parte mais baixa da arvore. Este metodo tem o funcionamente
+	 * semelhante ao de um comparator, onde dois objetos sao comparados um a um.
 	 * 
 	 * @param no
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
 	private void descerRestricoesSimples(NoArvore no) {
 		NoArvore pai = no.getPai();
-		while (pai != null && pai.getOperacao().getClass() == RestricaoSimples.class) {
-			/*Para cada duas restricoes proximas, verifica qual deve ficar mais abaixo*/
-			RestricaoSimples r1 = (RestricaoSimples) pai.getOperacao();
+		Object operacaoPai = pai.getOperacao();
+		while (pai != null && operacaoPai.getClass() == RestricaoSimples.class) {
+			/*Compara duas restricoes proximas para ver qual fica mais abaixo*/
+			RestricaoSimples r1 = (RestricaoSimples) operacaoPai;
 			RestricaoSimples r2 = (RestricaoSimples) no.getOperacao();
 			if (r1.getTipoBusca() == TipoBusca.LINEAR) {
 				if (r2.getTipoBusca() != TipoBusca.LINEAR) {
@@ -107,17 +104,18 @@ public class PlanoExecucao {
 				}
 			} else if (r1.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
 				if (r2.getTipoBusca() == TipoBusca.LOOP_ANINHADO) {
-					/*Restricoes que fazem juncao baseada em hash devem ficar 
+					/*Restricoes que fazem juncao baseada em hash devem ficar		       
 					 * mais abaixo das que utilizam loop aninhado*/
 					pai.setOperacao(r2);
 					no.setOperacao(r1);
 				}
-			} else {
+			}/* else {
 				break;
-			}
+			}*/
 			//
 			no = no.getPai();
 			pai = no.getPai();
+			operacaoPai = pai.getOperacao();
 		}
 	}
 
@@ -125,15 +123,12 @@ public class PlanoExecucao {
 	private Set<RestricaoSimples> restricoesJaOrdenadas;
 
 	/**
-	 * Ordena as restricoes que utilizam o
-	 * algoritmo de busca linear para que
-	 * elas fiquem posicionadas na mesma subarvore
-	 * da relacao sobre qual ira
+	 * Ordena as restricoes que utilizam o algoritmo de busca linear para que
+	 * elas fiquem posicionadas na mesma subarvore da relacao sobre qual ira
 	 * efetuar a busca.
 	 * 
 	 * @param raiz
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
 	private void ordenarRestricoesLineares(NoArvore raiz) {
 		if (raiz != null) {
@@ -263,8 +258,7 @@ public class PlanoExecucao {
 	 * 
 	 * @param no
 	 * @throws RelacaoInexistenteException
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
 	private void inserirRelacoes(NoArvore no) throws RelacaoInexistenteException {
 		if (no.getOperacao().getClass() != ArvoreConsulta.class) {
@@ -298,8 +292,7 @@ public class PlanoExecucao {
 	 * @param relacoes
 	 * @return
 	 * @throws RelacaoInexistenteException
-	 * @author Douglas Matheus de Souza em
-	 *         13/10/2011
+	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws RelacaoInexistenteException {
 		double time = System.currentTimeMillis();

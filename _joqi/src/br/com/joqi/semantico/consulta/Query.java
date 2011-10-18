@@ -3,20 +3,11 @@ package br.com.joqi.semantico.consulta;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
-import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
-import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
-import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 import br.com.joqi.testes.BancoConsulta;
 
 public class Query implements IPossuiRestricoes {
@@ -48,6 +39,7 @@ public class Query implements IPossuiRestricoes {
 		relacoes.add(f);
 	}
 
+	@Override
 	public void addRestricao(Restricao restricao) {
 		restricoes.add(restricao);
 	}
@@ -60,8 +52,23 @@ public class Query implements IPossuiRestricoes {
 		return relacoes;
 	}
 
+	@Override
 	public List<Restricao> getRestricoes() {
 		return restricoes;
+	}
+
+	@Override
+	public Restricao getUltima() {
+		try {
+			return restricoes.get(restricoes.size() - 1);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	@Override
+	public void remove(Restricao restricao) {
+		restricoes.remove(restricao);		
 	}
 
 	public void getResultado() {

@@ -58,4 +58,18 @@ public class RestricaoConjunto extends Restricao implements IPossuiRestricoes {
 		return sb.toString();
 	}
 
+	@Override
+	public Restricao getUltima() {
+		try {
+			return restricoes.get(restricoes.size() - 1);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	@Override
+	public void remove(Restricao restricao) {
+		restricoes.remove(restricao);
+	}
+
 }

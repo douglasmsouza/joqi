@@ -1,3 +1,5 @@
-select	(x+y-(z*w))
-from	strings str1,
-		strings str2
+from 	pessoas avo,
+		pessoas paiMae,
+		pessoas filho		
+where	1 = 1 and
+		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		
