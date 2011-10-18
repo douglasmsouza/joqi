@@ -65,10 +65,10 @@ public class Query implements IPossuiRestricoes {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void remove(Restricao restricao) {
-		restricoes.remove(restricao);		
+		restricoes.remove(restricao);
 	}
 
 	public void getResultado() {
