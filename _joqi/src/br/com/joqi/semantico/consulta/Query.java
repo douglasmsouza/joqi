@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -84,7 +85,9 @@ public class Query implements IPossuiRestricoes {
 			queryImpl.getResultSet();*/
 			//
 			//
-			planoExecucao.montarArvore(bancoConsulta, projecoes, restricoes, relacoes);
+			ArvoreConsulta arvore = planoExecucao.montarArvore(bancoConsulta, projecoes, restricoes, relacoes);
+			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
+			queryImplOtimizada4.getResultSet();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
