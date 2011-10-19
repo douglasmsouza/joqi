@@ -1,13 +1,16 @@
 package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
+import br.com.joqi.semantico.exception.ClausulaFromException;
 import br.com.joqi.testes.BancoConsulta;
 
 public class Query implements IPossuiRestricoes {
@@ -17,7 +20,7 @@ public class Query implements IPossuiRestricoes {
 	private BancoConsulta bancoConsulta;
 	//
 	private List<Projecao<?>> projecoes;
-	private List<Relacao> relacoes;
+	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
 
 	public Query() {
@@ -26,7 +29,7 @@ public class Query implements IPossuiRestricoes {
 		bancoConsulta = new BancoConsulta();
 		//
 		projecoes = new ArrayList<Projecao<?>>();
-		relacoes = new ArrayList<Relacao>();
+		relacoes = new HashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
 	}
 
@@ -35,8 +38,10 @@ public class Query implements IPossuiRestricoes {
 		planoExecucao.insereOperacao(projecao);
 	}
 
-	public void addRelacao(Relacao f) {
-		relacoes.add(f);
+	public void addRelacao(Relacao relacao) throws ClausulaFromException {
+		if (!relacoes.add(relacao)) {
+			throw new ClausulaFromException("A relação \"" + relacao.getNomeNaConsulta() + "\" foi declarada mais de uma vez ");
+		}
 	}
 
 	@Override
@@ -48,7 +53,7 @@ public class Query implements IPossuiRestricoes {
 		return projecoes;
 	}
 
-	public List<Relacao> getRelacoes() {
+	public Set<Relacao> getRelacoes() {
 		return relacoes;
 	}
 
