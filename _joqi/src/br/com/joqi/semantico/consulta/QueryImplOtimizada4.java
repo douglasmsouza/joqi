@@ -19,24 +19,16 @@ public class QueryImplOtimizada4 {
 	public ResultSet getResultSet() {
 		ResultSet resultSet = new ResultSet();
 		//
-		lerArvoreBottomUp();
+		executaConsulta(arvoreConsulta.getRaiz());
+		arvoreConsulta.imprime();
 		//
 		return resultSet;
 	}
 
-	private void lerArvoreBottomUp() {
-		System.out.println("Nó inicial: " + getNoInicial(arvoreConsulta.getRaiz()));
-		arvoreConsulta.imprime();
-	}
-
-	private NoArvore getNoInicial(NoArvore raiz) {
-		if (raiz.getFilho() != null) {
-			raiz = raiz.getFilho();
-			while (raiz.getIrmao() != null) {
-				raiz = raiz.getIrmao();
-			}
-			return getNoInicial(raiz);
+	private void executaConsulta(NoArvore no) {
+		if (no != null) {
+			executaConsulta(no.getFilho());
+			executaConsulta(no.getIrmao());
 		}
-		return raiz;
 	}
 }

@@ -379,32 +379,32 @@ public class PlanoExecucao {
 	 */
 	private void ordenarRestricoesJuncoes(NoArvore raiz) {
 		while (raiz != null) {
-			NoArvore no = raiz.getFilho();
+			raiz = raiz.getFilho();
 			//
-			while (no != null && no.getOperacao().getClass() == ArvoreConsulta.class) {
-				ordenarRestricoesJuncoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes().getFilho());
-				no = no.getFilho();
+			while (raiz != null && raiz.getOperacao().getClass() == ArvoreConsulta.class) {
+				ordenarRestricoesJuncoes(((ArvoreConsulta) raiz.getOperacao()).getRaizRestricoes().getFilho());
+				raiz = raiz.getFilho();
 			}
 
-			if (no == null)
+			if (raiz == null)
 				break;
 
 			/*Vai descendo na arvore arvore ateh achar a ultima restricao que faz juncao*/
-			while (no.getOperacao().getClass() == RestricaoSimples.class
-					&& ((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
-				no = no.getFilho();
+			while (raiz.getOperacao().getClass() == RestricaoSimples.class
+					&& ((RestricaoSimples) raiz.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
+				raiz = raiz.getFilho();
 			}
 
 			/*Vai subindo na arvore e montando as juncoes*/
-			no = no.getPai();
-			while (no.getOperacao().getClass() == RestricaoSimples.class &&
-					((RestricaoSimples) no.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
-				RestricaoSimples restricaoJuncao = (RestricaoSimples) no.getOperacao();
+			raiz = raiz.getPai();
+			while (raiz.getOperacao().getClass() == RestricaoSimples.class &&
+					((RestricaoSimples) raiz.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
+				RestricaoSimples restricaoJuncao = (RestricaoSimples) raiz.getOperacao();
 				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
 				String relacao2 = restricaoJuncao.getOperando2().getRelacao();
 				/*Uma vez encontrada a restricao, percorre os filhos e 
 				 * verifica qual nao tem relacao alguma com a mesma*/
-				NoArvore filho = no.getFilho();
+				NoArvore filho = raiz.getFilho();
 				while (filho != null) {
 					boolean trocarPosicao = false;
 					//
@@ -431,14 +431,14 @@ public class PlanoExecucao {
 					}
 					//
 					if (trocarPosicao) {
-						no.removeFilho(filho);
-						no.addIrmao(filho);
+						raiz.removeFilho(filho);
+						raiz.addIrmao(filho);
 					}
 					//
 					filho = filho.getIrmao();
 				}
 				//
-				no = no.getPai();
+				raiz = raiz.getPai();
 			}
 			//
 			raiz = raiz.getIrmao();
