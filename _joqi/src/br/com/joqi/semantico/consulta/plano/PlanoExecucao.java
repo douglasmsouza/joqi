@@ -134,8 +134,18 @@ public class PlanoExecucao {
 		verificaRelacaoOperando(restricao, restricao.getOperando2());
 	}
 
+	/**
+	 * Verifica se a relacao informada junto a um operando existe. Caso exista
+	 * mais de uma relacao na clausula FROM, verifica tambem se todos o operando
+	 * que faz referencia ao nome de um atributo possue o nome da relacao.
+	 * 
+	 * @param restricao
+	 * @param operando
+	 * @throws ClausulaWhereException
+	 * @author Douglas Matheus de Souza em 19/10/2011
+	 */
 	private void verificaRelacaoOperando(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
-		String exception1 = "Nome da relação obrigatório em \"{0}\" na cláusula WHERE (" + restricao.getRestricaoString() + ")";
+		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula WHERE (" + restricao.getRestricaoString() + ")";
 		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + restricao.getRestricaoString() + ")";
 		//
 		if (operando != null) {
@@ -197,9 +207,7 @@ public class PlanoExecucao {
 					pai.setOperacao(r2);
 					no.setOperacao(r1);
 				}
-			}/* else {
-			 break;
-			 }*/
+			}
 			//
 			no = no.getPai();
 			pai = no.getPai();
@@ -248,6 +256,13 @@ public class PlanoExecucao {
 		}
 	}
 
+	/**
+	 * Encontra dentro da arvore o no que contem a operacao de relacao.
+	 * 
+	 * @param raiz
+	 * @param relacao
+	 * @author Douglas Matheus de Souza em 19/10/2011
+	 */
 	private NoArvore encontraRelacao(NoArvore raiz, String relacao) {
 		NoArvore noRelacao = null;
 		//
@@ -273,6 +288,12 @@ public class PlanoExecucao {
 		return false;
 	}
 
+	/**
+	 * Arranja as juncoes de maneira que fiquem ligadas as suas duas relacoes de
+	 * entrada.
+	 * 
+	 * @author Douglas Matheus de Souza em 19/10/2011
+	 */
 	private void ordenarRestricoesJuncoes(NoArvore raiz) {
 		while (raiz != null) {
 			NoArvore no = raiz.getFilho();
@@ -423,8 +444,8 @@ public class PlanoExecucao {
 			return operando2.getRelacao();
 		}
 	}
-	
-	private String getNomeRelacaoUnica(){
+
+	private String getNomeRelacaoUnica() {
 		return relacoes.iterator().next().getNomeNaConsulta();
 	}
 
