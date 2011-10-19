@@ -18,7 +18,12 @@ public class QueryImplOtimizada4 {
 	public ResultSet getResultSet() {
 		ResultSet resultSet = new ResultSet();
 		//
+		lerArvoreBottomUp();
 		//
 		return resultSet;
 	}
+
+	private void lerArvoreBottomUp() {
+				
+	}		
 }

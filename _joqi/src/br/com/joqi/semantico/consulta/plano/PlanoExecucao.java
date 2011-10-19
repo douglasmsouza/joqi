@@ -18,6 +18,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoOr;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.exception.ClausulaSelectException;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 
@@ -30,6 +31,86 @@ public class PlanoExecucao {
 
 	public PlanoExecucao() {
 		arvore = new ArvoreConsulta();
+	}
+
+	/**
+	 * Monta a arvore de consulta principal
+	 * 
+	 * @param objetoConsulta
+	 * @param restricoes
+	 * @param relacoes
+	 * @throws ClausulaWhereException
+	 * @throws RelacaoInexistenteException
+	 * @author Douglas Matheus de Souza em 13/10/2011
+	 * @param projecoes
+	 * @throws ClausulaSelectException
+	 */
+	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes)
+			throws ClausulaSelectException, RelacaoInexistenteException, ClausulaWhereException {
+		double time = System.currentTimeMillis();
+		//
+		this.objetoConsulta = objetoConsulta;
+		this.relacoes = relacoes;
+		//
+		if (restricoes.size() > 0) {
+			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
+			//
+			inserirProjecoes(arvore, projecoes);
+			inserirRestricoes(arvore, restricoes);
+			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
+			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
+		} else {
+			NoArvore no = arvore.insere(new ProdutoCartesiano());
+			inserirRelacoes(no);
+		}
+		arvore.imprime();
+		//
+		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
+		//
+		return null;
+	}
+
+	private void inserirProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws ClausulaSelectException {
+		for (Projecao<?> projecao : projecoes) {
+			verificaRelacaoOperandoProjecao(projecao);
+			arvore.insere(projecao);
+		}
+	}
+
+	private void verificaRelacaoOperandoProjecao(Projecao<?> projecao) throws ClausulaSelectException {
+		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula SELECT (" + projecao + ")";
+		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + projecao + ")";
+		//
+		if (projecao.getClass() == ProjecaoCampo.class) {
+			if (projecao.getRelacao() == null) {
+				if (relacoes.size() > 1) {
+					throw new ClausulaSelectException(exception1.replace("{0}", (String) projecao.getValor()));
+				} else {
+					projecao.setRelacao(getNomeRelacaoUnica());
+				}
+			} else {
+				if (!relacoes.contains(new Relacao(projecao.getRelacao()))) {
+					throw new ClausulaSelectException(exception2.replace("{0}", projecao.getRelacao()));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Insere na arvore a lista restricoes
+	 * 
+	 * @param arvore
+	 * @param restricoes
+	 * @throws RelacaoInexistenteException
+	 * @throws ClausulaWhereException
+	 * @author Douglas Matheus de Souza em 13/10/2011
+	 */
+	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException,
+			RelacaoInexistenteException {
+		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
+		inserirRestricoes(raizRestricoes, restricoes);
+		arvore.setRaizRestricoes(raizRestricoes);
+		return arvore;
 	}
 
 	/**
@@ -64,7 +145,7 @@ public class PlanoExecucao {
 				descerRestricoesSimples(noRestricao);
 			} else {
 				/*Caso seja um conjunto de restricoes entre parenteses, eh necessario criar uma subarvore*/
-				ArvoreConsulta subArvore = montarArvore(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
+				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
 				noRestricao = arvore.insere(noInserir, subArvore);
 				subirSubarvore(noRestricao);
 			}
@@ -130,13 +211,13 @@ public class PlanoExecucao {
 	 * @author Douglas Matheus de Souza em 18/10/2011
 	 */
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
-		verificaRelacaoOperando(restricao, restricao.getOperando1());
-		verificaRelacaoOperando(restricao, restricao.getOperando2());
+		verificaRelacaoOperandoRestricao(restricao, restricao.getOperando1());
+		verificaRelacaoOperandoRestricao(restricao, restricao.getOperando2());
 	}
 
 	/**
 	 * Verifica se a relacao informada junto a um operando existe. Caso exista
-	 * mais de uma relacao na clausula FROM, verifica tambem se todos o operando
+	 * mais de uma relacao na clausula FROM, verifica tambem se o operando
 	 * que faz referencia ao nome de um atributo possue o nome da relacao.
 	 * 
 	 * @param restricao
@@ -144,7 +225,7 @@ public class PlanoExecucao {
 	 * @throws ClausulaWhereException
 	 * @author Douglas Matheus de Souza em 19/10/2011
 	 */
-	private void verificaRelacaoOperando(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
+	private void verificaRelacaoOperandoRestricao(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
 		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula WHERE (" + restricao.getRestricaoString() + ")";
 		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + restricao.getRestricaoString() + ")";
 		//
@@ -376,60 +457,6 @@ public class PlanoExecucao {
 				arvore.insere(no, relacao);
 			}
 		}
-	}
-
-	/**
-	 * Insere na arvore a lista restricoes
-	 * 
-	 * @param arvore
-	 * @param restricoes
-	 * @throws RelacaoInexistenteException
-	 * @throws ClausulaWhereException
-	 * @author Douglas Matheus de Souza em 13/10/2011
-	 */
-	private ArvoreConsulta montarArvore(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException, RelacaoInexistenteException {
-		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
-		inserirRestricoes(raizRestricoes, restricoes);
-		arvore.setRaizRestricoes(raizRestricoes);
-		return arvore;
-	}
-
-	/**
-	 * Monta a arvore de consulta principal
-	 * 
-	 * @param objetoConsulta
-	 * @param restricoes
-	 * @param relacoes
-	 * @throws ClausulaWhereException
-	 * @throws RelacaoInexistenteException
-	 * @author Douglas Matheus de Souza em 13/10/2011
-	 */
-	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, Set<Relacao> relacoes) throws ClausulaWhereException,
-			RelacaoInexistenteException {
-		double time = System.currentTimeMillis();
-		//
-		this.objetoConsulta = objetoConsulta;
-		this.relacoes = relacoes;
-		//
-		if (restricoes.size() > 0) {
-			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
-			//
-			montarArvore(arvore, restricoes);
-			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
-			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
-		} else {
-			NoArvore no = arvore.insere(new ProdutoCartesiano());
-			inserirRelacoes(no);
-		}
-		arvore.imprime();
-		//
-		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
-		//
-		return null;
-	}
-
-	public void insereOperacao(Object operacao) {
-		arvore.insere(operacao);
 	}
 
 	private String getRelacaoString(RestricaoSimples restricao) {

@@ -1,6 +1,9 @@
-from	strings str1,
-		strings str2
-where	(str1.toString between 'f' and 'm' or
-		str1.toString = 'A' or
-		str1.toString = 'B') and
-		str1.toString > str2.toString
+select	pai.nmPessoa,
+		filho1.nmPessoa,
+		filho2.nmPessoa
+from 	pessoas pai,
+		pessoas filho1,
+		pessoas filho2
+where	pai.cdPessoa = filho1.cdPai and	
+		pai.cdPessoa = filho2.cdPai and
+		filho2.cdPessoa = 1
