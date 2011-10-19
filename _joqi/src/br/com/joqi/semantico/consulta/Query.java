@@ -35,7 +35,6 @@ public class Query implements IPossuiRestricoes {
 
 	public void addProjecao(Projecao<?> projecao) {
 		projecoes.add(projecao);
-		planoExecucao.insereOperacao(projecao);
 	}
 
 	public void addRelacao(Relacao relacao) throws ClausulaFromException {
@@ -85,7 +84,7 @@ public class Query implements IPossuiRestricoes {
 			queryImpl.getResultSet();*/
 			//
 			//
-			planoExecucao.montarArvore(bancoConsulta, restricoes, relacoes);
+			planoExecucao.montarArvore(bancoConsulta, projecoes, restricoes, relacoes);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

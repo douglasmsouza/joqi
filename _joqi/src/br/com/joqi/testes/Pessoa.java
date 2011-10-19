@@ -2,8 +2,6 @@ package br.com.joqi.testes;
 
 import java.util.Date;
 
-import br.com.joqi.semantico.consulta.util.JoqiUtil;
-
 public class Pessoa {
 
 	private int cdPessoa;
