@@ -1,6 +1,3 @@
-select	pai.nmPessoa,
-		filho1.nmPessoa,
-		filho2.nmPessoa
 from 	pessoas pai,
 		pessoas filho1,
 		pessoas filho2

@@ -49,13 +49,16 @@ public class PlanoExecucao {
 			throws ClausulaSelectException, RelacaoInexistenteException, ClausulaWhereException {
 		double time = System.currentTimeMillis();
 		//
+		this.arvore = new ArvoreConsulta();
+		//
 		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
+		//
+		inserirProjecoes(arvore, projecoes);
 		//
 		if (restricoes.size() > 0) {
 			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
 			//
-			inserirProjecoes(arvore, projecoes);
 			inserirRestricoes(arvore, restricoes);
 			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
 			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
@@ -63,11 +66,10 @@ public class PlanoExecucao {
 			NoArvore no = arvore.insere(new ProdutoCartesiano());
 			inserirRelacoes(no);
 		}
-		arvore.imprime();
 		//
 		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
 		//
-		return null;
+		return this.arvore;
 	}
 
 	private void inserirProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws ClausulaSelectException {
