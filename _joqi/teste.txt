@@ -1,7 +1,6 @@
-from	pessoas
-where	cdPessoa = intValue and
-		cdPessoa = intValue and
-		vlIdade = 22 or
-		vlIdade > 0
-		
-		
+from	strings str1,
+		strings str2
+where	(str1.toString between 'f' and 'm' or
+		str1.toString = 'A' or
+		str1.toString = 'B') and
+		str1.toString > str2.toString
