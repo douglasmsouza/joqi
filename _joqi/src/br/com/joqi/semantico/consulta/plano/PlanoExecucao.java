@@ -26,7 +26,7 @@ public class PlanoExecucao {
 	private ArvoreConsulta arvore;
 	//
 	private Object objetoConsulta;
-	private List<Relacao> relacoes;
+	private Set<Relacao> relacoes;
 
 	public PlanoExecucao() {
 		arvore = new ArvoreConsulta();
@@ -57,6 +57,7 @@ public class PlanoExecucao {
 
 			/*Caso seja apenas uma restricao simples, vai inserindo os nos filhos*/
 			if (r.getClass() == RestricaoSimples.class) {
+				verificaRestricao((RestricaoSimples) r);
 				setTipoBusca((RestricaoSimples) r);
 				//
 				noRestricao = arvore.insere(noInserir, r);
@@ -81,11 +82,10 @@ public class PlanoExecucao {
 	 * @author Douglas Matheus de Souza em 18/10/2011
 	 * @throws ClausulaWhereException
 	 */
-	private void setTipoBusca(RestricaoSimples restricao) throws ClausulaWhereException {
+	private void setTipoBusca(RestricaoSimples restricao) {
 		if (relacoes.size() == 1) {
 			restricao.setTipoBusca(TipoBusca.LINEAR);
 		} else {
-			verificaRestricao(restricao);
 			//
 			Projecao<?> operando1 = restricao.getOperando1();
 			Projecao<?> operando2 = restricao.getOperando2();
@@ -130,18 +130,25 @@ public class PlanoExecucao {
 	 * @author Douglas Matheus de Souza em 18/10/2011
 	 */
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
-		if (relacoes.size() > 1) {
-			String exception = "Nome da relação obrigatório na cláusula WHERE (" + restricao.getRestricaoString() + ")";
-			if (restricao.getOperando1().getClass() == ProjecaoCampo.class) {
-				if (restricao.getOperando1().getRelacao() == null) {
-					throw new ClausulaWhereException(exception);
-				}
-			}
-			//
-			if (restricao.getOperando2() != null) {
-				if (restricao.getOperando2().getClass() == ProjecaoCampo.class) {
-					if (restricao.getOperando2().getRelacao() == null) {
-						throw new ClausulaWhereException(exception);
+		verificaRelacaoOperando(restricao, restricao.getOperando1());
+		verificaRelacaoOperando(restricao, restricao.getOperando2());
+	}
+
+	private void verificaRelacaoOperando(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
+		String exception1 = "Nome da relação obrigatório em \"{0}\" na cláusula WHERE (" + restricao.getRestricaoString() + ")";
+		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + restricao.getRestricaoString() + ")";
+		//
+		if (operando != null) {
+			if (operando.getClass() == ProjecaoCampo.class) {
+				if (operando.getRelacao() == null) {
+					if (relacoes.size() > 1) {
+						throw new ClausulaWhereException(exception1.replace("{0}", (String) operando.getValor()));
+					} else {
+						operando.setRelacao(getNomeRelacaoUnica());
+					}
+				} else {
+					if (!relacoes.contains(new Relacao(operando.getRelacao()))) {
+						throw new ClausulaWhereException(exception2.replace("{0}", operando.getRelacao()));
 					}
 				}
 			}
@@ -376,7 +383,7 @@ public class PlanoExecucao {
 	 * @throws RelacaoInexistenteException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, List<Relacao> relacoes) throws ClausulaWhereException,
+	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Restricao> restricoes, Set<Relacao> relacoes) throws ClausulaWhereException,
 			RelacaoInexistenteException {
 		double time = System.currentTimeMillis();
 		//
@@ -409,12 +416,16 @@ public class PlanoExecucao {
 		Projecao<?> operando2 = restricao.getOperando2();
 		//
 		if (operando1.getRelacao() == null && operando2.getRelacao() == null) {
-			return relacoes.get(0).getNomeNaConsulta();
+			return getNomeRelacaoUnica();
 		} else if (operando1.getRelacao() != null) {
 			return operando1.getRelacao();
 		} else {
 			return operando2.getRelacao();
 		}
+	}
+	
+	private String getNomeRelacaoUnica(){
+		return relacoes.iterator().next().getNomeNaConsulta();
 	}
 
 	public Object getObjetoConsulta() {

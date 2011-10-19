@@ -72,9 +72,11 @@ public class Relacao {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Relacao))
-			return false;
-		return ((Relacao) obj).getNomeNaConsulta().equals(this.getNomeNaConsulta());
+		return obj.hashCode() == this.hashCode();
 	}
 
+	@Override
+	public int hashCode() {
+		return this.getNomeNaConsulta().hashCode();
+	}
 }
