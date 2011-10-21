@@ -61,7 +61,7 @@ public class PlanoExecucao {
 			//
 			inserirRestricoes(arvore, restricoes);
 			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
-			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
+			/*ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());*/
 		} else {
 			NoArvore no = arvore.insere(new ProdutoCartesiano());
 			inserirRelacoes(no);
@@ -79,6 +79,7 @@ public class PlanoExecucao {
 		}
 	}
 
+	
 	private void verificaRelacaoOperandoProjecao(Projecao<?> projecao) throws ClausulaSelectException {
 		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula SELECT (" + projecao + ")";
 		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + projecao + ")";
@@ -402,8 +403,9 @@ public class PlanoExecucao {
 				RestricaoSimples restricaoJuncao = (RestricaoSimples) raiz.getOperacao();
 				String relacao1 = restricaoJuncao.getOperando1().getRelacao();
 				String relacao2 = restricaoJuncao.getOperando2().getRelacao();
-				/*Uma vez encontrada a restricao, percorre os filhos e 
-				 * verifica qual nao tem relacao alguma com a mesma*/
+				/*Uma vez encontrada a restricao, percorre os filhos e verifica 
+				 * qual nao tem relacao alguma com a mesma. Os filhos que nao 
+				 * fazem parte da juncao irao virar seus irmais*/
 				NoArvore filho = raiz.getFilho();
 				while (filho != null) {
 					boolean trocarPosicao = false;
