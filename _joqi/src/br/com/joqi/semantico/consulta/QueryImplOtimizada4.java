@@ -56,7 +56,7 @@ public class QueryImplOtimizada4 {
 			}
 		}
 		//
-		System.out.println(resultado);
+		System.out.println(resultado.size());
 		return resultado;
 	}
 
@@ -131,12 +131,14 @@ public class QueryImplOtimizada4 {
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			Object valor = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
-			List<ResultObject> objetos = hashTable.get(valor);
-			if (objetos == null) {
-				objetos = new ArrayList<ResultObject>();
+			if (valor != null) {
+				List<ResultObject> objetos = hashTable.get(valor);
+				if (objetos == null) {
+					objetos = new ArrayList<ResultObject>();
+				}
+				objetos.add(objeto1);
+				hashTable.put(valor, objetos);
 			}
-			objetos.add(objeto1);
-			hashTable.put(valor, objetos);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
@@ -246,9 +248,12 @@ public class QueryImplOtimizada4 {
 
 	private Object getValorOperandoJuncao(Projecao<?> operando, ResultObject resultObject) throws Exception {
 		Object objeto = resultObject.get(operando.getRelacao());
-		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
-		if (!(valor instanceof Comparable<?>))
-			throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
+		Object valor = null;
+		if (objeto != null) {
+			valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
+			if (!(valor instanceof Comparable<?>))
+				throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
+		}
 		return valor;
 	}
 

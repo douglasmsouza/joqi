@@ -1,4 +1,8 @@
-from	pessoas p1,
-		pessoas p2
-where	p1.nmPessoa = 'douglas' and
-		p2.nmPessoa = 'carlos'
+from	pessoas pai,
+		pessoas filho1,
+		pessoas filho2
+where	pai.cdPessoa = filho1.cdPai and
+		pai.cdPessoa = filho2.cdPai and
+		pai.cdPessoa = 4
+		
+		
