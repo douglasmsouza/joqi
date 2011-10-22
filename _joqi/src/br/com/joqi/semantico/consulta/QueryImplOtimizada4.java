@@ -57,7 +57,30 @@ public class QueryImplOtimizada4 {
 	}
 
 	private ResultSet produtoCartesiano(NoArvore no) throws Exception {
-		return restringe(no.getFilho());
+		ResultSet resultado = new ResultSet();
+		//
+		NoArvore filho = no.getFilho();
+		resultado = restringe(filho);
+		//
+		filho = filho.getIrmao();
+		while (filho != null) {
+			ResultSet resultadoNovo = restringe(filho);
+			//
+			ResultSet temp = new ResultSet();
+			for (ResultObject r1 : resultado) {
+				for (ResultObject r2 : resultadoNovo) {
+					ResultObject resultObject = new ResultObject();
+					resultObject.putAll(r1);
+					resultObject.putAll(r2);
+					temp.add(resultObject);
+				}
+			}
+			resultado = temp;
+			//
+			filho = filho.getIrmao();
+		}
+		//
+		return resultado;
 	}
 
 	private ResultSet restringe(NoArvore no) throws Exception {
@@ -182,7 +205,10 @@ public class QueryImplOtimizada4 {
 
 	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws Exception {
 		if (valor1.getClass() != valor2.getClass()) {
-			throw new OperandosIncompativeisException();
+			/*Valores numericos podem ser de classes diferentes, uma vez que serao comparados
+			 * sempre como Double. Entao*/
+			if (valor1 instanceof Number ^ valor2 instanceof Number)
+				throw new OperandosIncompativeisException();
 		}
 		//
 		if (valor1 instanceof String) {
