@@ -47,9 +47,13 @@ public class NoArvore {
 	}
 
 	public NoArvore addFilho(Object operacao) {
-		NoArvore novoFilho = new NoArvore(operacao);
+		NoArvore novoFilho;
 		if (operacao.getClass() == NoArvore.class) {
-			novoFilho.setFilho(((NoArvore) operacao).getFilho());
+			NoArvore operacaoNo = (NoArvore) operacao;
+			novoFilho = new NoArvore(operacaoNo.getOperacao());
+			novoFilho.setFilho(operacaoNo.getFilho());
+		} else {
+			novoFilho = new NoArvore(operacao);
 		}
 		novoFilho.setIrmao(this.filho);
 		this.setFilho(novoFilho);

@@ -61,8 +61,8 @@ public class PlanoExecucao {
 			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
 			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
 		} else {
-			NoArvore no = arvore.insere(new ProdutoCartesiano());
-			inserirRelacoes(no);
+			arvore.setRaizRestricoes(arvore.insere(new UniaoRestricoes()));
+			inserirRelacoes(arvore.insere(new ProdutoCartesiano()));
 		}
 		//
 		return this.arvore;
@@ -412,6 +412,8 @@ public class PlanoExecucao {
 							if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
 								trocarPosicao = true;
 							}
+							//
+							setaPrimeiroFilho(raiz, filho, relacao1, relacaoFilho);
 						} else {
 							String relacao1Filho = restricaoFilho.getOperando1().getRelacao();
 							String relacao2Filho = restricaoFilho.getOperando2().getRelacao();
@@ -419,17 +421,21 @@ public class PlanoExecucao {
 									!relacao2Filho.equals(relacao1) && !relacao1Filho.equals(relacao2)) {
 								trocarPosicao = true;
 							}
+							//
+							setaPrimeiroFilho(raiz, filho, relacao1, relacao1Filho);
 						}
 					} else if (filho.getOperacao().getClass() == Relacao.class) {
 						String relacaoFilho = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
 						if (!relacaoFilho.equals(relacao1) && !relacaoFilho.equals(relacao2)) {
 							trocarPosicao = true;
 						}
+						//
+						setaPrimeiroFilho(raiz, filho, relacao1, relacaoFilho);
 					}
 					//
 					if (trocarPosicao) {
 						raiz.removeFilho(filho);
-						raiz.addIrmao(filho);
+						raiz.addIrmao(filho.getOperacao());
 					}
 					//
 					filho = filho.getIrmao();
@@ -439,6 +445,13 @@ public class PlanoExecucao {
 			}
 			//
 			raiz = raiz.getIrmao();
+		}
+	}
+
+	private void setaPrimeiroFilho(NoArvore raiz, NoArvore filho, String relacaoRaiz, String relacaoFilho) {
+		if (relacaoFilho.equals(relacaoRaiz)) {
+			raiz.removeFilho(filho);
+			raiz.addFilho(filho);
 		}
 	}
 
