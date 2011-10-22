@@ -116,29 +116,42 @@ public class QueryImplOtimizada4 {
 		return null;
 	}
 
-	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) {
+	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
+
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
+
+		int soma = 0;
+		for (ResultObject objeto1 : relacaoEntrada1) {
+			for (ResultObject objeto2 : relacaoEntrada2) {
+
+			}
+		}
+		System.out.println(soma);
 		return resultado;
 	}
 
+	/**
+	 * Algoritmo de juncao utilizando hash
+	 * 
+	 * @param relacaoEntrada1
+	 * @param relacaoEntrada2
+	 * @param restricao
+	 * @author Douglas Matheus de Souza em 22/10/2011
+	 */
 	private ResultSet juncaoHash(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
-		//
-		/*String nomeRelacao1 = restricao.getOperando1().getRelacao();
-		String nomeRelacao2 = restricao.getOperando2().getRelacao();*/
 		//
 		Map<Object, List<ResultObject>> hashTable = new HashMap<Object, List<ResultObject>>();
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			Object valor = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
-			if (valor != null) {
-				List<ResultObject> objetos = hashTable.get(valor);
-				if (objetos == null) {
-					objetos = new ArrayList<ResultObject>();
-				}
-				objetos.add(objeto1);
-				hashTable.put(valor, objetos);
+			List<ResultObject> objetos = hashTable.get(valor);
+			if (objetos == null) {
+				objetos = new ArrayList<ResultObject>();
 			}
+			objetos.add(objeto1);
+			hashTable.put(valor, objetos);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
@@ -248,12 +261,9 @@ public class QueryImplOtimizada4 {
 
 	private Object getValorOperandoJuncao(Projecao<?> operando, ResultObject resultObject) throws Exception {
 		Object objeto = resultObject.get(operando.getRelacao());
-		Object valor = null;
-		if (objeto != null) {
-			valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
-			if (!(valor instanceof Comparable<?>))
-				throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
-		}
+		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
+		if (!(valor instanceof Comparable<?>))
+			throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
 		return valor;
 	}
 
