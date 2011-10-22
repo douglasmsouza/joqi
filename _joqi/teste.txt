@@ -1,2 +1,4 @@
-from	pessoas
-where	nmPessoa > 'douglas'
+from	pessoas p1,
+		pessoas p2
+where	p1.nmPessoa = 'douglas' and
+		p2.nmPessoa = 'carlos'
