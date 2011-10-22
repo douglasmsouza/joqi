@@ -47,8 +47,6 @@ public class PlanoExecucao {
 	 */
 	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes)
 			throws ClausulaSelectException, RelacaoInexistenteException, ClausulaWhereException {
-		double time = System.currentTimeMillis();
-		//
 		this.arvore = new ArvoreConsulta();
 		//
 		this.objetoConsulta = objetoConsulta;
@@ -61,13 +59,11 @@ public class PlanoExecucao {
 			//
 			inserirRestricoes(arvore, restricoes);
 			ordenarRestricoesLineares(arvore.getRaizRestricoes().getFilho());
-			/*ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());*/
+			ordenarRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
 		} else {
 			NoArvore no = arvore.insere(new ProdutoCartesiano());
 			inserirRelacoes(no);
 		}
-		//
-		System.out.println("Tempo montagem árvore: " + (System.currentTimeMillis() - time) + " ms");
 		//
 		return this.arvore;
 	}
@@ -79,7 +75,6 @@ public class PlanoExecucao {
 		}
 	}
 
-	
 	private void verificaRelacaoOperandoProjecao(Projecao<?> projecao) throws ClausulaSelectException {
 		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula SELECT (" + projecao + ")";
 		String exception2 = "Relação \"{0}\" não declarada na cláusula FROM (" + projecao + ")";
@@ -180,7 +175,7 @@ public class PlanoExecucao {
 					if (!operando1.getRelacao().equals(operando2.getRelacao())) {
 						if (operadorRelacional.getClass() == Igual.class) {
 							if (restricao.isNegacao()) {
-								restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+								restricao.setTipoBusca(TipoBusca.JUNCAO_LOOP_ANINHADO);
 							} else {
 								restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
 							}
@@ -188,10 +183,10 @@ public class PlanoExecucao {
 							if (restricao.isNegacao()) {
 								restricao.setTipoBusca(TipoBusca.JUNCAO_HASH);
 							} else {
-								restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+								restricao.setTipoBusca(TipoBusca.JUNCAO_LOOP_ANINHADO);
 							}
 						} else {
-							restricao.setTipoBusca(TipoBusca.LOOP_ANINHADO);
+							restricao.setTipoBusca(TipoBusca.JUNCAO_LOOP_ANINHADO);
 						}
 					} else {
 						restricao.setTipoBusca(TipoBusca.LINEAR);
@@ -285,7 +280,7 @@ public class PlanoExecucao {
 					no.setOperacao(r1);
 				}
 			} else if (r1.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
-				if (r2.getTipoBusca() == TipoBusca.LOOP_ANINHADO) {
+				if (r2.getTipoBusca() == TipoBusca.JUNCAO_LOOP_ANINHADO) {
 					/*Restricoes que fazem juncao baseada em hash devem ficar		       
 					 * mais abaixo das que utilizam loop aninhado*/
 					pai.setOperacao(r2);
