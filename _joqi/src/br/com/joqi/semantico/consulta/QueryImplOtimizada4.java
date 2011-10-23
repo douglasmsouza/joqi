@@ -18,7 +18,8 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelac
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
-import br.com.joqi.semantico.exception.ClausulaWhereException;
+import br.com.joqi.semantico.exception.CampoInexistenteException;
+import br.com.joqi.semantico.exception.CampoNaoComparableException;
 import br.com.joqi.semantico.exception.OperandosIncompativeisException;
 
 public class QueryImplOtimizada4 {
@@ -145,7 +146,13 @@ public class QueryImplOtimizada4 {
 		Map<Object, ObjetoHash> hashTable = new HashMap<Object, ObjetoHash>();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			Object chave = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
+			Object chave = null;
+			try {
+				chave = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
+			} catch (CampoInexistenteException e) {
+				continue;
+			}
+			//
 			ObjetoHash objetoHash = hashTable.get(chave);
 			if (objetoHash != null) {
 				ObjetoHash objetoHashNovo = new ObjetoHash(objeto1);
@@ -158,7 +165,12 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
-			Object chave = getValorOperandoJuncao(restricao.getOperando2(), objeto2);
+			Object chave = null;
+			try {
+				chave = getValorOperandoJuncao(restricao.getOperando2(), objeto2);
+			} catch (CampoInexistenteException e) {
+				continue;
+			}
 			ObjetoHash objetoHash = hashTable.get(chave);
 			//
 			while (objetoHash != null) {
@@ -193,7 +205,14 @@ public class QueryImplOtimizada4 {
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
 		for (ResultObject objeto : relacao) {
-			Object valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
+			Object valorOperando1 = null;
+			try {
+				valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
+			} catch (CampoInexistenteException e) {
+				continue;
+			} catch (CampoNaoComparableException e) {
+				continue;
+			}
 
 			/*Se eh uma instrucao IS TRUE ou IS FALSE, compara logo de cara, uma vez que nao*/
 			/*existem outros operandos na restricao*/
@@ -212,7 +231,14 @@ public class QueryImplOtimizada4 {
 				continue;
 			}
 
-			Object valorOperando2 = getValorOperandoBuscaLinear(operando2, objeto);
+			Object valorOperando2 = null;
+			try {
+				valorOperando2 = getValorOperandoBuscaLinear(operando2, objeto);
+			} catch (CampoInexistenteException e) {
+				continue;
+			} catch (CampoNaoComparableException e) {
+				continue;
+			}
 
 			/*Caso o valor do campo na tupla seja NULL, eh um caso "especial" */
 			if (valorOperando1 == null || valorOperando2 == null) {
@@ -253,22 +279,23 @@ public class QueryImplOtimizada4 {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
 	}
 
-	private Object getValorOperandoBuscaLinear(Projecao<?> operando, ResultObject resultObject) throws Exception {
+	private Object getValorOperandoBuscaLinear(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException,
+			CampoNaoComparableException {
 		Object valor = operando.getValor();
 		if (operando.getClass() == ProjecaoCampo.class) {
 			Object objeto = resultObject.get(operando.getRelacao());
 			valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
 			if (!(valor instanceof Comparable<?>))
-				throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
+				throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
 		}
 		return valor;
 	}
 
-	private Object getValorOperandoJuncao(Projecao<?> operando, ResultObject resultObject) throws Exception {
+	private Object getValorOperandoJuncao(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
 		Object objeto = resultObject.get(operando.getRelacao());
 		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
-		if (!(valor instanceof Comparable<?>))
-			throw new ClausulaWhereException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
+		/*if (!(valor instanceof Comparable<?>))
+			throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");*/
 		return valor;
 	}
 
