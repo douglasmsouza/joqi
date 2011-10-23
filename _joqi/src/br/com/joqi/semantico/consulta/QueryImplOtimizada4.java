@@ -47,14 +47,14 @@ public class QueryImplOtimizada4 {
 		System.out.println("--------------------------------------------------------------------");
 		//
 		double time = System.currentTimeMillis();
-		resultado = resolverRestricoes(arvoreConsulta.getRaizRestricoes());
+		resultado = executarConsulta(arvoreConsulta.getRaizRestricoes());
 		System.out.println("Registros...: " + resultado.size());
 		System.out.println("Tempo.......: " + (System.currentTimeMillis() - time) + " ms");
 		//
 		return resultado;
 	}
 
-	public ResultSet resolverRestricoes(NoArvore raiz) throws Exception {
+	private ResultSet executarConsulta(NoArvore raiz) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
 		if (raiz != null) {
@@ -116,7 +116,7 @@ public class QueryImplOtimizada4 {
 				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
-			return resolverRestricoes(((ArvoreConsulta) operacao).getRaizRestricoes());
+			return executarConsulta(((ArvoreConsulta) operacao).getRaizRestricoes());
 		} else if (no.isFolha()) {
 			return ((Relacao) no.getOperacao()).getResultSet();
 		}
