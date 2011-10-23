@@ -47,25 +47,24 @@ public class QueryImplOtimizada4 {
 		System.out.println("--------------------------------------------------------------------");
 		//
 		double time = System.currentTimeMillis();
-		executarRestricoes();
-		System.out.println("Tempo: " + (System.currentTimeMillis() - time) + " ms");
+		resultado = resolverRestricoes(arvoreConsulta.getRaizRestricoes());
+		System.out.println("Registros...: " + resultado.size());
+		System.out.println("Tempo.......: " + (System.currentTimeMillis() - time) + " ms");
 		//
 		return resultado;
 	}
 
-	public ResultSet executarRestricoes() throws Exception {
+	public ResultSet resolverRestricoes(NoArvore raiz) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
-		NoArvore no = arvoreConsulta.getRaizRestricoes();
-		if (no != null) {
-			NoArvore filho = no.getFilho();
+		if (raiz != null) {
+			NoArvore filho = raiz.getFilho();
 			while (filho != null) {
 				resultado.addAll(produtoCartesiano(filho));
 				filho = filho.getIrmao();
 			}
 		}
 		//
-		System.out.println(resultado.size());
 		return resultado;
 	}
 
@@ -73,11 +72,11 @@ public class QueryImplOtimizada4 {
 		ResultSet resultado = new ResultSet();
 		//
 		NoArvore filho = no.getFilho();
-		resultado = restringe(filho);
+		resultado = restricao(filho);
 		//
 		filho = filho.getIrmao();
 		while (filho != null) {
-			ResultSet resultadoNovo = restringe(filho);
+			ResultSet resultadoNovo = restricao(filho);
 			//
 			ResultSet temp = new ResultSet();
 			for (ResultObject r1 : resultado) {
@@ -96,30 +95,30 @@ public class QueryImplOtimizada4 {
 		return resultado;
 	}
 
-	private ResultSet restringe(NoArvore no) throws Exception {
-		if (no.isFolha()) {
-			return ((Relacao) no.getOperacao()).getResultSet();
-		}
-		//
+	private ResultSet restricao(NoArvore no) throws Exception {
 		Object operacao = no.getOperacao();
 		//
-		if (operacao instanceof RestricaoSimples) {
+		if (operacao.getClass() == RestricaoSimples.class) {
 			RestricaoSimples restricao = (RestricaoSimples) operacao;
 			if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
-				ResultSet relacaoEntrada = restringe(no.getFilho());
+				ResultSet relacaoEntrada = restricao(no.getFilho());
 				//
 				return buscaLinear(relacaoEntrada, restricao);
 			} else if (restricao.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
-				ResultSet relacaoEntrada1 = restringe(no.getFilho());
-				ResultSet relacaoEntrada2 = restringe(no.getFilho().getIrmao());
+				ResultSet relacaoEntrada1 = restricao(no.getFilho());
+				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				//
 				return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
 			} else {
-				ResultSet relacaoEntrada1 = restringe(no.getFilho());
-				ResultSet relacaoEntrada2 = restringe(no.getFilho().getIrmao());
+				ResultSet relacaoEntrada1 = restricao(no.getFilho());
+				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				//
 				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
 			}
+		} else if (operacao.getClass() == ArvoreConsulta.class) {
+			return resolverRestricoes(((ArvoreConsulta) operacao).getRaizRestricoes());
+		} else if (no.isFolha()) {
+			return ((Relacao) no.getOperacao()).getResultSet();
 		}
 		//
 		return null;
