@@ -12,22 +12,20 @@ import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.exception.ClausulaFromException;
+import br.com.joqi.semantico.exception.RelacaoInexistenteException;
+import br.com.joqi.semantico.exception.TipoGenericoException;
 import br.com.joqi.testes.BancoConsulta;
 
 public class Query implements IPossuiRestricoes {
 
-	private PlanoExecucao planoExecucao;
-	//
-	private BancoConsulta bancoConsulta;
+	private BancoConsulta objetoConsulta;
 	//
 	private List<Projecao<?>> projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
 
 	public Query() {
-		planoExecucao = new PlanoExecucao();
-		//
-		bancoConsulta = new BancoConsulta();
+		objetoConsulta = new BancoConsulta();
 		//
 		projecoes = new ArrayList<Projecao<?>>();
 		relacoes = new HashSet<Relacao>();
@@ -38,9 +36,13 @@ public class Query implements IPossuiRestricoes {
 		projecoes.add(projecao);
 	}
 
-	public void addRelacao(Relacao relacao) throws ClausulaFromException {
+	public void addRelacao(Relacao relacao) throws TipoGenericoException, RelacaoInexistenteException, ClausulaFromException {
 		if (!relacoes.add(relacao)) {
+			/*Apresenta erro caso a relacao ja tenho sido declarada na clausula FROM com o mesmo apelido*/
 			throw new ClausulaFromException("A relação \"" + relacao.getNomeNaConsulta() + "\" foi declarada mais de uma vez ");
+		} else {
+			/*Associa a colecao a relacao*/
+			relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
 		}
 	}
 
@@ -85,7 +87,8 @@ public class Query implements IPossuiRestricoes {
 			queryImpl.getResultSet();*/
 			//
 			//
-			ArvoreConsulta arvore = planoExecucao.montarArvore(bancoConsulta, projecoes, restricoes, relacoes);
+			PlanoExecucao planoExecucao = new PlanoExecucao();
+			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes);
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			queryImplOtimizada4.getResultSet();
 		} catch (Exception e) {
