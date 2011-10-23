@@ -1,9 +1,8 @@
 package br.com.joqi.semantico.consulta;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
@@ -82,27 +81,32 @@ public class QueryUtils {
 	 * @param nomeCampo
 	 * @return
 	 */
-	public static Object getValorDoCampo(Object objeto, String nomeCampo) throws Exception {
+	public static Object getValorDoCampo(Object objeto, String nomeCampo) throws CampoInexistenteException {
 		Class<?> classe = objeto.getClass();
 
-		/*Se existe o metodo informado, retorna o valor*/
-		Method metodo = retornaMetodo(classe, nomeCampo);
-		if (metodo != null) {
-			return metodo.invoke(objeto);
-		}
+		try {
+			/*Se existe o metodo informado, retorna o valor*/
+			Method metodo = retornaMetodo(classe, nomeCampo);
+			if (metodo != null) {
+				return metodo.invoke(objeto);
+			}
 
-		String nmCampoMetodoGet = String.valueOf(nomeCampo.toCharArray()[0]).toUpperCase() + nomeCampo.substring(1);
+			String nmCampoMetodoGet = String.valueOf(nomeCampo.toCharArray()[0]).toUpperCase() + nomeCampo.substring(1);
 
-		/*Busca pelo metodo "get" */
-		metodo = retornaMetodo(classe, "get" + nmCampoMetodoGet);
-		if (metodo != null) {
-			return metodo.invoke(objeto);
-		}
+			/*Busca pelo metodo "get" */
+			metodo = retornaMetodo(classe, "get" + nmCampoMetodoGet);
+			if (metodo != null) {
+				return metodo.invoke(objeto);
+			}
 
-		/*Se nao existir o metodo "get", busca pelo metodo "is" */
-		metodo = retornaMetodo(classe, "is" + nmCampoMetodoGet);
-		if (metodo != null) {
-			return metodo.invoke(objeto);
+			/*Se nao existir o metodo "get", busca pelo metodo "is" */
+			metodo = retornaMetodo(classe, "is" + nmCampoMetodoGet);
+			if (metodo != null) {
+				return metodo.invoke(objeto);
+			}
+		} catch (IllegalArgumentException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
 		}
 
 		/*Caso nao exista nenhum metodo, lanca excecao*/

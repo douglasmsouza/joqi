@@ -1,8 +1,6 @@
 package br.com.joqi.semantico.consulta;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
@@ -24,6 +22,15 @@ import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.OperandosIncompativeisException;
 
 public class QueryImplOtimizada4 {
+
+	private class ObjetoHash {
+		Object objeto;
+		ObjetoHash proximo;
+
+		ObjetoHash(Object objeto) {
+			this.objeto = objeto;
+		}
+	}
 
 	private ArvoreConsulta arvoreConsulta;
 
@@ -135,29 +142,34 @@ public class QueryImplOtimizada4 {
 	private ResultSet juncaoHash(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
-		Map<Object, List<ResultObject>> hashTable = new HashMap<Object, List<ResultObject>>();
-		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
+		Map<Object, ObjetoHash> hashTable = new HashMap<Object, ObjetoHash>();
+		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			Object valor = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
-			List<ResultObject> objetos = hashTable.get(valor);
-			if (objetos == null) {
-				objetos = new ArrayList<ResultObject>();
+			Object chave = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
+			ObjetoHash objetoHash = hashTable.get(chave);
+			if (objetoHash != null) {
+				ObjetoHash objetoHashNovo = new ObjetoHash(objeto1);
+				objetoHashNovo.proximo = objetoHash;
+				hashTable.put(chave, objetoHashNovo);
+			} else {
+				objetoHash = new ObjetoHash(objeto1);
+				hashTable.put(chave, objetoHash);
 			}
-			objetos.add(objeto1);
-			hashTable.put(valor, objetos);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
-			Object valor = getValorOperandoJuncao(restricao.getOperando2(), objeto2);
-			List<ResultObject> objetos1 = hashTable.get(valor);
+			Object chave = getValorOperandoJuncao(restricao.getOperando2(), objeto2);
+			ObjetoHash objetoHash = hashTable.get(chave);
 			//
-			if (verificaCondicao(objetos1 != null, restricao)) {
-				for (ResultObject objeto1 : objetos1) {
-					ResultObject tupla = new ResultObject();
-					tupla.putAll(objeto1);
-					tupla.putAll(objeto2);
-					resultado.add(tupla);
-				}
+			while (objetoHash != null) {
+				Object objeto = objetoHash.objeto;
+				//
+				ResultObject tupla = new ResultObject();
+				tupla.putAll((ResultObject) objeto);
+				tupla.putAll((ResultObject) objeto2);
+				resultado.add(tupla);
+				//
+				objetoHash = objetoHash.proximo;
 			}
 		}
 		//
@@ -260,7 +272,7 @@ public class QueryImplOtimizada4 {
 		return valor;
 	}
 
-	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws Exception {
+	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws OperandosIncompativeisException {
 		if (valor1.getClass() != valor2.getClass()) {
 			/*Valores numericos podem ser de classes diferentes, uma vez que serao comparados
 			 * sempre como Double. Entao*/
