@@ -2,21 +2,18 @@ package br.com.joqi.semantico.consulta;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 
-import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
-import br.com.joqi.semantico.consulta.projecao.Projecao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MaiorIgual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
+import br.com.joqi.semantico.exception.TipoGenericoException;
 
 /**
  * Classe responsavel pelas operacoes que utilizam Reflection
@@ -31,12 +28,13 @@ public class QueryUtils {
 	 * @param objeto
 	 * @param nome
 	 * @return
+	 * @throws TipoGenericoException
 	 * @throws
 	 * @throws
 	 * @throws RelacaoInexistenteException
 	 * @throws Exception
 	 */
-	public static Collection<Object> getColecao(Object objeto, String nome) throws RelacaoInexistenteException {
+	public static Collection<Object> getColecao(Object objeto, String nome) throws TipoGenericoException, RelacaoInexistenteException {
 		Class<?> clazz = objeto.getClass();
 		try {
 			Field atributo = clazz.getDeclaredField(nome);
@@ -50,10 +48,24 @@ public class QueryUtils {
 			if (ehPrivado)
 				atributo.setAccessible(false);
 
+			/*if (valor instanceof Collection) {
+				Type tipo = atributo.getGenericType();
+				if (tipo instanceof ParameterizedType) {
+					ParameterizedType tipoGenerico = (ParameterizedType) tipo;
+					Class<?> clazzGenerica = (Class<?>) tipoGenerico.getActualTypeArguments()[0];
+					if (clazzGenerica != Object.class) {
+						return (Collection<Object>) valor;
+					}
+					//
+					throw new TipoGenericoException("Tipo genérico não pode ser Object na coleção \"" + nome + "\"");
+				}
+				//
+				throw new TipoGenericoException("Tipo genérico não declarado na coleção \"" + nome + "\"");
+			}*/
 			if (valor instanceof Collection) {
 				return (Collection<Object>) valor;
 			}
-
+			//
 			throw new RelacaoInexistenteException("O objeto \"" + nome + "\" deve implementar a interface Collection");
 		} catch (NoSuchFieldException e) {
 			throw new RelacaoInexistenteException("A coleção \"" + nome + "\" não existe na classe \"" + clazz.getName() + "\"");

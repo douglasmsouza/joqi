@@ -2,6 +2,9 @@ package br.com.joqi.semantico.consulta.relacao;
 
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
+
 /**
  * Guarda as informacoes de um objeto que sera consultado
  * 
@@ -13,6 +16,7 @@ public class Relacao {
 	private String nome;
 	//
 	private Collection<Object> colecao;
+	private ResultSet resultSet;
 
 	public Relacao(String nome) {
 		super();
@@ -43,11 +47,6 @@ public class Relacao {
 
 	@Override
 	public String toString() {
-		/*StringBuilder s = new StringBuilder();
-		s.append(nome);
-		if (apelido != null)
-			s.append(" as ").append(apelido);
-		return s.toString();*/
 		String toString = nome;
 		if (apelido != null)
 			toString = apelido;
@@ -66,8 +65,8 @@ public class Relacao {
 		this.colecao = colecao;
 	}
 
-	public Collection<Object> getColecao() {
-		return colecao;
+	public ResultSet getResultSet() {
+		return resultSet;
 	}
 
 	@Override
@@ -78,5 +77,14 @@ public class Relacao {
 	@Override
 	public int hashCode() {
 		return this.getNomeNaConsulta().hashCode();
+	}
+
+	public void transformaEmResultSet() {
+		resultSet = new ResultSet();
+		for (Object o : colecao) {
+			ResultObject tupla = new ResultObject();
+			tupla.put(getNomeNaConsulta(), o);
+			resultSet.add(tupla);
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,9 @@ public class QueryImplOtimizada4 {
 		arvoreConsulta.imprime();
 		System.out.println("--------------------------------------------------------------------");
 		//
+		double time = System.currentTimeMillis();
 		executarRestricoes();
+		System.out.println("Tempo: " + (System.currentTimeMillis() - time) + " ms");
 		//
 		return resultado;
 	}
@@ -89,7 +90,7 @@ public class QueryImplOtimizada4 {
 
 	private ResultSet restringe(NoArvore no) throws Exception {
 		if (no.isFolha()) {
-			return transformaEmResultSet((Relacao) no.getOperacao());
+			return ((Relacao) no.getOperacao()).getResultSet();
 		}
 		//
 		Object operacao = no.getOperacao();
@@ -118,16 +119,8 @@ public class QueryImplOtimizada4 {
 
 	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
-
-		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
-
-		int soma = 0;
-		for (ResultObject objeto1 : relacaoEntrada1) {
-			for (ResultObject objeto2 : relacaoEntrada2) {
-
-			}
-		}
-		System.out.println(soma);
+		// TODO: Testar a implementacao do Sort-Merge. O loop aninhado ficou
+		// lento.
 		return resultado;
 	}
 
@@ -290,18 +283,4 @@ public class QueryImplOtimizada4 {
 		//
 		return valor1;
 	}
-
-	private ResultSet transformaEmResultSet(Relacao relacao) {
-		ResultSet resultSet = new ResultSet();
-		//
-		Collection<Object> colecao = relacao.getColecao();
-		for (Object o : colecao) {
-			ResultObject tupla = new ResultObject();
-			tupla.put(relacao.getNomeNaConsulta(), o);
-			resultSet.add(tupla);
-		}
-		//
-		return resultSet;
-	}
-
 }

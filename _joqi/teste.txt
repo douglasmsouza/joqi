@@ -1,5 +1,4 @@
-from	pessoas p1,
-		inteiros int
-where	p1.cdPessoa > int.intValue
+from	pessoas
+where	cdPessoa > 1
 		
 		

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
@@ -26,7 +25,6 @@ public class PlanoExecucao {
 
 	private ArvoreConsulta arvore;
 	//
-	private Object objetoConsulta;
 	private Set<Relacao> relacoes;
 
 	public PlanoExecucao() {
@@ -45,11 +43,10 @@ public class PlanoExecucao {
 	 * @param projecoes
 	 * @throws ClausulaSelectException
 	 */
-	public ArvoreConsulta montarArvore(Object objetoConsulta, List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes)
-			throws ClausulaSelectException, RelacaoInexistenteException, ClausulaWhereException {
+	public ArvoreConsulta montarArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes)
+			throws ClausulaSelectException, ClausulaWhereException {
 		this.arvore = new ArvoreConsulta();
 		//
-		this.objetoConsulta = objetoConsulta;
 		this.relacoes = relacoes;
 		//
 		inserirProjecoes(arvore, projecoes);
@@ -99,12 +96,10 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param restricoes
-	 * @throws RelacaoInexistenteException
 	 * @throws ClausulaWhereException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException,
-			RelacaoInexistenteException {
+	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException {
 		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
 		inserirRestricoes(raizRestricoes, restricoes);
 		arvore.setRaizRestricoes(raizRestricoes);
@@ -116,10 +111,9 @@ public class PlanoExecucao {
 	 * 
 	 * @param no
 	 * @param restricoes
-	 * @throws RelacaoInexistenteException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) throws ClausulaWhereException, RelacaoInexistenteException {
+	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) throws ClausulaWhereException {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
@@ -459,13 +453,12 @@ public class PlanoExecucao {
 	 * Insere as relacoes em um no
 	 * 
 	 * @param no
-	 * @throws RelacaoInexistenteException
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private void inserirRelacoes(NoArvore no) throws RelacaoInexistenteException {
+	private void inserirRelacoes(NoArvore no) {
 		if (no.getOperacao().getClass() != ArvoreConsulta.class) {
 			for (Relacao relacao : relacoes) {
-				relacao.setColecao(QueryUtils.getColecao(objetoConsulta, relacao.getNome()));
+				relacao.transformaEmResultSet();
 				arvore.insere(no, relacao);
 			}
 		}
@@ -488,7 +481,4 @@ public class PlanoExecucao {
 		return relacoes.iterator().next().getNomeNaConsulta();
 	}
 
-	public Object getObjetoConsulta() {
-		return objetoConsulta;
-	}
 }
