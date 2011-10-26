@@ -2,6 +2,7 @@ from	pessoas pai,
 		pessoas filho1,
 		pessoas filho2
 where	pai.cdPessoa = filho1.cdPai and
-		pai.cdPessoa = filho2.cdPai
+		pai.cdPessoa = filho2.cdPai and
+		(pai.cdPessoa = 4 or pai.cdPessoa = 5)
 		
 		
