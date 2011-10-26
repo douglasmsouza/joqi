@@ -85,7 +85,7 @@ public class QueryImplOtimizada3 {
 		//
 		tempoTotal = System.currentTimeMillis() - tempoTotal;
 
-		imprimeResultado(15, tempoTotal, new String[] { "pai", "filho1", "filho2" }, resultSet);
+		JoqiUtil.imprimeResultado(15, tempoTotal, new String[] { "pai", "filho1", "filho2" }, resultSet);
 	}
 
 	private ResultList where(IPossuiRestricoes possuiRestricoes) throws Exception {
@@ -442,37 +442,5 @@ public class QueryImplOtimizada3 {
 
 	private boolean verificaCondicao(boolean comparacao, RestricaoSimples restricao) {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
-	}
-
-	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
-		for (String h : headers) {
-			char[] header = new char[tamanhoColuna];
-			Arrays.fill(header, ' ');
-			for (int i = 0; i < h.length(); i++) {
-				header[i] = h.charAt(i);
-			}
-			System.out.print(header);
-		}
-		//
-		System.out.println();
-		System.out.println("------------------------------------");
-		//
-		for (ResultObject objeto : resultSet) {
-			for (String c : headers) {
-				char[] campo = new char[tamanhoColuna];
-				Arrays.fill(campo, ' ');
-				String valor = objeto.get(c).toString();
-				for (int i = 0; i < valor.length(); i++) {
-					campo[i] = valor.charAt(i);
-				}
-				System.out.print(campo);
-			}
-			System.out.println();
-		}
-
-		System.out.println("-------------------------------");
-		System.out.println("Registros...: " + resultSet.size());
-		System.out.println("Tempo total : " + tempo + " ms");
-		System.out.println("-------------------------------");
 	}
 }
