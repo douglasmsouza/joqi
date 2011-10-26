@@ -1,7 +1,7 @@
-from	pessoas p1,
-		pessoas p2,
-		pessoas p3,
-		pessoas p4,
-		pessoas p5,
-		pessoas p6
+from	pessoas pai,
+		pessoas filho1,
+		pessoas filho2
+where	pai.cdPessoa = filho1.cdPai and
+		pai.cdPessoa = filho2.cdPai
+		
 		

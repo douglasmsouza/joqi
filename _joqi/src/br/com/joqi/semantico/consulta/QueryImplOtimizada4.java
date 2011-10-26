@@ -1,5 +1,6 @@
 package br.com.joqi.semantico.consulta;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,8 +49,9 @@ public class QueryImplOtimizada4 {
 		//
 		double time = System.currentTimeMillis();
 		resultado = executarConsulta(arvoreConsulta.getRaizRestricoes());
-		System.out.println("Registros...: " + resultado.size());
-		System.out.println("Tempo.......: " + (System.currentTimeMillis() - time) + " ms");
+		time = System.currentTimeMillis() - time;
+		/*resultado = mergeSort(resultado, "pai", "nmPessoa");*/
+		imprimeResultado(15, time, new String[] { "pai", "filho1", "filho2" }, resultado);
 		//
 		return resultado;
 	}
@@ -125,9 +127,31 @@ public class QueryImplOtimizada4 {
 	}
 
 	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+		return juncaoMergeSort(relacaoEntrada1, relacaoEntrada2, restricao);
+	}
+
+	private ResultSet juncaoMergeSort(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
-		// TODO: Testar a implementacao do Sort-Merge. O loop aninhado ficou
-		// lento.
+		//
+		/*Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando2 = restricao.getOperando2();
+		//
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
+		//
+		ResultObject[] relacao1 = ordenaMergeSort(relacaoEntrada1, operando1.getRelacao(), (String) operando1.getValor());
+		ResultObject[] relacao2 = ordenaMergeSort(relacaoEntrada2, operando2.getRelacao(), (String) operando2.getValor());
+		//
+		for (int i = 0; i < relacao1.length; i++) {
+			Comparable<Object> valor1 = getValorOperandoJuncaoComparable(operando1, relacao1[i]);
+			int j = 0;
+			for (j = 0; j < relacao2.length; j++) {
+				Comparable<Object> valor2 = getValorOperandoJuncaoComparable(operando2, relacao2[j]);
+				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
+					break;
+				}
+			}
+		}*/
+		//
 		return resultado;
 	}
 
@@ -298,6 +322,14 @@ public class QueryImplOtimizada4 {
 		return valor;
 	}
 
+	private Comparable<Object> getValorOperandoJuncaoComparable(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
+		Object objeto = resultObject.get(operando.getRelacao());
+		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
+		/*if (!(valor instanceof Comparable<?>))
+			throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");*/
+		return (Comparable<Object>) valor;
+	}
+
 	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws OperandosIncompativeisException {
 		if (valor1.getClass() != valor2.getClass()) {
 			/*Valores numericos podem ser de classes diferentes, uma vez que serao comparados
@@ -320,5 +352,86 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return valor1;
+	}
+
+	private ResultObject[] ordenaMergeSort(ResultSet resultSet, String relacao, String campo) throws CampoInexistenteException {
+		ResultObject[] resultObjects = resultSet.toArray(new ResultObject[0]);
+		merge(resultObjects, relacao, campo);
+		return resultObjects;
+	}
+
+	private void merge(ResultObject[] a, String relacao, String campo) throws CampoInexistenteException {
+		ResultObject[] tmpArray = new ResultObject[a.length];
+		merge(a, tmpArray, 0, a.length - 1, relacao, campo);
+	}
+
+	private void merge(ResultObject[] a, ResultObject[] tmpArray, int left, int right, String relacao, String campo) throws CampoInexistenteException {
+		if (left < right) {
+			int center = (left + right) / 2;
+			merge(a, tmpArray, left, center, relacao, campo);
+			merge(a, tmpArray, center + 1, right, relacao, campo);
+			merge(a, tmpArray, left, center + 1, right, relacao, campo);
+		}
+	}
+
+	private void merge(ResultObject[] a, ResultObject[] tmpArray, int leftPos, int rightPos, int rightEnd, String relacao, String campo)
+			throws CampoInexistenteException {
+		int leftEnd = rightPos - 1;
+		int tmpPos = leftPos;
+		int numElements = rightEnd - leftPos + 1;
+
+		/*MergeSorteMain loop*/
+		while (leftPos <= leftEnd && rightPos <= rightEnd) {
+			Comparable<Object> rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos].get(relacao), campo);
+			Comparable<Object> rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos].get(relacao), campo);
+			if (rLeftPos.compareTo(rRightPos) <= 0)
+				tmpArray[tmpPos++] = a[leftPos++];
+			else
+				tmpArray[tmpPos++] = a[rightPos++];
+		}
+
+		while (leftPos <= leftEnd)
+			/*Copy rest of first half*/
+			tmpArray[tmpPos++] = a[leftPos++];
+
+		while (rightPos <= rightEnd)
+			/*Copy rest of right half*/
+			tmpArray[tmpPos++] = a[rightPos++];
+
+		/*Copy tmpArray back*/
+		for (int i = 0; i < numElements; i++, rightEnd--)
+			a[rightEnd] = tmpArray[rightEnd];
+	}
+
+	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
+		for (String h : headers) {
+			char[] header = new char[tamanhoColuna];
+			Arrays.fill(header, ' ');
+			for (int i = 0; i < h.length(); i++) {
+				header[i] = h.charAt(i);
+			}
+			System.out.print(header);
+		}
+		//
+		System.out.println();
+		System.out.println("------------------------------------");
+		//
+		for (ResultObject objeto : resultSet) {
+			for (String c : headers) {
+				char[] campo = new char[tamanhoColuna];
+				Arrays.fill(campo, ' ');
+				String valor = objeto.get(c).toString();
+				for (int i = 0; i < valor.length(); i++) {
+					campo[i] = valor.charAt(i);
+				}
+				System.out.print(campo);
+			}
+			System.out.println();
+		}
+
+		System.out.println("-------------------------------");
+		System.out.println("Registros...: " + resultSet.size());
+		System.out.println("Tempo total : " + tempo + " ms");
+		System.out.println("-------------------------------");
 	}
 }
