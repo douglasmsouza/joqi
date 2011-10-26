@@ -359,4 +359,30 @@ public class BancoConsulta {
 				new Pessoa(35, "Dona Neide", 70, 0, 0, true)
 				));
 	}
+
+	public List<Pessoa> getPessoas() {
+		return pessoas;
+	}
+
+	public List<Integer> getInteiros() {
+		return inteiros;
+	}
+
+	public List<String> getStrings() {
+		return strings;
+	}
+
+	public List<Float> getFloats() {
+		return floats;
+	}
+
+	public List<Object> getTodos() {
+		return todos;
+	}
+
+	public List<Integer> getCodigos() {
+		return codigos;
+	}
+	
+	
 }
