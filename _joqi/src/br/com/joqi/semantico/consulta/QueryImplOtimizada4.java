@@ -1,8 +1,9 @@
 package br.com.joqi.semantico.consulta;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.naming.spi.DirStateFactory.Result;
 
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
@@ -48,15 +49,14 @@ public class QueryImplOtimizada4 {
 		System.out.println("--------------------------------------------------------------------");
 		//
 		double time = System.currentTimeMillis();
-		resultado = executarConsulta(arvoreConsulta.getRaizRestricoes());
+		resultado = executaConsulta(arvoreConsulta.getRaizRestricoes());
 		time = System.currentTimeMillis() - time;
-		/*resultado = mergeSort(resultado, "pai", "nmPessoa");*/
-		imprimeResultado(15, time, new String[] { "pai", "filho1", "filho2" }, resultado);
+		JoqiUtil.imprimeResultado(15, time, new String[] { "str1", "str2" }, resultado);
 		//
 		return resultado;
 	}
 
-	private ResultSet executarConsulta(NoArvore raiz) throws Exception {
+	private ResultSet executaConsulta(NoArvore raiz) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
 		if (raiz != null) {
@@ -115,10 +115,16 @@ public class QueryImplOtimizada4 {
 				ResultSet relacaoEntrada1 = restricao(no.getFilho());
 				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				//
-				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
+				return juncaoMerge(relacaoEntrada1, relacaoEntrada2, restricao);
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
-			return executarConsulta(((ArvoreConsulta) operacao).getRaizRestricoes());
+			if (no.isFolha()) {
+				return executaConsulta(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+			} else {
+				ResultSet relacaoEntrada1 = produtoCartesiano(no);
+				ResultSet relacaoEntrada2 = executaConsulta(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				return interseccao(relacaoEntrada1, relacaoEntrada2);
+			}
 		} else if (no.isFolha()) {
 			return ((Relacao) no.getOperacao()).getResultSet();
 		}
@@ -126,11 +132,7 @@ public class QueryImplOtimizada4 {
 		return null;
 	}
 
-	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
-		return juncaoMergeSort(relacaoEntrada1, relacaoEntrada2, restricao);
-	}
-
-	private ResultSet juncaoMergeSort(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+	private ResultSet juncaoMerge(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
 		/*Projecao<?> operando1 = restricao.getOperando1();
@@ -151,6 +153,31 @@ public class QueryImplOtimizada4 {
 				}
 			}
 		}*/
+		//
+		return resultado;
+	}
+
+	/**
+	 * Efetua a operacao de interseccao entre duas relacoes
+	 * 
+	 * @param relacaoEntrada1
+	 * @param relacaoEntrada2
+	 * @author Douglas Matheus de Souza em 26/10/2011
+	 */
+	private ResultSet interseccao(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2) throws Exception {
+		ResultSet resultado = new ResultSet();
+		//
+		Map<ResultObject, Boolean> hashTable = new HashMap<ResultObject, Boolean>();
+		//
+		for (ResultObject objeto1 : relacaoEntrada1) {
+			hashTable.put(objeto1, true);
+		}
+		//
+		for (ResultObject objeto2 : relacaoEntrada2) {
+			if (hashTable.get(objeto2) != null) {
+				resultado.add(objeto2);
+			}
+		}
 		//
 		return resultado;
 	}
@@ -401,37 +428,5 @@ public class QueryImplOtimizada4 {
 		/*Copy tmpArray back*/
 		for (int i = 0; i < numElements; i++, rightEnd--)
 			a[rightEnd] = tmpArray[rightEnd];
-	}
-
-	private void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
-		for (String h : headers) {
-			char[] header = new char[tamanhoColuna];
-			Arrays.fill(header, ' ');
-			for (int i = 0; i < h.length(); i++) {
-				header[i] = h.charAt(i);
-			}
-			System.out.print(header);
-		}
-		//
-		System.out.println();
-		System.out.println("------------------------------------");
-		//
-		for (ResultObject objeto : resultSet) {
-			for (String c : headers) {
-				char[] campo = new char[tamanhoColuna];
-				Arrays.fill(campo, ' ');
-				String valor = objeto.get(c).toString();
-				for (int i = 0; i < valor.length(); i++) {
-					campo[i] = valor.charAt(i);
-				}
-				System.out.print(campo);
-			}
-			System.out.println();
-		}
-
-		System.out.println("-------------------------------");
-		System.out.println("Registros...: " + resultSet.size());
-		System.out.println("Tempo total : " + tempo + " ms");
-		System.out.println("-------------------------------");
 	}
 }
