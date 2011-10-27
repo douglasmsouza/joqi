@@ -1,4 +1,4 @@
-from	pessoas p1,
-		pessoas p2
-where	p1.nmPessoa = 'douglas' or
-		p2.nmPessoa = 'nathalia'
+from	pessoas pai,
+		pessoas filho
+where	(pai.cdPessoa = filho.cdPai or
+		 pai.cdPessoa = filho.cdMae) 
