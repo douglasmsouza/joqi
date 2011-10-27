@@ -46,9 +46,7 @@ public class QueryImplOtimizada4 {
 	public ResultSet getResultSet() throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
-		System.out.println("--------------------------------------------------------------------");
 		arvoreConsulta.imprime();
-		System.out.println("--------------------------------------------------------------------");
 		//
 		double time = System.currentTimeMillis();
 		resultado = executaConsulta(arvoreConsulta.getRaizRestricoes());

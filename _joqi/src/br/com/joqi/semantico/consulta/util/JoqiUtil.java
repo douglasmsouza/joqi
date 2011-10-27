@@ -37,6 +37,8 @@ public class JoqiUtil {
 	}
 	
 	public static void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
+		System.out.println();
+		System.out.println("--------------------------------------------------------------------");
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];
 			Arrays.fill(header, ' ');
@@ -47,7 +49,7 @@ public class JoqiUtil {
 		}
 		//
 		System.out.println();
-		System.out.println("------------------------------------");
+		System.out.println("--------------------------------------------------------------------");
 		//
 		for (ResultObject objeto : resultSet) {
 			for (String c : headers) {
@@ -62,9 +64,9 @@ public class JoqiUtil {
 			System.out.println();
 		}
 
-		System.out.println("-------------------------------");
+		System.out.println("--------------------------------------------------------------------");
 		System.out.println("Registros...: " + resultSet.size());
 		System.out.println("Tempo total : " + tempo + " ms");
-		System.out.println("-------------------------------");
+		System.out.println("--------------------------------------------------------------------");
 	}
 }
