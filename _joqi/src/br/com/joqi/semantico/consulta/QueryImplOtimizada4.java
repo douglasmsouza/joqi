@@ -36,9 +36,11 @@ public class QueryImplOtimizada4 {
 	}
 
 	private ArvoreConsulta arvoreConsulta;
+	private Query query;
 
-	public QueryImplOtimizada4(ArvoreConsulta arvoreConsulta) {
+	public QueryImplOtimizada4(Query query, ArvoreConsulta arvoreConsulta) {
 		this.arvoreConsulta = arvoreConsulta;
+		this.query = query;
 	}
 
 	public ResultSet getResultSet() throws Exception {
@@ -50,8 +52,14 @@ public class QueryImplOtimizada4 {
 		//
 		double time = System.currentTimeMillis();
 		resultado = executaConsulta(arvoreConsulta.getRaizRestricoes());
+		String[] colunas = new String[query.getRelacoes().size()];
+		int i = 0;
+		for (Relacao r : query.getRelacoes()) {
+			colunas[i] = r.getNomeNaConsulta();
+			i++;
+		}
 		time = System.currentTimeMillis() - time;
-		JoqiUtil.imprimeResultado(15, time, new String[] { "str1", "str2" }, resultado);
+		JoqiUtil.imprimeResultado(15, time, colunas, resultado);
 		//
 		return resultado;
 	}
