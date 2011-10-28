@@ -37,7 +37,6 @@ public class JoqiUtil {
 	}
 	
 	public static void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
-		System.out.println();
 		System.out.println("--------------------------------------------------------------------");
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];

@@ -12,6 +12,8 @@ import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
+import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaFromException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 import br.com.joqi.semantico.exception.TipoGenericoException;
@@ -32,6 +34,7 @@ public class Query implements IPossuiRestricoes {
 		projecoes = new ArrayList<Projecao<?>>();
 		relacoes = new HashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
+		itensOrdenacoes = new ArrayList<ItemOrdenacao>();
 	}
 
 	public void addProjecao(Projecao<?> projecao) {
@@ -75,6 +78,14 @@ public class Query implements IPossuiRestricoes {
 		}
 	}
 
+	public List<ItemOrdenacao> getItensOrdenacoes() {
+		return itensOrdenacoes;
+	}
+
+	public void addItemOrdenacao(ItemOrdenacao item) {
+		itensOrdenacoes.add(item);
+	}
+
 	@Override
 	public void remove(Restricao restricao) {
 		restricoes.remove(restricao);
@@ -90,9 +101,20 @@ public class Query implements IPossuiRestricoes {
 			//
 			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
-			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes);
-			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(this, arvore);
-			queryImplOtimizada4.getResultSet();
+			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, itensOrdenacoes);
+			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
+			//
+			/*arvore.imprime();*/
+			double time = System.currentTimeMillis();
+			ResultSet resultado = queryImplOtimizada4.getResultSet();
+			String[] colunas = new String[relacoes.size()];
+			int i = 0;
+			for (Relacao r : relacoes) {
+				colunas[i] = r.getNomeNaConsulta();
+				i++;
+			}
+			time = System.currentTimeMillis() - time;
+			JoqiUtil.imprimeResultado(15, time, colunas, resultado);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
