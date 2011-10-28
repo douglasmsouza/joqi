@@ -4,7 +4,7 @@ import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 
 public class ItemOrdenacao {
 
-	static enum TipoOrdenacao {
+	public static enum TipoOrdenacao {
 		ASC, DESC
 	}
 
@@ -35,4 +35,8 @@ public class ItemOrdenacao {
 		this.tipoOrdenacao = tipoOrdenacao;
 	}
 
+	@Override
+	public String toString() {
+		return campo + " " + tipoOrdenacao;
+	}
 }

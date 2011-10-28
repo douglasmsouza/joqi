@@ -2,4 +2,5 @@ from 	pessoas avo,
 		pessoas paiMae,
 		pessoas filho		
 where	(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
-		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		
+		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)
+order by avo.nmPessoa desc, paiMae.nmPessoa, filho.nmPessoa		

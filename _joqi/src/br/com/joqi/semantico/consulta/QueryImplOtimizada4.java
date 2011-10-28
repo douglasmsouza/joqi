@@ -3,13 +3,13 @@ package br.com.joqi.semantico.consulta;
 import java.util.HashMap;
 import java.util.Map;
 
-import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
+import br.com.joqi.semantico.consulta.restricao.RestricaoSimples.TipoBusca;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
@@ -34,30 +34,13 @@ public class QueryImplOtimizada4 {
 	}
 
 	private ArvoreConsulta arvoreConsulta;
-	private Query query;
 
-	public QueryImplOtimizada4(Query query, ArvoreConsulta arvoreConsulta) {
+	public QueryImplOtimizada4(ArvoreConsulta arvoreConsulta) {
 		this.arvoreConsulta = arvoreConsulta;
-		this.query = query;
 	}
 
 	public ResultSet getResultSet() throws Exception {
-		ResultSet resultado = new ResultSet();
-		//
-		arvoreConsulta.imprime();
-		//
-		double time = System.currentTimeMillis();
-		resultado = executaConsulta(arvoreConsulta.getRaizRestricoes());
-		String[] colunas = new String[query.getRelacoes().size()];
-		int i = 0;
-		for (Relacao r : query.getRelacoes()) {
-			colunas[i] = r.getNomeNaConsulta();
-			i++;
-		}
-		time = System.currentTimeMillis() - time;
-		JoqiUtil.imprimeResultado(15, time, colunas, resultado);
-		//
-		return resultado;
+		return executaConsulta(arvoreConsulta.getRaizRestricoes());
 	}
 
 	private ResultSet executaConsulta(NoArvore raiz) throws Exception {
