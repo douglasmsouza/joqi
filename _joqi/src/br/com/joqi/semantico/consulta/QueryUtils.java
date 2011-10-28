@@ -5,11 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MaiorIgual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
+import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 import br.com.joqi.semantico.exception.TipoGenericoException;
@@ -72,6 +74,14 @@ public class QueryUtils {
 		} catch (IllegalArgumentException e) {
 		}
 		return null;
+	}
+
+	public static Object getValorDoCampo(Object objeto, ProjecaoCampo campo) throws CampoInexistenteException {
+		return getValorDoCampo(objeto, (String) campo.getValor());
+	}
+
+	public static Object getValorDoCampo(ResultObject objeto, ProjecaoCampo campo) throws CampoInexistenteException {
+		return getValorDoCampo(objeto.get(campo.getRelacao()), (String) campo.getValor());
 	}
 
 	/**
