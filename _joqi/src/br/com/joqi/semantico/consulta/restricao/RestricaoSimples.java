@@ -1,11 +1,9 @@
 package br.com.joqi.semantico.consulta.restricao;
 
-import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 
@@ -16,6 +14,10 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelac
  * @author Douglas Matheus de Souza em 20/07/2011
  */
 public class RestricaoSimples extends Restricao {
+
+	public static enum TipoBusca {
+		LINEAR, JUNCAO_LOOP_ANINHADO, JUNCAO_HASH
+	}
 
 	private TipoBusca tipoBusca;
 	//

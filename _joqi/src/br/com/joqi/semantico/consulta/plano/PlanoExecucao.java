@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -13,6 +12,7 @@ import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoConjunto;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
+import br.com.joqi.semantico.consulta.restricao.RestricaoSimples.TipoBusca;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoOr;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
