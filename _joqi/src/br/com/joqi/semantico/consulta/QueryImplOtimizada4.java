@@ -1,12 +1,12 @@
 package br.com.joqi.semantico.consulta;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
-import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
-import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
+import br.com.joqi.semantico.consulta.ordenacao.ResultSetComparator;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -19,6 +19,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
@@ -53,7 +54,12 @@ public class QueryImplOtimizada4 {
 		Object operacao = no.getOperacao();
 		//
 		if (operacao.getClass() == Ordenacao.class) {
-			resultado = ordena(executaOperacao(no.getFilho()), (Ordenacao) operacao);
+			resultado = executaOperacao(no.getFilho());
+			/*Ordena o resultado*/
+			ResultSetComparator comparator = new ResultSetComparator((Ordenacao) operacao);
+			ResultList resultList = new ResultList(resultado);
+			Collections.sort(resultList, comparator);
+			resultado = new ResultSet(resultList);
 		} else if (operacao.getClass() == UniaoRestricoes.class) {
 			resultado = executaRestricoes(no);
 		}
@@ -357,85 +363,5 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return valor1;
-	}
-
-	private ResultSet ordena(ResultSet resultSet, Ordenacao ordenacao) throws CampoInexistenteException {
-		ResultObject[] resultObjects = resultSet.toArray(new ResultObject[0]);
-		merge(resultObjects, ordenacao);
-		return new ResultSet(resultObjects);
-	}
-
-	private void merge(ResultObject[] a, Ordenacao ordenacao) throws CampoInexistenteException {
-		ResultObject[] tmpArray = new ResultObject[a.length];
-		merge(a, tmpArray, 0, a.length - 1, ordenacao);
-	}
-
-	private void merge(ResultObject[] a, ResultObject[] tmpArray, int left, int right, Ordenacao ordenacao) throws CampoInexistenteException {
-		if (left < right) {
-			int center = (left + right) / 2;
-			merge(a, tmpArray, left, center, ordenacao);
-			merge(a, tmpArray, center + 1, right, ordenacao);
-			merge(a, tmpArray, left, center + 1, right, ordenacao);
-		}
-	}
-
-	private void merge(ResultObject[] a, ResultObject[] tmpArray, int leftPos, int rightPos, int rightEnd, Ordenacao ordenacao)
-			throws CampoInexistenteException {
-		int leftEnd = rightPos - 1;
-		int tmpPos = leftPos;
-		int numElements = rightEnd - leftPos + 1;
-
-		/*MergeSorteMain loop*/
-		while (leftPos <= leftEnd && rightPos <= rightEnd) {
-			ItemOrdenacao itemOrdenacao = ordenacao.getItem(0);
-			//
-			ProjecaoCampo campo = itemOrdenacao.getCampo();
-			TipoOrdenacao tipoOrdenacao = itemOrdenacao.getTipoOrdenacao();
-			//
-			Comparable<Object> rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
-			Comparable<Object> rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
-			//
-			int comparacao = rLeftPos.compareTo(rRightPos);
-			int i = 0;
-			while (comparacao == 0) {
-				itemOrdenacao = ordenacao.getItem(i);
-				if (itemOrdenacao != null) {
-					campo = itemOrdenacao.getCampo();
-					tipoOrdenacao = itemOrdenacao.getTipoOrdenacao();
-					rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
-					rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
-					comparacao = rLeftPos.compareTo(rRightPos);
-				} else {
-					break;
-				}
-				i++;
-			}
-			//
-			if (tipoOrdenacao == TipoOrdenacao.ASC && comparacao <= 0) {
-				if (comparacao <= 0) {
-					tmpArray[tmpPos++] = a[leftPos++];
-				} else {
-					tmpArray[tmpPos++] = a[rightPos++];
-				}
-			} else {
-				if (comparacao >= 0) {
-					tmpArray[tmpPos++] = a[leftPos++];
-				} else {
-					tmpArray[tmpPos++] = a[rightPos++];
-				}
-			}
-		}
-
-		while (leftPos <= leftEnd)
-			/*Copy rest of first half*/
-			tmpArray[tmpPos++] = a[leftPos++];
-
-		while (rightPos <= rightEnd)
-			/*Copy rest of right half*/
-			tmpArray[tmpPos++] = a[rightPos++];
-
-		/*Copy tmpArray back*/
-		for (int i = 0; i < numElements; i++, rightEnd--)
-			a[rightEnd] = tmpArray[rightEnd];
 	}
 }
