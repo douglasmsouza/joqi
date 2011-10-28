@@ -136,8 +136,11 @@ public class PlanoExecucao {
 				noRestricao = arvore.insere(noInserir, r);
 				descerRestricoesSimples(noRestricao);
 			} else {
+				RestricaoConjunto restricaoConjunto = (RestricaoConjunto) r;
+				if (restricaoConjunto.isNegacao())
+					restricaoConjunto.negarRestricoes();
 				/*Caso seja um conjunto de restricoes entre parenteses, eh necessario criar uma subarvore*/
-				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), ((RestricaoConjunto) r).getRestricoes());
+				ArvoreConsulta subArvore = inserirRestricoes(new ArvoreConsulta(), restricaoConjunto.getRestricoes());
 				noRestricao = arvore.insere(noInserir, subArvore);
 				subirSubarvore(noRestricao);
 			}
@@ -458,7 +461,6 @@ public class PlanoExecucao {
 	private void inserirRelacoes(NoArvore no) {
 		if (no.getOperacao().getClass() != ArvoreConsulta.class) {
 			for (Relacao relacao : relacoes) {
-				relacao.transformaEmResultSet();
 				arvore.insere(no, relacao);
 			}
 		}

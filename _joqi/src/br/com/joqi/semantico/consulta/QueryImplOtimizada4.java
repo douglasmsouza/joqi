@@ -3,8 +3,6 @@ package br.com.joqi.semantico.consulta;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.naming.spi.DirStateFactory.Result;
-
 import br.com.joqi.semantico.consulta.busca.tipo.TipoBusca;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
@@ -114,14 +112,18 @@ public class QueryImplOtimizada4 {
 				return buscaLinear(relacaoEntrada, restricao);
 			} else if (restricao.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
 				ResultSet relacaoEntrada1 = restricao(no.getFilho());
-				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
+				ResultSet relacaoEntrada2;
+				if (no.getFilho().getIrmao() != null)
+					relacaoEntrada2 = restricao(no.getFilho().getIrmao());
+				else
+					relacaoEntrada2 = (ResultSet) relacaoEntrada1.clone();
 				//
 				return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
 			} else {
 				ResultSet relacaoEntrada1 = restricao(no.getFilho());
 				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				//
-				return juncaoMerge(relacaoEntrada1, relacaoEntrada2, restricao);
+				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
 			if (no.isFolha()) {
@@ -138,27 +140,27 @@ public class QueryImplOtimizada4 {
 		return null;
 	}
 
-	private ResultSet juncaoMerge(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
-		/*Projecao<?> operando1 = restricao.getOperando1();
+		Projecao<?> operando1 = restricao.getOperando1();
 		Projecao<?> operando2 = restricao.getOperando2();
 		//
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
-		ResultObject[] relacao1 = ordenaMergeSort(relacaoEntrada1, operando1.getRelacao(), (String) operando1.getValor());
-		ResultObject[] relacao2 = ordenaMergeSort(relacaoEntrada2, operando2.getRelacao(), (String) operando2.getValor());
-		//
-		for (int i = 0; i < relacao1.length; i++) {
-			Comparable<Object> valor1 = getValorOperandoJuncaoComparable(operando1, relacao1[i]);
-			int j = 0;
-			for (j = 0; j < relacao2.length; j++) {
-				Comparable<Object> valor2 = getValorOperandoJuncaoComparable(operando2, relacao2[j]);
+		for (ResultObject objeto1 : relacaoEntrada1) {
+			Comparable<Object> valor1 = getValorOperandoJuncaoComparable(operando1, objeto1);
+			for (ResultObject objeto2 : relacaoEntrada2) {
+				Comparable<Object> valor2 = getValorOperandoJuncaoComparable(operando2, objeto2);
+				//
 				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
-					break;
+					ResultObject resultObject = new ResultObject();
+					resultObject.putAll(objeto1);
+					resultObject.putAll(objeto2);
+					resultado.add(resultObject);
 				}
 			}
-		}*/
+		}
 		//
 		return resultado;
 	}
@@ -385,54 +387,5 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return valor1;
-	}
-
-	private ResultObject[] ordenaMergeSort(ResultSet resultSet, String relacao, String campo) throws CampoInexistenteException {
-		ResultObject[] resultObjects = resultSet.toArray(new ResultObject[0]);
-		merge(resultObjects, relacao, campo);
-		return resultObjects;
-	}
-
-	private void merge(ResultObject[] a, String relacao, String campo) throws CampoInexistenteException {
-		ResultObject[] tmpArray = new ResultObject[a.length];
-		merge(a, tmpArray, 0, a.length - 1, relacao, campo);
-	}
-
-	private void merge(ResultObject[] a, ResultObject[] tmpArray, int left, int right, String relacao, String campo) throws CampoInexistenteException {
-		if (left < right) {
-			int center = (left + right) / 2;
-			merge(a, tmpArray, left, center, relacao, campo);
-			merge(a, tmpArray, center + 1, right, relacao, campo);
-			merge(a, tmpArray, left, center + 1, right, relacao, campo);
-		}
-	}
-
-	private void merge(ResultObject[] a, ResultObject[] tmpArray, int leftPos, int rightPos, int rightEnd, String relacao, String campo)
-			throws CampoInexistenteException {
-		int leftEnd = rightPos - 1;
-		int tmpPos = leftPos;
-		int numElements = rightEnd - leftPos + 1;
-
-		/*MergeSorteMain loop*/
-		while (leftPos <= leftEnd && rightPos <= rightEnd) {
-			Comparable<Object> rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos].get(relacao), campo);
-			Comparable<Object> rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos].get(relacao), campo);
-			if (rLeftPos.compareTo(rRightPos) <= 0)
-				tmpArray[tmpPos++] = a[leftPos++];
-			else
-				tmpArray[tmpPos++] = a[rightPos++];
-		}
-
-		while (leftPos <= leftEnd)
-			/*Copy rest of first half*/
-			tmpArray[tmpPos++] = a[leftPos++];
-
-		while (rightPos <= rightEnd)
-			/*Copy rest of right half*/
-			tmpArray[tmpPos++] = a[rightPos++];
-
-		/*Copy tmpArray back*/
-		for (int i = 0; i < numElements; i++, rightEnd--)
-			a[rightEnd] = tmpArray[rightEnd];
 	}
 }
