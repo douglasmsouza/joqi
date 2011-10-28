@@ -6,6 +6,7 @@ import java.util.Map;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
+import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -389,6 +390,7 @@ public class QueryImplOtimizada4 {
 			ItemOrdenacao itemOrdenacao = ordenacao.getItem(0);
 			//
 			ProjecaoCampo campo = itemOrdenacao.getCampo();
+			TipoOrdenacao tipoOrdenacao = itemOrdenacao.getTipoOrdenacao();
 			//
 			Comparable<Object> rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
 			Comparable<Object> rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
@@ -399,6 +401,7 @@ public class QueryImplOtimizada4 {
 				itemOrdenacao = ordenacao.getItem(i);
 				if (itemOrdenacao != null) {
 					campo = itemOrdenacao.getCampo();
+					tipoOrdenacao = itemOrdenacao.getTipoOrdenacao();
 					rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
 					rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
 					comparacao = rLeftPos.compareTo(rRightPos);
@@ -408,10 +411,19 @@ public class QueryImplOtimizada4 {
 				i++;
 			}
 			//
-			if (comparacao <= 0)
-				tmpArray[tmpPos++] = a[leftPos++];
-			else
-				tmpArray[tmpPos++] = a[rightPos++];
+			if (tipoOrdenacao == TipoOrdenacao.ASC && comparacao <= 0) {
+				if (comparacao <= 0) {
+					tmpArray[tmpPos++] = a[leftPos++];
+				} else {
+					tmpArray[tmpPos++] = a[rightPos++];
+				}
+			} else {
+				if (comparacao >= 0) {
+					tmpArray[tmpPos++] = a[leftPos++];
+				} else {
+					tmpArray[tmpPos++] = a[rightPos++];
+				}
+			}
 		}
 
 		while (leftPos <= leftEnd)
