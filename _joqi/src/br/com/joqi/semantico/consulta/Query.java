@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -23,6 +24,7 @@ public class Query implements IPossuiRestricoes {
 	private List<Projecao<?>> projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
+	private List<ItemOrdenacao> itensOrdenacoes;
 
 	public Query() {
 		objetoConsulta = new BancoConsulta();
@@ -89,7 +91,7 @@ public class Query implements IPossuiRestricoes {
 			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
 			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes);
-			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(this,arvore);
+			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(this, arvore);
 			queryImplOtimizada4.getResultSet();
 		} catch (Exception e) {
 			e.printStackTrace();
