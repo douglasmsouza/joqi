@@ -3,6 +3,9 @@ package br.com.joqi.semantico.consulta;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
+import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
+import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -40,18 +43,30 @@ public class QueryImplOtimizada4 {
 	}
 
 	public ResultSet getResultSet() throws Exception {
-		return executaConsulta(arvoreConsulta.getRaizRestricoes());
+		return executaOperacao(arvoreConsulta.getRaiz());
 	}
 
-	private ResultSet executaConsulta(NoArvore raiz) throws Exception {
+	private ResultSet executaOperacao(NoArvore no) throws Exception {
 		ResultSet resultado = new ResultSet();
 		//
-		if (raiz != null) {
-			NoArvore filho = raiz.getFilho();
-			while (filho != null) {
-				resultado.addAll(produtoCartesiano(filho));
-				filho = filho.getIrmao();
-			}
+		Object operacao = no.getOperacao();
+		//
+		if (operacao.getClass() == Ordenacao.class) {
+			resultado = ordena(executaOperacao(no.getFilho()), (Ordenacao) operacao);
+		} else if (operacao.getClass() == UniaoRestricoes.class) {
+			resultado = executaRestricoes(no);
+		}
+		//
+		return resultado;
+	}
+
+	private ResultSet executaRestricoes(NoArvore raiz) throws Exception {
+		ResultSet resultado = new ResultSet();
+		//
+		NoArvore filho = raiz.getFilho();
+		while (filho != null) {
+			resultado.addAll(produtoCartesiano(filho));
+			filho = filho.getIrmao();
 		}
 		//
 		return resultado;
@@ -110,10 +125,10 @@ public class QueryImplOtimizada4 {
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
 			if (no.isFolha()) {
-				return executaConsulta(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				return executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 			} else {
 				ResultSet relacaoEntrada1 = produtoCartesiano(no);
-				ResultSet relacaoEntrada2 = executaConsulta(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				ResultSet relacaoEntrada2 = executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 				return interseccao(relacaoEntrada1, relacaoEntrada2);
 			}
 		} else if (no.isFolha()) {
@@ -132,9 +147,9 @@ public class QueryImplOtimizada4 {
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			Comparable<Object> valor1 = getValorOperandoJuncaoComparable(operando1, objeto1);
+			Comparable<Object> valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto1, (ProjecaoCampo) operando1);
 			for (ResultObject objeto2 : relacaoEntrada2) {
-				Comparable<Object> valor2 = getValorOperandoJuncaoComparable(operando2, objeto2);
+				Comparable<Object> valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto2, (ProjecaoCampo) operando2);
 				//
 				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
 					ResultObject resultObject = new ResultObject();
@@ -189,7 +204,7 @@ public class QueryImplOtimizada4 {
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			Object chave = null;
 			try {
-				chave = getValorOperandoJuncao(restricao.getOperando1(), objeto1);
+				chave = QueryUtils.getValorDoCampo(objeto1, (ProjecaoCampo) restricao.getOperando1());
 			} catch (CampoInexistenteException e) {
 				continue;
 			}
@@ -208,7 +223,7 @@ public class QueryImplOtimizada4 {
 		for (ResultObject objeto2 : relacaoEntrada2) {
 			Object chave = null;
 			try {
-				chave = getValorOperandoJuncao(restricao.getOperando2(), objeto2);
+				chave = QueryUtils.getValorDoCampo(objeto2, (ProjecaoCampo) restricao.getOperando2());
 			} catch (CampoInexistenteException e) {
 				continue;
 			}
@@ -234,9 +249,11 @@ public class QueryImplOtimizada4 {
 	 * 
 	 * @param relacao
 	 * @param restricao
+	 * @throws CampoNaoComparableException
+	 * @throws CampoInexistenteException
 	 * @author Douglas Matheus de Souza em 22/10/2011
 	 */
-	private ResultSet buscaLinear(ResultSet relacao, RestricaoSimples restricao) throws Exception {
+	private ResultSet buscaLinear(ResultSet relacao, RestricaoSimples restricao) throws CampoNaoComparableException, CampoInexistenteException {
 		ResultSet resultado = new ResultSet();
 
 		/*Guarda os operandos e o operador da restricao*/
@@ -246,14 +263,7 @@ public class QueryImplOtimizada4 {
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
 		for (ResultObject objeto : relacao) {
-			Object valorOperando1 = null;
-			try {
-				valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
-			} catch (CampoInexistenteException e) {
-				continue;
-			} catch (CampoNaoComparableException e) {
-				continue;
-			}
+			Object valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
 
 			/*Se eh uma instrucao IS TRUE ou IS FALSE, compara logo de cara, uma vez que nao*/
 			/*existem outros operandos na restricao*/
@@ -272,14 +282,7 @@ public class QueryImplOtimizada4 {
 				continue;
 			}
 
-			Object valorOperando2 = null;
-			try {
-				valorOperando2 = getValorOperandoBuscaLinear(operando2, objeto);
-			} catch (CampoInexistenteException e) {
-				continue;
-			} catch (CampoNaoComparableException e) {
-				continue;
-			}
+			Object valorOperando2 = getValorOperandoBuscaLinear(operando2, objeto);
 
 			/*Caso o valor do campo na tupla seja NULL, eh um caso "especial" */
 			if (valorOperando1 == null || valorOperando2 == null) {
@@ -324,28 +327,11 @@ public class QueryImplOtimizada4 {
 			CampoNaoComparableException {
 		Object valor = operando.getValor();
 		if (operando.getClass() == ProjecaoCampo.class) {
-			Object objeto = resultObject.get(operando.getRelacao());
-			valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
+			valor = QueryUtils.getValorDoCampo(resultObject, (ProjecaoCampo) operando);
 			if (!(valor instanceof Comparable<?>))
 				throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
 		}
 		return valor;
-	}
-
-	private Object getValorOperandoJuncao(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
-		Object objeto = resultObject.get(operando.getRelacao());
-		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
-		/*if (!(valor instanceof Comparable<?>))
-			throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");*/
-		return valor;
-	}
-
-	private Comparable<Object> getValorOperandoJuncaoComparable(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
-		Object objeto = resultObject.get(operando.getRelacao());
-		Object valor = QueryUtils.getValorDoCampo(objeto, (String) operando.getValor());
-		/*if (!(valor instanceof Comparable<?>))
-			throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");*/
-		return (Comparable<Object>) valor;
 	}
 
 	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws OperandosIncompativeisException {
@@ -370,5 +356,74 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return valor1;
+	}
+
+	private ResultSet ordena(ResultSet resultSet, Ordenacao ordenacao) throws CampoInexistenteException {
+		ResultObject[] resultObjects = resultSet.toArray(new ResultObject[0]);
+		merge(resultObjects, ordenacao);
+		return new ResultSet(resultObjects);
+	}
+
+	private void merge(ResultObject[] a, Ordenacao ordenacao) throws CampoInexistenteException {
+		ResultObject[] tmpArray = new ResultObject[a.length];
+		merge(a, tmpArray, 0, a.length - 1, ordenacao);
+	}
+
+	private void merge(ResultObject[] a, ResultObject[] tmpArray, int left, int right, Ordenacao ordenacao) throws CampoInexistenteException {
+		if (left < right) {
+			int center = (left + right) / 2;
+			merge(a, tmpArray, left, center, ordenacao);
+			merge(a, tmpArray, center + 1, right, ordenacao);
+			merge(a, tmpArray, left, center + 1, right, ordenacao);
+		}
+	}
+
+	private void merge(ResultObject[] a, ResultObject[] tmpArray, int leftPos, int rightPos, int rightEnd, Ordenacao ordenacao)
+			throws CampoInexistenteException {
+		int leftEnd = rightPos - 1;
+		int tmpPos = leftPos;
+		int numElements = rightEnd - leftPos + 1;
+
+		/*MergeSorteMain loop*/
+		while (leftPos <= leftEnd && rightPos <= rightEnd) {
+			ItemOrdenacao itemOrdenacao = ordenacao.getItem(0);
+			//
+			ProjecaoCampo campo = itemOrdenacao.getCampo();
+			//
+			Comparable<Object> rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
+			Comparable<Object> rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
+			//
+			int comparacao = rLeftPos.compareTo(rRightPos);
+			int i = 0;
+			while (comparacao == 0) {
+				itemOrdenacao = ordenacao.getItem(i);
+				if (itemOrdenacao != null) {
+					campo = itemOrdenacao.getCampo();
+					rLeftPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[leftPos], campo);
+					rRightPos = (Comparable<Object>) QueryUtils.getValorDoCampo(a[rightPos], campo);
+					comparacao = rLeftPos.compareTo(rRightPos);
+				} else {
+					break;
+				}
+				i++;
+			}
+			//
+			if (comparacao <= 0)
+				tmpArray[tmpPos++] = a[leftPos++];
+			else
+				tmpArray[tmpPos++] = a[rightPos++];
+		}
+
+		while (leftPos <= leftEnd)
+			/*Copy rest of first half*/
+			tmpArray[tmpPos++] = a[leftPos++];
+
+		while (rightPos <= rightEnd)
+			/*Copy rest of right half*/
+			tmpArray[tmpPos++] = a[rightPos++];
+
+		/*Copy tmpArray back*/
+		for (int i = 0; i < numElements; i++, rightEnd--)
+			a[rightEnd] = tmpArray[rightEnd];
 	}
 }

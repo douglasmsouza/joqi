@@ -10,8 +10,12 @@ public class Ordenacao {
 		this.itens = itens;
 	}
 
-	public List<ItemOrdenacao> getItens() {
-		return itens;
+	public ItemOrdenacao getItem(int indice) {
+		try {
+			return itens.get(indice);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	@Override
