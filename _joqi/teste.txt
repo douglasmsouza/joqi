@@ -1,4 +1,2 @@
-from	pessoas pai,
-		pessoas filho
-where	(pai.cdPessoa = filho.cdPai or
-		 pai.cdPessoa = filho.cdMae) 
+from	inteiros	
+where	intValue > intValue

@@ -10,6 +10,6 @@ public class ResultSet extends ArrayList<ResultObject> {
 	}
 
 	public ResultSet() {
-	}
 
+	}
 }
