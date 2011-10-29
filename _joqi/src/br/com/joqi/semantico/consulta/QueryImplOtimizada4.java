@@ -10,7 +10,7 @@ import java.util.Map;
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
-import br.com.joqi.semantico.consulta.ordenacao.ResultSetComparator;
+import br.com.joqi.semantico.consulta.ordenacao.ResultListComparator;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -23,8 +23,8 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
-import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.CampoNaoComparableException;
@@ -47,13 +47,11 @@ public class QueryImplOtimizada4 {
 		this.arvoreConsulta = arvoreConsulta;
 	}
 
-	public Collection<ResultObject> getResultSet() throws Exception {
+	public Collection<ResultObject> getResultList() throws Exception {
 		return executaOperacao(arvoreConsulta.getRaiz());
 	}
 
 	private Collection<ResultObject> executaOperacao(NoArvore no) throws Exception {
-		ResultSet resultado = new ResultSet();
-		//
 		Object operacao = no.getOperacao();
 		//
 		if (operacao instanceof Projecao) {
@@ -66,27 +64,15 @@ public class QueryImplOtimizada4 {
 			return executaRestricoes(no);
 		}
 		//
-		return resultado;
+		return new ResultList();
 	}
 
-	private ResultSet executaRestricoes(NoArvore raiz) throws Exception {
-		ResultSet resultado = new ResultSet();
-		//
-		NoArvore filho = raiz.getFilho();
-		while (filho != null) {
-			resultado.addAll(produtoCartesiano(filho));
-			filho = filho.getIrmao();
-		}
-		//
-		return resultado;
-	}
-
-	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultSet, Agrupamento agrupamento) {
+	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) {
 		Map<Object, ResultObject> tabelaHash = new HashMap<Object, ResultObject>();
 		//
 		ProjecaoCampo campo = agrupamento.getCampo();
 		//
-		for (ResultObject objeto : resultSet) {
+		for (ResultObject objeto : resultList) {
 			Object chave = null;
 			try {
 				chave = QueryUtils.getValorDoCampo(objeto, campo);
@@ -101,24 +87,36 @@ public class QueryImplOtimizada4 {
 		return tabelaHash.values();
 	}
 
-	private Collection<ResultObject> ordenacao(Collection<ResultObject> resultSet, Ordenacao ordenacao) {
-		ResultSetComparator comparator = new ResultSetComparator(ordenacao);
-		List<ResultObject> resultList = new ArrayList<ResultObject>(resultSet);
-		Collections.sort(resultList, comparator);
-		return resultList;
+	private Collection<ResultObject> ordenacao(Collection<ResultObject> resultList, Ordenacao ordenacao) {
+		ResultListComparator comparator = new ResultListComparator(ordenacao);
+		List<ResultObject> resultado = new ArrayList<ResultObject>(resultList);
+		Collections.sort(resultado, comparator);
+		return resultado;
 	}
 
-	private ResultSet produtoCartesiano(NoArvore no) throws Exception {
-		ResultSet resultado = new ResultSet();
+	private ResultList executaRestricoes(NoArvore raiz) throws Exception {
+		ResultList resultado = new ResultList();
+		//
+		NoArvore filho = raiz.getFilho();
+		while (filho != null) {
+			resultado.addAll(produtoCartesiano(filho));
+			filho = filho.getIrmao();
+		}
+		//
+		return resultado;
+	}
+
+	private ResultList produtoCartesiano(NoArvore no) throws Exception {
+		ResultList resultado = new ResultList();
 		//
 		NoArvore filho = no.getFilho();
 		resultado = restricao(filho);
 		//
 		filho = filho.getIrmao();
 		while (filho != null) {
-			ResultSet resultadoNovo = restricao(filho);
+			ResultList resultadoNovo = restricao(filho);
 			//
-			ResultSet temp = new ResultSet();
+			ResultList temp = new ResultList();
 			for (ResultObject r1 : resultado) {
 				for (ResultObject r2 : resultadoNovo) {
 					ResultObject resultObject = new ResultObject();
@@ -135,27 +133,27 @@ public class QueryImplOtimizada4 {
 		return resultado;
 	}
 
-	private ResultSet restricao(NoArvore no) throws Exception {
+	private ResultList restricao(NoArvore no) throws Exception {
 		Object operacao = no.getOperacao();
 		//
 		if (operacao.getClass() == RestricaoSimples.class) {
 			RestricaoSimples restricao = (RestricaoSimples) operacao;
 			if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
-				ResultSet relacaoEntrada = restricao(no.getFilho());
+				ResultList relacaoEntrada = restricao(no.getFilho());
 				//
 				return buscaLinear(relacaoEntrada, restricao);
 			} else if (restricao.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
-				ResultSet relacaoEntrada1 = restricao(no.getFilho());
-				ResultSet relacaoEntrada2;
+				ResultList relacaoEntrada1 = restricao(no.getFilho());
+				ResultList relacaoEntrada2;
 				if (no.getFilho().getIrmao() != null)
 					relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				else
-					relacaoEntrada2 = (ResultSet) relacaoEntrada1.clone();
+					relacaoEntrada2 = (ResultList) relacaoEntrada1.clone();
 				//
 				return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
 			} else {
-				ResultSet relacaoEntrada1 = restricao(no.getFilho());
-				ResultSet relacaoEntrada2 = restricao(no.getFilho().getIrmao());
+				ResultList relacaoEntrada1 = restricao(no.getFilho());
+				ResultList relacaoEntrada2 = restricao(no.getFilho().getIrmao());
 				//
 				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
 			}
@@ -163,19 +161,19 @@ public class QueryImplOtimizada4 {
 			if (no.isFolha()) {
 				return executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 			} else {
-				ResultSet relacaoEntrada1 = produtoCartesiano(no);
-				ResultSet relacaoEntrada2 = executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				ResultList relacaoEntrada1 = produtoCartesiano(no);
+				ResultList relacaoEntrada2 = executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 				return interseccao(relacaoEntrada1, relacaoEntrada2);
 			}
 		} else if (no.isFolha()) {
-			return ((Relacao) no.getOperacao()).getResultSet();
+			return ((Relacao) no.getOperacao()).getResultList();
 		}
 		//
 		return null;
 	}
 
-	private ResultSet juncaoLoopAninhado(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
-		ResultSet resultado = new ResultSet();
+	private ResultList juncaoLoopAninhado(ResultList relacaoEntrada1, ResultList relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+		ResultList resultado = new ResultList();
 		//
 		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
 		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
@@ -206,8 +204,8 @@ public class QueryImplOtimizada4 {
 	 * @param relacaoEntrada2
 	 * @author Douglas Matheus de Souza em 26/10/2011
 	 */
-	private ResultSet interseccao(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2) throws Exception {
-		ResultSet resultado = new ResultSet();
+	private ResultList interseccao(ResultList relacaoEntrada1, ResultList relacaoEntrada2) throws Exception {
+		ResultList resultado = new ResultList();
 		//
 		Map<ResultObject, Boolean> hashTable = new HashMap<ResultObject, Boolean>();
 		//
@@ -232,8 +230,8 @@ public class QueryImplOtimizada4 {
 	 * @param restricao
 	 * @author Douglas Matheus de Souza em 22/10/2011
 	 */
-	private ResultSet juncaoHash(ResultSet relacaoEntrada1, ResultSet relacaoEntrada2, RestricaoSimples restricao) throws Exception {
-		ResultSet resultado = new ResultSet();
+	private ResultList juncaoHash(ResultList relacaoEntrada1, ResultList relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+		ResultList resultado = new ResultList();
 		//
 		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
 		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
@@ -292,8 +290,8 @@ public class QueryImplOtimizada4 {
 	 * @throws CampoInexistenteException
 	 * @author Douglas Matheus de Souza em 22/10/2011
 	 */
-	private ResultSet buscaLinear(ResultSet relacao, RestricaoSimples restricao) throws CampoNaoComparableException, CampoInexistenteException {
-		ResultSet resultado = new ResultSet();
+	private ResultList buscaLinear(ResultList relacao, RestricaoSimples restricao) throws CampoNaoComparableException, CampoInexistenteException {
+		ResultList resultado = new ResultList();
 
 		/*Guarda os operandos e o operador da restricao*/
 		Projecao<?> operando1 = restricao.getOperando1();

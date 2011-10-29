@@ -2,8 +2,8 @@ package br.com.joqi.semantico.consulta.relacao;
 
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
-import br.com.joqi.semantico.consulta.resultado.ResultSet;
 
 /**
  * Guarda as informacoes de um objeto que sera consultado
@@ -64,14 +64,14 @@ public class Relacao {
 		this.colecao = colecao;
 	}
 
-	public ResultSet getResultSet() {
-		ResultSet resultSet = new ResultSet();
+	public ResultList getResultList() {
+		ResultList resultList = new ResultList();
 		for (Object o : colecao) {
 			ResultObject tupla = new ResultObject();
 			tupla.put(getNomeNaConsulta(), o);
-			resultSet.add(tupla);
+			resultList.add(tupla);
 		}
-		return resultSet;
+		return resultList;
 	}
 
 	@Override

@@ -8,11 +8,11 @@ import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 
-public class ResultSetComparator implements Comparator<ResultObject> {
+public class ResultListComparator implements Comparator<ResultObject> {
 
 	private Ordenacao ordenacao;
 
-	public ResultSetComparator(Ordenacao ordenacao) {
+	public ResultListComparator(Ordenacao ordenacao) {
 		this.ordenacao = ordenacao;
 	}
 

@@ -115,7 +115,7 @@ public class Query implements IPossuiRestricoes {
 			//
 			arvore.imprime();
 			double time = System.currentTimeMillis();
-			Collection<ResultObject> resultado = queryImplOtimizada4.getResultSet();
+			Collection<ResultObject> resultado = queryImplOtimizada4.getResultList();
 			String[] colunas = new String[relacoes.size()];
 			int i = 0;
 			for (Relacao r : relacoes) {
