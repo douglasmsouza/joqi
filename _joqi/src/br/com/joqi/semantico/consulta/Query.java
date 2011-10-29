@@ -1,6 +1,7 @@
 package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,7 +105,7 @@ public class Query implements IPossuiRestricoes {
 			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, itensOrdenacoes);
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			//
-			/*arvore.imprime();*/
+			arvore.imprime();
 			double time = System.currentTimeMillis();
 			ResultSet resultado = queryImplOtimizada4.getResultSet();
 			String[] colunas = new String[relacoes.size()];

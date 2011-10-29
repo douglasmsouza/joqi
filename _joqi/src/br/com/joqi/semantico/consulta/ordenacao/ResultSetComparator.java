@@ -5,6 +5,7 @@ import java.util.Comparator;
 import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.exception.CampoInexistenteException;
 
 public class ResultSetComparator implements Comparator<ResultObject> {
 
@@ -15,31 +16,40 @@ public class ResultSetComparator implements Comparator<ResultObject> {
 	}
 
 	public int compare(ResultObject o1, ResultObject o2) {
-		return efetuaComparacao(o1, o2, 0);
+		try {
+			return efetuaComparacao(o1, o2, 0);
+		} catch (CampoInexistenteException e) {
+			return 0;
+		}
 	}
 
-	private int efetuaComparacao(ResultObject o1, ResultObject o2, int indiceItemOrdenacao) {
-		try {
-			int retornoComparacao = 0;
-			ItemOrdenacao item = ordenacao.getItem(indiceItemOrdenacao);
-			if (item != null) {
-				Comparable<Object> valor1;
-				Comparable<Object> valor2;
-				if (item.getTipoOrdenacao() == TipoOrdenacao.ASC) {
-					valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
-					valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
-				} else {
-					valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
-					valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
-				}
-				retornoComparacao = valor1.compareTo(valor2);
-				if (retornoComparacao == 0) {
-					return efetuaComparacao(o1, o2, indiceItemOrdenacao + 1);
-				}
+	private int efetuaComparacao(ResultObject o1, ResultObject o2, int indiceItemOrdenacao) throws CampoInexistenteException {
+		int retornoComparacao = 0;
+		ItemOrdenacao item = ordenacao.getItem(indiceItemOrdenacao);
+		if (item != null) {
+			Comparable<Object> valor1;
+			Comparable<Object> valor2;
+			if (item.getTipoOrdenacao() == TipoOrdenacao.ASC) {
+				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
+				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
+			} else {
+				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
+				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
 			}
-			return retornoComparacao;
-		} catch (Exception e) {
+			//
+			if (valor1 == null && valor2 != null) {
+				return -1;
+			} else if (valor1 != null && valor2 == null) {
+				return 1;
+			} else if (valor1 == null && valor2 == null) {
+				return 0;
+			}
+			//
+			retornoComparacao = valor1.compareTo(valor2);
+			if (retornoComparacao == 0) {
+				return efetuaComparacao(o1, o2, indiceItemOrdenacao + 1);
+			}
 		}
-		return 0;
+		return retornoComparacao;
 	}
 }
