@@ -50,16 +50,15 @@ public class PlanoExecucao {
 	 * @param agrupamentos
 	 * @throws ClausulaGroupByException
 	 */
-	public ArvoreConsulta montarArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes,
-			List<Agrupamento> agrupamentos, List<ItemOrdenacao> itensOrdenacao) throws ClausulaSelectException, ClausulaWhereException,
-			ClausulaOrderByException, ClausulaGroupByException {
+	public ArvoreConsulta montarArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes, Agrupamento agrupamento,
+			Ordenacao ordenacao) throws ClausulaSelectException, ClausulaWhereException, ClausulaOrderByException, ClausulaGroupByException {
 		this.arvore = new ArvoreConsulta();
 		//
 		this.relacoes = relacoes;
 		//
 		inserirProjecoes(arvore, projecoes);
-		inserirOrdenacao(arvore, itensOrdenacao);
-		inserirAgrupamento(arvore, agrupamentos);		
+		inserirOrdenacao(arvore, ordenacao);
+		inserirAgrupamento(arvore, agrupamento);
 		//
 		if (restricoes.size() > 0) {
 			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
@@ -140,16 +139,15 @@ public class PlanoExecucao {
 	 * Insere a ordenacao na arvore
 	 * 
 	 * @param arvore
-	 * @param itensOrdenacao
+	 * @param ordenacao
 	 * @throws ClausulaOrderByException
 	 */
-	private void inserirOrdenacao(ArvoreConsulta arvore, List<ItemOrdenacao> itensOrdenacao) throws ClausulaOrderByException {
-		if (itensOrdenacao.size() > 0) {
-			for (ItemOrdenacao item : itensOrdenacao) {
+	private void inserirOrdenacao(ArvoreConsulta arvore, Ordenacao ordenacao) throws ClausulaOrderByException {
+		if (ordenacao.getItens().size() > 0) {
+			for (ItemOrdenacao item : ordenacao.getItens()) {
 				verificaSemanticaOrdenacao(item);
 			}
-			//
-			arvore.insere(new Ordenacao(itensOrdenacao));
+			arvore.insere(ordenacao);
 		}
 	}
 
@@ -157,15 +155,15 @@ public class PlanoExecucao {
 	 * Insere o agrupamento na arvore
 	 * 
 	 * @param arvore
-	 * @param itensAgrupamento
+	 * @param agrupamento
 	 * @throws ClausulaGroupByException
 	 */
-	private void inserirAgrupamento(ArvoreConsulta arvore, List<Agrupamento> itensAgrupamento) throws ClausulaGroupByException {
-		if (itensAgrupamento.size() > 0) {
-			for (Agrupamento item : itensAgrupamento) {
-				verificaSemanticaAgrupamento(item);
-				arvore.insere(item);
+	private void inserirAgrupamento(ArvoreConsulta arvore, Agrupamento agrupamento) throws ClausulaGroupByException {
+		if (agrupamento.getCampos().size() > 0) {
+			for (ProjecaoCampo campo : agrupamento.getCampos()) {
+				verificaSemanticaAgrupamento(campo);
 			}
+			arvore.insere(agrupamento);
 		}
 	}
 
@@ -175,9 +173,7 @@ public class PlanoExecucao {
 	 * @param item
 	 * @author Douglas Matheus de Souza em 29/10/2011
 	 */
-	private void verificaSemanticaAgrupamento(Agrupamento item) throws ClausulaGroupByException {
-		ProjecaoCampo campo = item.getCampo();
-		//
+	private void verificaSemanticaAgrupamento(ProjecaoCampo campo) throws ClausulaGroupByException {
 		if (campo.getRelacao() == null) {
 			if (relacoes.size() > 1) {
 				throw new ClausulaGroupByException(MensagemErro.getNomeRelacaoObrigatorio(campo, "group by"));

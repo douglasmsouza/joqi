@@ -1,22 +1,34 @@
 package br.com.joqi.semantico.consulta.agrupamento;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 
 public class Agrupamento {
 
-	private ProjecaoCampo campo;
+	private Set<ProjecaoCampo> campos;
 
-	public Agrupamento(ProjecaoCampo campo) {
-		this.campo = campo;
+	public Agrupamento() {
+		this.campos = new LinkedHashSet<ProjecaoCampo>();
 	}
 
-	public ProjecaoCampo getCampo() {
-		return campo;
+	public Set<ProjecaoCampo> getCampos() {
+		return campos;
+	}
+
+	public void addCampo(ProjecaoCampo campo) {
+		campos.add(campo);
 	}
 
 	@Override
 	public String toString() {
-		return "GROUP BY " + campo.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("GROUP BY ");
+		for (ProjecaoCampo campo : campos) {
+			sb.append(campo).append(", ");
+		}
+		return sb.delete(sb.length() - 2, sb.length()).toString();
 	}
 
 }

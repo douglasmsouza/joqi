@@ -68,20 +68,20 @@ public class QueryImplOtimizada4 {
 	}
 
 	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) {
-		Map<Object, ResultObject> tabelaHash = new HashMap<Object, ResultObject>();
-		//
-		ProjecaoCampo campo = agrupamento.getCampo();
+		Map<String, ResultObject> tabelaHash = new HashMap<String, ResultObject>();
 		//
 		for (ResultObject objeto : resultList) {
-			Object chave = null;
-			try {
-				chave = QueryUtils.getValorDoCampo(objeto, campo);
-			} catch (CampoInexistenteException e) {
-				continue;
+			String hash = "";
+			for (ProjecaoCampo campo : agrupamento.getCampos()) {
+				try {
+					hash += String.valueOf(QueryUtils.getValorDoCampo(objeto, campo).hashCode());
+				} catch (CampoInexistenteException e) {
+					continue;
+				}
 			}
 			//
-			if (!tabelaHash.containsKey(chave))
-				tabelaHash.put(chave, objeto);
+			if (!tabelaHash.containsKey(hash))
+				tabelaHash.put(hash, objeto);
 		}
 		//
 		return tabelaHash.values();
