@@ -1,11 +1,12 @@
 package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
@@ -13,6 +14,7 @@ import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
+import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaFromException;
@@ -27,7 +29,8 @@ public class Query implements IPossuiRestricoes {
 	private List<Projecao<?>> projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
-	private List<ItemOrdenacao> itensOrdenacoes;
+	private List<ItemOrdenacao> itensOrdenacao;
+	private List<Agrupamento> agrupamentos;
 
 	public Query() {
 		objetoConsulta = new BancoConsulta();
@@ -35,7 +38,8 @@ public class Query implements IPossuiRestricoes {
 		projecoes = new ArrayList<Projecao<?>>();
 		relacoes = new HashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
-		itensOrdenacoes = new ArrayList<ItemOrdenacao>();
+		itensOrdenacao = new ArrayList<ItemOrdenacao>();
+		agrupamentos = new ArrayList<Agrupamento>();
 	}
 
 	public void addProjecao(Projecao<?> projecao) {
@@ -80,11 +84,15 @@ public class Query implements IPossuiRestricoes {
 	}
 
 	public List<ItemOrdenacao> getItensOrdenacoes() {
-		return itensOrdenacoes;
+		return itensOrdenacao;
 	}
 
 	public void addItemOrdenacao(ItemOrdenacao item) {
-		itensOrdenacoes.add(item);
+		itensOrdenacao.add(item);
+	}
+
+	public void addAgrupamento(Agrupamento item) {
+		agrupamentos.add(item);
 	}
 
 	@Override
@@ -102,12 +110,12 @@ public class Query implements IPossuiRestricoes {
 			//
 			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
-			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, itensOrdenacoes);
+			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, agrupamentos, itensOrdenacao);
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			//
 			arvore.imprime();
 			double time = System.currentTimeMillis();
-			ResultSet resultado = queryImplOtimizada4.getResultSet();
+			Collection<ResultObject> resultado = queryImplOtimizada4.getResultSet();
 			String[] colunas = new String[relacoes.size()];
 			int i = 0;
 			for (Relacao r : relacoes) {

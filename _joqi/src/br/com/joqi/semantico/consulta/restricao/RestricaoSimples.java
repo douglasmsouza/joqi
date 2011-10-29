@@ -60,13 +60,6 @@ public class RestricaoSimples extends Restricao {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append(getRestricaoString());
-		s.append(" [").append(tipoBusca).append("]");
-		return s.toString();
-	}
-
-	public String getRestricaoString() {
-		StringBuilder s = new StringBuilder();
 		if (isNegacao())
 			s.append("not ");
 		s.append(operando1).append(" ").append(operadorRelacional).append(" ").append(operando2);

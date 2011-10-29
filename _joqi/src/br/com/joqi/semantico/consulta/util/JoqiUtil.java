@@ -3,10 +3,10 @@ package br.com.joqi.semantico.consulta.util;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
-import br.com.joqi.semantico.consulta.resultado.ResultSet;
 
 public class JoqiUtil {
 
@@ -35,8 +35,8 @@ public class JoqiUtil {
 		s = s.replaceAll(expressaoRegular.toString(), "");
 		return s;
 	}
-	
-	public static void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, ResultSet resultSet) {
+
+	public static void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, Collection<ResultObject> resultSet) {
 		System.out.println("--------------------------------------------------------------------");
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];

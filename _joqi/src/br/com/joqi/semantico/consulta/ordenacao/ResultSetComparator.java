@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 
@@ -25,16 +26,20 @@ public class ResultSetComparator implements Comparator<ResultObject> {
 
 	private int efetuaComparacao(ResultObject o1, ResultObject o2, int indiceItemOrdenacao) throws CampoInexistenteException {
 		int retornoComparacao = 0;
+		//
 		ItemOrdenacao item = ordenacao.getItem(indiceItemOrdenacao);
+		//
 		if (item != null) {
+			ProjecaoCampo campo = item.getCampo();
+			//
 			Comparable<Object> valor1;
 			Comparable<Object> valor2;
 			if (item.getTipoOrdenacao() == TipoOrdenacao.ASC) {
-				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
-				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
+				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, campo);
+				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, campo);
 			} else {
-				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, item.getCampo());
-				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, item.getCampo());
+				valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(o2, campo);
+				valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(o1, campo);
 			}
 			//
 			if (valor1 == null && valor2 != null) {

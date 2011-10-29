@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
@@ -19,10 +20,11 @@ import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoOr;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
+import br.com.joqi.semantico.exception.ClausulaGroupByException;
 import br.com.joqi.semantico.exception.ClausulaOrderByException;
 import br.com.joqi.semantico.exception.ClausulaSelectException;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
-import br.com.joqi.semantico.exception.RelacaoInexistenteException;
+import br.com.joqi.semantico.exception.mensagem.MensagemErro;
 
 public class PlanoExecucao {
 
@@ -45,15 +47,19 @@ public class PlanoExecucao {
 	 * @throws ClausulaWhereException
 	 * @throws ClausulaOrderByException
 	 * @author Douglas Matheus de Souza em 13/10/2011
+	 * @param agrupamentos
+	 * @throws ClausulaGroupByException
 	 */
 	public ArvoreConsulta montarArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes,
-			List<ItemOrdenacao> itensOrdenacao) throws ClausulaSelectException, ClausulaWhereException, ClausulaOrderByException {
+			List<Agrupamento> agrupamentos, List<ItemOrdenacao> itensOrdenacao) throws ClausulaSelectException, ClausulaWhereException,
+			ClausulaOrderByException, ClausulaGroupByException {
 		this.arvore = new ArvoreConsulta();
 		//
 		this.relacoes = relacoes;
 		//
 		inserirProjecoes(arvore, projecoes);
 		inserirOrdenacao(arvore, itensOrdenacao);
+		inserirAgrupamento(arvore, agrupamentos);		
 		//
 		if (restricoes.size() > 0) {
 			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
@@ -79,7 +85,7 @@ public class PlanoExecucao {
 	 */
 	private void inserirProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws ClausulaSelectException {
 		for (Projecao<?> projecao : projecoes) {
-			verificaSemanticaOperandoProjecao(projecao);
+			verificaSemanticaProjecao(projecao);
 			arvore.insere(projecao);
 		}
 	}
@@ -91,20 +97,17 @@ public class PlanoExecucao {
 	 * @throws ClausulaSelectException
 	 * @author Douglas Matheus de Souza em 28/10/2011
 	 */
-	private void verificaSemanticaOperandoProjecao(Projecao<?> projecao) throws ClausulaSelectException {
-		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula SELECT (" + projecao + ")";
-		String exception2 = "Relação \"{0}\" não declarada (" + projecao + ")";
-		//
+	private void verificaSemanticaProjecao(Projecao<?> projecao) throws ClausulaSelectException {
 		if (projecao.getClass() == ProjecaoCampo.class) {
 			if (projecao.getRelacao() == null) {
 				if (relacoes.size() > 1) {
-					throw new ClausulaSelectException(exception1.replace("{0}", (String) projecao.getValor()));
+					throw new ClausulaSelectException(MensagemErro.getNomeRelacaoObrigatorio(projecao, "select"));
 				} else {
 					projecao.setRelacao(getNomeRelacaoUnica());
 				}
 			} else {
 				if (!relacoes.contains(new Relacao(projecao.getRelacao()))) {
-					throw new ClausulaSelectException(exception2.replace("{0}", projecao.getRelacao()));
+					throw new ClausulaSelectException(MensagemErro.getRelacaoNaoDeclarada(projecao));
 				}
 			}
 		}
@@ -117,21 +120,18 @@ public class PlanoExecucao {
 	 * @throws ClausulaOrderByException
 	 * @author Douglas Matheus de Souza em 28/10/2011
 	 */
-	private void verificaSemanticaItemOrdenacao(ItemOrdenacao item) throws ClausulaOrderByException {
-		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula ORDER BY (" + item + ")";
-		String exception2 = "Relação \"{0}\" não declarada (" + item + ")";
-		//
+	private void verificaSemanticaOrdenacao(ItemOrdenacao item) throws ClausulaOrderByException {
 		ProjecaoCampo campo = item.getCampo();
 		//
 		if (campo.getRelacao() == null) {
 			if (relacoes.size() > 1) {
-				throw new ClausulaOrderByException(exception1.replace("{0}", (String) campo.getValor()));
+				throw new ClausulaOrderByException(MensagemErro.getNomeRelacaoObrigatorio(campo, "order by"));
 			} else {
 				campo.setRelacao(getNomeRelacaoUnica());
 			}
 		} else {
 			if (!relacoes.contains(new Relacao(campo.getRelacao()))) {
-				throw new ClausulaOrderByException(exception2.replace("{0}", campo.getRelacao()));
+				throw new ClausulaOrderByException(MensagemErro.getRelacaoNaoDeclarada(campo));
 			}
 		}
 	}
@@ -146,10 +146,48 @@ public class PlanoExecucao {
 	private void inserirOrdenacao(ArvoreConsulta arvore, List<ItemOrdenacao> itensOrdenacao) throws ClausulaOrderByException {
 		if (itensOrdenacao.size() > 0) {
 			for (ItemOrdenacao item : itensOrdenacao) {
-				verificaSemanticaItemOrdenacao(item);
+				verificaSemanticaOrdenacao(item);
 			}
 			//
 			arvore.insere(new Ordenacao(itensOrdenacao));
+		}
+	}
+
+	/**
+	 * Insere o agrupamento na arvore
+	 * 
+	 * @param arvore
+	 * @param itensAgrupamento
+	 * @throws ClausulaGroupByException
+	 */
+	private void inserirAgrupamento(ArvoreConsulta arvore, List<Agrupamento> itensAgrupamento) throws ClausulaGroupByException {
+		if (itensAgrupamento.size() > 0) {
+			for (Agrupamento item : itensAgrupamento) {
+				verificaSemanticaAgrupamento(item);
+				arvore.insere(item);
+			}
+		}
+	}
+
+	/**
+	 * Faz a verificacao semantica do agrupamento
+	 * 
+	 * @param item
+	 * @author Douglas Matheus de Souza em 29/10/2011
+	 */
+	private void verificaSemanticaAgrupamento(Agrupamento item) throws ClausulaGroupByException {
+		ProjecaoCampo campo = item.getCampo();
+		//
+		if (campo.getRelacao() == null) {
+			if (relacoes.size() > 1) {
+				throw new ClausulaGroupByException(MensagemErro.getNomeRelacaoObrigatorio(campo, "group by"));
+			} else {
+				campo.setRelacao(getNomeRelacaoUnica());
+			}
+		} else {
+			if (!relacoes.contains(new Relacao(campo.getRelacao()))) {
+				throw new ClausulaGroupByException(MensagemErro.getRelacaoNaoDeclarada(campo));
+			}
 		}
 	}
 
@@ -192,7 +230,7 @@ public class PlanoExecucao {
 
 			/*Caso seja apenas uma restricao simples, vai inserindo os nos filhos*/
 			if (r.getClass() == RestricaoSimples.class) {
-				verificaRestricao((RestricaoSimples) r);
+				verificaSemanticaRestricao((RestricaoSimples) r);
 				setTipoBusca((RestricaoSimples) r);
 				//
 				noRestricao = arvore.insere(noInserir, r);
@@ -267,7 +305,7 @@ public class PlanoExecucao {
 	 * @throws ClausulaWhereException
 	 * @author Douglas Matheus de Souza em 18/10/2011
 	 */
-	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
+	private void verificaSemanticaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
 		verificaSemanticaOperandoRestricao(restricao, restricao.getOperando1());
 		verificaSemanticaOperandoRestricao(restricao, restricao.getOperando2());
 	}
@@ -283,20 +321,17 @@ public class PlanoExecucao {
 	 * @author Douglas Matheus de Souza em 19/10/2011
 	 */
 	private void verificaSemanticaOperandoRestricao(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
-		String exception1 = "Nome da relação obrigatório na constante \"{0}\" na cláusula WHERE (" + restricao.getRestricaoString() + ")";
-		String exception2 = "Relação \"{0}\" não declarada (" + restricao.getRestricaoString() + ")";
-		//
 		if (operando != null) {
 			if (operando.getClass() == ProjecaoCampo.class) {
 				if (operando.getRelacao() == null) {
 					if (relacoes.size() > 1) {
-						throw new ClausulaWhereException(exception1.replace("{0}", (String) operando.getValor()));
+						throw new ClausulaWhereException(MensagemErro.getNomeRelacaoObrigatorio(operando, restricao, "where"));
 					} else {
 						operando.setRelacao(getNomeRelacaoUnica());
 					}
 				} else {
 					if (!relacoes.contains(new Relacao(operando.getRelacao()))) {
-						throw new ClausulaWhereException(exception2.replace("{0}", operando.getRelacao()));
+						throw new ClausulaWhereException(MensagemErro.getRelacaoNaoDeclarada(operando, restricao));
 					}
 				}
 			}
