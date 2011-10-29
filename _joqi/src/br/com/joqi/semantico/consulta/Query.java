@@ -8,14 +8,16 @@ import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
+import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
+import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
-import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaFromException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
@@ -29,8 +31,8 @@ public class Query implements IPossuiRestricoes {
 	private List<Projecao<?>> projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
-	private List<ItemOrdenacao> itensOrdenacao;
-	private List<Agrupamento> agrupamentos;
+	private Ordenacao ordenacao;
+	private Agrupamento agrupamento;
 
 	public Query() {
 		objetoConsulta = new BancoConsulta();
@@ -38,8 +40,8 @@ public class Query implements IPossuiRestricoes {
 		projecoes = new ArrayList<Projecao<?>>();
 		relacoes = new HashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
-		itensOrdenacao = new ArrayList<ItemOrdenacao>();
-		agrupamentos = new ArrayList<Agrupamento>();
+		ordenacao = new Ordenacao();
+		agrupamento = new Agrupamento();
 	}
 
 	public void addProjecao(Projecao<?> projecao) {
@@ -83,16 +85,12 @@ public class Query implements IPossuiRestricoes {
 		}
 	}
 
-	public List<ItemOrdenacao> getItensOrdenacoes() {
-		return itensOrdenacao;
+	public void addItemOrdenacao(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
+		ordenacao.addItem(campo, tipoOrdenacao);
 	}
 
-	public void addItemOrdenacao(ItemOrdenacao item) {
-		itensOrdenacao.add(item);
-	}
-
-	public void addAgrupamento(Agrupamento item) {
-		agrupamentos.add(item);
+	public void addCampoAgrupamento(ProjecaoCampo campo) {
+		agrupamento.addCampo(campo);
 	}
 
 	@Override
@@ -110,7 +108,7 @@ public class Query implements IPossuiRestricoes {
 			//
 			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
-			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, agrupamentos, itensOrdenacao);
+			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			//
 			arvore.imprime();

@@ -1,6 +1,7 @@
 package br.com.joqi.semantico.consulta.ordenacao;
 
 import java.util.Comparator;
+import java.util.Iterator;
 
 import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
@@ -18,18 +19,18 @@ public class ResultListComparator implements Comparator<ResultObject> {
 
 	public int compare(ResultObject o1, ResultObject o2) {
 		try {
-			return efetuaComparacao(o1, o2, 0);
+			Iterator<ItemOrdenacao> iterator = ordenacao.getItens().iterator();
+			return efetuaComparacao(o1, o2, iterator);
 		} catch (CampoInexistenteException e) {
 			return 0;
 		}
 	}
 
-	private int efetuaComparacao(ResultObject o1, ResultObject o2, int indiceItemOrdenacao) throws CampoInexistenteException {
+	private int efetuaComparacao(ResultObject o1, ResultObject o2, Iterator<ItemOrdenacao> iterator) throws CampoInexistenteException {
 		int retornoComparacao = 0;
 		//
-		ItemOrdenacao item = ordenacao.getItem(indiceItemOrdenacao);
-		//
-		if (item != null) {
+		if (iterator.hasNext()) {
+			ItemOrdenacao item = iterator.next();
 			ProjecaoCampo campo = item.getCampo();
 			//
 			Comparable<Object> valor1;
@@ -52,7 +53,7 @@ public class ResultListComparator implements Comparator<ResultObject> {
 			//
 			retornoComparacao = valor1.compareTo(valor2);
 			if (retornoComparacao == 0) {
-				return efetuaComparacao(o1, o2, indiceItemOrdenacao + 1);
+				return efetuaComparacao(o1, o2, iterator);
 			}
 		}
 		return retornoComparacao;

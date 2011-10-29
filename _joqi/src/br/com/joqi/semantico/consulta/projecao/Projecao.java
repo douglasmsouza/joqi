@@ -66,10 +66,11 @@ public abstract class Projecao<T> {
 	public boolean equals(Object obj) {
 		Projecao<?> outra = (Projecao<?>) obj;
 		//
-		boolean valoresIguais = outra.valor.equals(this.valor);
-		boolean relacoesIguais = outra.relacao != null && this.relacao != null && outra.relacao.equals(this.relacao);
-		boolean relacoesNulas = outra.relacao == null && this.relacao == null;
-		//
-		return valoresIguais && (relacoesIguais || relacoesNulas);
+		return outra.relacao.equals(this.relacao) && outra.valor.equals(this.valor);
+	}
+
+	@Override
+	public int hashCode() {
+		return relacao.hashCode() + valor.hashCode();
 	}
 }
