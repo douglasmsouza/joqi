@@ -3,4 +3,4 @@ from 	pessoas avo,
 		pessoas filho		
 where	(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
 		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)
-order by avo.nmPessoa, paiMae.nmPessoa, filho.nmPessoa		
+order by filho.apareceNa

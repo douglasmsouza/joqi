@@ -1,3 +1,4 @@
+
 package br.com.joqi.semantico.consulta;
 
 import java.util.Collections;
