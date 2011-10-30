@@ -1,5 +1,6 @@
 package br.com.joqi.semantico.consulta.plano;
 
+import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,16 +43,13 @@ public class PlanoExecucao {
 	 * @param projecoes
 	 * @param restricoes
 	 * @param relacoes
-	 * @param itensOrdenacao
-	 * @throws ClausulaSelectException
-	 * @throws ClausulaWhereException
-	 * @throws ClausulaOrderByException
-	 * @author Douglas Matheus de Souza em 13/10/2011
 	 * @param agrupamentos
-	 * @throws ClausulaGroupByException
+	 * @param ordenacao
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
 	public ArvoreConsulta montarArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes, Agrupamento agrupamento,
-			Ordenacao ordenacao) throws ClausulaSelectException, ClausulaWhereException, ClausulaOrderByException, ClausulaGroupByException {
+			Ordenacao ordenacao) throws Exception {
 		this.arvore = new ArvoreConsulta();
 		//
 		this.relacoes = relacoes;
@@ -79,59 +77,13 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param projecoes
-	 * @throws ClausulaSelectException
+	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 28/10/2011
 	 */
-	private void inserirProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws ClausulaSelectException {
+	private void inserirProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws Exception {
 		for (Projecao<?> projecao : projecoes) {
-			verificaSemanticaProjecao(projecao);
+			verificaSemanticaOperando(projecao, null, "select", ClausulaSelectException.class);
 			arvore.insere(projecao);
-		}
-	}
-
-	/**
-	 * Verifica erros semanticos nas projecoes
-	 * 
-	 * @param projecao
-	 * @throws ClausulaSelectException
-	 * @author Douglas Matheus de Souza em 28/10/2011
-	 */
-	private void verificaSemanticaProjecao(Projecao<?> projecao) throws ClausulaSelectException {
-		if (projecao.getClass() == ProjecaoCampo.class) {
-			if (projecao.getRelacao() == null) {
-				if (relacoes.size() > 1) {
-					throw new ClausulaSelectException(MensagemErro.getNomeRelacaoObrigatorio(projecao, "select"));
-				} else {
-					projecao.setRelacao(getNomeRelacaoUnica());
-				}
-			} else {
-				if (!relacoes.contains(new Relacao(projecao.getRelacao()))) {
-					throw new ClausulaSelectException(MensagemErro.getRelacaoNaoDeclarada(projecao));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Verifica erros semanticos na ordenacao
-	 * 
-	 * @param item
-	 * @throws ClausulaOrderByException
-	 * @author Douglas Matheus de Souza em 28/10/2011
-	 */
-	private void verificaSemanticaOrdenacao(ItemOrdenacao item) throws ClausulaOrderByException {
-		ProjecaoCampo campo = item.getCampo();
-		//
-		if (campo.getRelacao() == null) {
-			if (relacoes.size() > 1) {
-				throw new ClausulaOrderByException(MensagemErro.getNomeRelacaoObrigatorio(campo, "order by"));
-			} else {
-				campo.setRelacao(getNomeRelacaoUnica());
-			}
-		} else {
-			if (!relacoes.contains(new Relacao(campo.getRelacao()))) {
-				throw new ClausulaOrderByException(MensagemErro.getRelacaoNaoDeclarada(campo));
-			}
 		}
 	}
 
@@ -140,12 +92,13 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param ordenacao
-	 * @throws ClausulaOrderByException
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	private void inserirOrdenacao(ArvoreConsulta arvore, Ordenacao ordenacao) throws ClausulaOrderByException {
+	private void inserirOrdenacao(ArvoreConsulta arvore, Ordenacao ordenacao) throws Exception {
 		if (ordenacao.getItens().size() > 0) {
 			for (ItemOrdenacao item : ordenacao.getItens()) {
-				verificaSemanticaOrdenacao(item);
+				verificaSemanticaOperando(item.getCampo(), null, "order by", ClausulaOrderByException.class);
 			}
 			arvore.insere(ordenacao);
 		}
@@ -156,34 +109,15 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param agrupamento
-	 * @throws ClausulaGroupByException
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	private void inserirAgrupamento(ArvoreConsulta arvore, Agrupamento agrupamento) throws ClausulaGroupByException {
+	private void inserirAgrupamento(ArvoreConsulta arvore, Agrupamento agrupamento) throws Exception {
 		if (agrupamento.getCampos().size() > 0) {
 			for (ProjecaoCampo campo : agrupamento.getCampos()) {
-				verificaSemanticaAgrupamento(campo);
+				verificaSemanticaOperando(campo, null, "group by", ClausulaGroupByException.class);
 			}
 			arvore.insere(agrupamento);
-		}
-	}
-
-	/**
-	 * Faz a verificacao semantica do agrupamento
-	 * 
-	 * @param item
-	 * @author Douglas Matheus de Souza em 29/10/2011
-	 */
-	private void verificaSemanticaAgrupamento(ProjecaoCampo campo) throws ClausulaGroupByException {
-		if (campo.getRelacao() == null) {
-			if (relacoes.size() > 1) {
-				throw new ClausulaGroupByException(MensagemErro.getNomeRelacaoObrigatorio(campo, "group by"));
-			} else {
-				campo.setRelacao(getNomeRelacaoUnica());
-			}
-		} else {
-			if (!relacoes.contains(new Relacao(campo.getRelacao()))) {
-				throw new ClausulaGroupByException(MensagemErro.getRelacaoNaoDeclarada(campo));
-			}
 		}
 	}
 
@@ -192,10 +126,10 @@ public class PlanoExecucao {
 	 * 
 	 * @param arvore
 	 * @param restricoes
-	 * @throws ClausulaWhereException
+	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) throws ClausulaWhereException {
+	private ArvoreConsulta inserirRestricoes(ArvoreConsulta arvore, List<Restricao> restricoes) throws Exception {
 		NoArvore raizRestricoes = arvore.insere(new UniaoRestricoes());
 		inserirRestricoes(raizRestricoes, restricoes);
 		arvore.setRaizRestricoes(raizRestricoes);
@@ -207,9 +141,10 @@ public class PlanoExecucao {
 	 * 
 	 * @param no
 	 * @param restricoes
+	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) throws ClausulaWhereException {
+	private void inserirRestricoes(NoArvore no, List<Restricao> restricoes) throws Exception {
 		NoArvore noRestricao = null;
 		//
 		for (Restricao r : restricoes) {
@@ -298,12 +233,12 @@ public class PlanoExecucao {
 	 * relacao na clausula FROM.
 	 * 
 	 * @param restricao
-	 * @throws ClausulaWhereException
+	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 18/10/2011
 	 */
-	private void verificaSemanticaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
-		verificaSemanticaOperandoRestricao(restricao, restricao.getOperando1());
-		verificaSemanticaOperandoRestricao(restricao, restricao.getOperando2());
+	private void verificaSemanticaRestricao(RestricaoSimples restricao) throws Exception {
+		verificaSemanticaOperando(restricao.getOperando1(), restricao, "where", ClausulaWhereException.class);
+		verificaSemanticaOperando(restricao.getOperando2(), restricao, "where", ClausulaWhereException.class);
 	}
 
 	/**
@@ -311,27 +246,34 @@ public class PlanoExecucao {
 	 * mais de uma relacao na clausula FROM, verifica tambem se o operando
 	 * que faz referencia ao nome de um atributo possue o nome da relacao.
 	 * 
-	 * @param restricao
 	 * @param operando
-	 * @throws ClausulaWhereException
-	 * @author Douglas Matheus de Souza em 19/10/2011
+	 * @param operacao
+	 * @param clausula
+	 * @param classeExcecao
+	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	private void verificaSemanticaOperandoRestricao(RestricaoSimples restricao, Projecao<?> operando) throws ClausulaWhereException {
+	private void verificaSemanticaOperando(Projecao<?> operando, Object operacao, String clausula, Class<? extends Exception> classeExcecao)
+			throws Exception {
 		if (operando != null) {
 			if (operando.getClass() == ProjecaoCampo.class) {
 				if (operando.getRelacao() == null) {
 					if (relacoes.size() > 1) {
-						throw new ClausulaWhereException(MensagemErro.getNomeRelacaoObrigatorio(operando, restricao, "where"));
+						lancaExcecao(MensagemErro.getNomeRelacaoObrigatorio(operando, operacao, clausula), classeExcecao);
 					} else {
 						operando.setRelacao(getNomeRelacaoUnica());
 					}
 				} else {
 					if (!relacoes.contains(new Relacao(operando.getRelacao()))) {
-						throw new ClausulaWhereException(MensagemErro.getRelacaoNaoDeclarada(operando, restricao));
+						lancaExcecao(MensagemErro.getRelacaoNaoDeclarada(operando, operacao), classeExcecao);
 					}
 				}
 			}
 		}
+	}
+
+	private void lancaExcecao(String mensagem, Class<? extends Exception> classeExcecao) throws Exception {
+		Constructor<? extends Exception> constructor = classeExcecao.getConstructor(new Class<?>[] { String.class });
+		throw constructor.newInstance(mensagem);
 	}
 
 	private void subirSubarvore(NoArvore no) {

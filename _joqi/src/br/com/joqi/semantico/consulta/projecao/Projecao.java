@@ -82,6 +82,11 @@ public abstract class Projecao<T> {
 
 	@Override
 	public int hashCode() {
-		return relacao.hashCode() + valor.hashCode();
+		int hashCode = super.hashCode();
+		if(valor != null)
+			hashCode += valor.hashCode();
+		if(relacao != null)
+			hashCode += relacao.hashCode();
+		return hashCode;
 	}
 }

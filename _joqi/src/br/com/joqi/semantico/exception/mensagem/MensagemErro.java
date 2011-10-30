@@ -4,12 +4,12 @@ import br.com.joqi.semantico.consulta.projecao.Projecao;
 
 public class MensagemErro {
 
-	public static String getNomeRelacaoObrigatorio(Projecao<?> campo, Object operacao) {
-		return getNomeRelacaoObrigatorio(campo, operacao, null);
+	public static String getNomeRelacaoObrigatorio(Projecao<?> campo, String clausula) {
+		return getNomeRelacaoObrigatorio(campo, null, clausula);
 	}
 
 	public static String getNomeRelacaoObrigatorio(Projecao<?> campo, Object operacao, String clausula) {
-		String exception = "Nome da relação obrigatório em \"" + campo.getValor() + "\" na cláusula " + clausula.toUpperCase();
+		String exception = "Nome da relação obrigatório em \"" + campo.getProjecaoStr() + "\" na cláusula " + clausula.toUpperCase();
 		if (operacao != null)
 			exception += " (" + operacao + ")";
 		return exception;

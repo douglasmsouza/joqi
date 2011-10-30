@@ -62,7 +62,7 @@ public class RestricaoSimples extends Restricao {
 		StringBuilder s = new StringBuilder();
 		if (isNegacao())
 			s.append("not ");
-		s.append(operando1).append(" ").append(operadorRelacional).append(" ").append(operando2);
+		s.append(operando1.getProjecaoStr()).append(" ").append(operadorRelacional).append(" ").append(operando2.getProjecaoStr());
 		return s.toString();
 	}
 
