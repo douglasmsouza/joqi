@@ -114,11 +114,21 @@ public class Query implements IPossuiRestricoes {
 			arvore.imprime();
 			double time = System.currentTimeMillis();
 			Collection<ResultObject> resultado = queryImplOtimizada4.getResultList();
-			String[] colunas = new String[relacoes.size()];
-			int i = 0;
-			for (Relacao r : relacoes) {
-				colunas[i] = r.getNomeNaConsulta();
-				i++;
+			String[] colunas;
+			if (projecoes.size() == 0) {
+				colunas = new String[relacoes.size()];
+				int i = 0;
+				for (Relacao r : relacoes) {
+					colunas[i] = r.getNomeNaConsulta();
+					i++;
+				}
+			} else {
+				colunas = new String[projecoes.size()];
+				int i = 0;
+				for (Projecao<?> projecao : projecoes) {
+					colunas[i] = projecao.getNomeNaConsulta();
+					i++;
+				}
 			}
 			time = System.currentTimeMillis() - time;
 			JoqiUtil.imprimeResultado(15, time, colunas, resultado);

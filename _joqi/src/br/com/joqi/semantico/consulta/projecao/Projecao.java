@@ -31,6 +31,12 @@ public abstract class Projecao<T> {
 		return apelido;
 	}
 
+	public String getNomeNaConsulta() {
+		if (apelido != null)
+			return apelido;
+		return valor.toString();
+	}
+
 	public void setApelido(String apelido) {
 		this.apelido = apelido;
 	}
@@ -53,6 +59,11 @@ public abstract class Projecao<T> {
 
 	@Override
 	public String toString() {
+		StringBuilder s = new StringBuilder("SELECT ");
+		return s.append(getProjecaoStr()).toString();
+	}
+
+	public String getProjecaoStr() {
 		StringBuilder s = new StringBuilder();
 		if (relacao != null)
 			s.append(relacao).append(".");
