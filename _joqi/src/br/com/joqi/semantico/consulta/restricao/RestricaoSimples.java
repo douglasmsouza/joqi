@@ -1,10 +1,7 @@
 package br.com.joqi.semantico.consulta.restricao;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 
 /**
@@ -66,45 +63,6 @@ public class RestricaoSimples extends Restricao {
 		return s.toString();
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj.getClass() == RestricaoSimples.class) {
-			RestricaoSimples outra = ((RestricaoSimples) obj);
-			//
-			boolean operandosIguais = outra.operando1.equals(this.operando1) && outra.operando2.equals(this.operando2);
-			boolean operadorRelacionalIgual = outra.operadorRelacional.getClass() == this.operadorRelacional.getClass();
-			//
-			return operandosIguais && operadorRelacionalIgual;
-		}
-		return false;
-	}
-
-	public boolean isJuncao() {
-		/*return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
-				operando2.getClass() == ProjecaoCampo.class &&
-				!operando1.getRelacao().equals(operando2.getRelacao()) &&
-				((operadorRelacional.getClass() == Igual.class && !isNegacao()) ||
-						(operadorRelacional.getClass() == Diferente.class && isNegacao()));*/
-		return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
-				operando2.getClass() == ProjecaoCampo.class &&
-				!operando1.getRelacao().equals(operando2.getRelacao());
-	}
-
-	public boolean isProdutoCartesiano() {
-		return operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
-				operando2.getClass() == ProjecaoCampo.class &&
-				((operadorRelacional.getClass() == Igual.class && isNegacao()) ||
-						(operadorRelacional.getClass() == Diferente.class && !isNegacao()) ||
-				 (operadorRelacional.getClass() != Igual.class && operadorRelacional.getClass() != Diferente.class));
-	}
-
-	public boolean isConstante() {
-		return (operando1.getClass() != ProjecaoCampo.class || operando2.getClass() != ProjecaoCampo.class) ||
-				(operando1.getClass() == ProjecaoCampo.class && operando2 != null &&
-						operando2.getClass() == ProjecaoCampo.class &&
-				operando1.getRelacao().equals(operando2.getRelacao()));
-	}
-
 	public TipoBusca getTipoBusca() {
 		return tipoBusca;
 	}
@@ -113,27 +71,18 @@ public class RestricaoSimples extends Restricao {
 		this.tipoBusca = tipoBusca;
 	}
 
-	@Override
-	public int compareTo(Restricao o) {
-		RestricaoSimples outra = (RestricaoSimples) o;
-		//
-		if (outra.isJuncao()) {
-			if (isConstante()) {
-				return -1;
-			}
-			if (isProdutoCartesiano()) {
-				return 1;
-			}
-		} else if (outra.isConstante()) {
-			if (!isConstante()) {
-				return 1;
-			}
-		} else if (outra.isProdutoCartesiano()) {
-			if (!isProdutoCartesiano()) {
-				return -1;
-			}
-		}
-		//
-		return 0;
+	@Deprecated
+	public boolean isJuncao() {
+		return false;
+	}
+
+	@Deprecated
+	public boolean isConstante() {
+		return false;
+	}
+
+	@Deprecated
+	public boolean isProdutoCartesiano() {
+		return false;
 	}
 }
