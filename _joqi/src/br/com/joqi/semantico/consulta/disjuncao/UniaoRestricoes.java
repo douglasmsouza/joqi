@@ -4,7 +4,7 @@ public class UniaoRestricoes {
 	
 	@Override
 	public String toString() {
-		return "[UNIÃO RESTRIÇÕES]";
+		return "WHERE";
 	}
 
 }

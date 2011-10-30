@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class QueryImplOtimizada4 {
 		Object operacao = no.getOperacao();
 		//
 		if (operacao instanceof Projecao) {
-			return executaOperacao(no.getFilho());
+			return projecao(executaOperacao(no.getFilho()), (Projecao<?>) operacao);
 		} else if (operacao.getClass() == Agrupamento.class) {
 			return agrupamento(executaOperacao(no.getFilho()), (Agrupamento) operacao);
 		} else if (operacao.getClass() == Ordenacao.class) {
@@ -65,6 +66,10 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return new ResultList();
+	}
+
+	private Collection<ResultObject> projecao(Collection<ResultObject> resultList, Projecao<?> projecao) {
+		return resultList;
 	}
 
 	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) {
