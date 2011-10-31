@@ -14,7 +14,6 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
-import br.com.joqi.semantico.exception.TipoGenericoException;
 
 /**
  * Classe responsavel pelas operacoes que utilizam Reflection
@@ -35,7 +34,7 @@ public class QueryUtils {
 	 * @throws RelacaoInexistenteException
 	 * @throws Exception
 	 */
-	public static Collection<Object> getColecao(Object objeto, String nome) throws TipoGenericoException, RelacaoInexistenteException {
+	public static Collection<Object> getColecao(Object objeto, String nome) throws RelacaoInexistenteException {
 		Class<?> clazz = objeto.getClass();
 		try {
 			Field atributo = clazz.getDeclaredField(nome);

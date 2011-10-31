@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
-import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
-import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
+import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
@@ -21,7 +20,6 @@ import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaFromException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
-import br.com.joqi.semantico.exception.TipoGenericoException;
 import br.com.joqi.testes.BancoConsulta;
 
 public class Query implements IPossuiRestricoes {
@@ -48,7 +46,7 @@ public class Query implements IPossuiRestricoes {
 		projecoes.add(projecao);
 	}
 
-	public void addRelacao(Relacao relacao) throws TipoGenericoException, RelacaoInexistenteException, ClausulaFromException {
+	public void addRelacao(Relacao relacao) throws RelacaoInexistenteException, ClausulaFromException {
 		if (!relacoes.add(relacao)) {
 			/*Apresenta erro caso a relacao ja tenho sido declarada na clausula FROM com o mesmo apelido*/
 			throw new ClausulaFromException("A relação \"" + relacao.getNomeNaConsulta() + "\" foi declarada mais de uma vez ");

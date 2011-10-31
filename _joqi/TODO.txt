@@ -1,6 +1,6 @@
 - Permitir uso de nome de campo em expressões aritméticas
 - Implementar funções de agregação (count, max, min, sum, etc...)
-
+- Ver o operador LIKE (Ex: r.atributo like s.atributo)
 --------------------------------------------------------
 Para otimizar a consulta
 --------------------------------------------------------
