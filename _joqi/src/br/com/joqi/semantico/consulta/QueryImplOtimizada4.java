@@ -94,10 +94,10 @@ public class QueryImplOtimizada4 {
 	 * @throws CampoInexistenteException
 	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	private String hashAgrupamento(Object objeto, Agrupamento agrupamento) throws CampoInexistenteException {
+	private String hashAgrupamento(ResultObject objeto, Agrupamento agrupamento) throws CampoInexistenteException {
 		String hash = "";
 		for (ProjecaoCampo campo : agrupamento.getCampos()) {
-			hash += String.valueOf(QueryUtils.getValorDoCampo(objeto, campo).hashCode());
+			hash += QueryUtils.getValorDoCampo(objeto, campo).hashCode();
 		}
 		return hash;
 	}
