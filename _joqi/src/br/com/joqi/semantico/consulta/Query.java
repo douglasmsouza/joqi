@@ -106,7 +106,7 @@ public class Query implements IPossuiRestricoes {
 			//
 			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
-			ArvoreConsulta arvore = planoExecucao.montarArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
+			ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			//
 			arvore.imprime();
