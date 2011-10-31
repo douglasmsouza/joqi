@@ -252,17 +252,22 @@ public class PlanoExecucao {
 	 * @param classeExcecao
 	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	private void verificaSemanticaOperando(Projecao<?> operando, Object operacao, String clausula, Class<? extends Exception> classeExcecao)
-			throws Exception {
+	private void verificaSemanticaOperando(Projecao<?> operando, Object operacao, String clausula,
+			Class<? extends Exception> classeExcecao) throws Exception {
 		if (operando != null) {
+			/*Se eh o operando eh referencia a atributo, verifica se existe o nome da relacao*/
 			if (operando.getClass() == ProjecaoCampo.class) {
 				if (operando.getRelacao() == null) {
+					/*Caso nao tenha sido declarado o nome da relacao e exista mais de uma 
+					 * relacao declarada em FROM, lanca uma excecao*/
 					if (relacoes.size() > 1) {
 						lancaExcecao(MensagemErro.getNomeRelacaoObrigatorio(operando, operacao, clausula), classeExcecao);
 					} else {
+						/*Caso contrario, associa a unica relacao de FROM a este operando*/
 						operando.setRelacao(getNomeRelacaoUnica());
 					}
 				} else {
+					/*Se a relacao foi informado junto ao operando, verifica se a mesma existe na clausula FROM*/
 					if (!relacoes.contains(new Relacao(operando.getRelacao()))) {
 						lancaExcecao(MensagemErro.getRelacaoNaoDeclarada(operando, operacao), classeExcecao);
 					}

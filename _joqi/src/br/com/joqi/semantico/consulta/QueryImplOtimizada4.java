@@ -71,30 +71,44 @@ public class QueryImplOtimizada4 {
 		return resultList;
 	}
 
-	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) {
-		Map<String, ResultObject> tabelaHash = new HashMap<String, ResultObject>();
+	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) throws CampoInexistenteException {
+		Map<String, ResultObject> hashes = new HashMap<String, ResultObject>();
 		//
 		for (ResultObject objeto : resultList) {
-			String hash = "";
-			for (ProjecaoCampo campo : agrupamento.getCampos()) {
-				try {
-					hash += String.valueOf(QueryUtils.getValorDoCampo(objeto, campo).hashCode());
-				} catch (CampoInexistenteException e) {
-					continue;
-				}
-			}
-			//
-			if (!tabelaHash.containsKey(hash))
-				tabelaHash.put(hash, objeto);
+			String hash = hashAgrupamento(objeto, agrupamento);
+			/*Se hash nao existe na tabela, insere o objeto*/
+			if (!hashes.containsKey(hash))
+				hashes.put(hash, objeto);
 		}
 		//
-		return tabelaHash.values();
+		resultList = null;
+		//
+		return hashes.values();
+	}
+
+	/**
+	 * Metodo para gera o hash do agrupamento
+	 * 
+	 * @param objeto
+	 * @param agrupamento
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 30/10/2011
+	 */
+	private String hashAgrupamento(Object objeto, Agrupamento agrupamento) throws CampoInexistenteException {
+		String hash = "";
+		for (ProjecaoCampo campo : agrupamento.getCampos()) {
+			hash += String.valueOf(QueryUtils.getValorDoCampo(objeto, campo).hashCode());
+		}
+		return hash;
 	}
 
 	private Collection<ResultObject> ordenacao(Collection<ResultObject> resultList, Ordenacao ordenacao) {
 		ResultListComparator comparator = new ResultListComparator(ordenacao);
 		List<ResultObject> resultado = new ArrayList<ResultObject>(resultList);
 		Collections.sort(resultado, comparator);
+		//
+		resultList = null;
+		//
 		return resultado;
 	}
 
@@ -198,6 +212,9 @@ public class QueryImplOtimizada4 {
 			}
 		}
 		//
+		relacaoEntrada1 = null;
+		relacaoEntrada2 = null;
+		//
 		return resultado;
 	}
 
@@ -211,17 +228,20 @@ public class QueryImplOtimizada4 {
 	private ResultList interseccao(ResultList relacaoEntrada1, ResultList relacaoEntrada2) throws Exception {
 		ResultList resultado = new ResultList();
 		//
-		Map<ResultObject, Boolean> hashTable = new HashMap<ResultObject, Boolean>();
+		Map<ResultObject, Boolean> hashes = new HashMap<ResultObject, Boolean>();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			hashTable.put(objeto1, true);
+			hashes.put(objeto1, true);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
-			if (hashTable.get(objeto2) != null) {
+			if (hashes.get(objeto2) != null) {
 				resultado.add(objeto2);
 			}
 		}
+		//
+		relacaoEntrada1 = null;
+		relacaoEntrada2 = null;
 		//
 		return resultado;
 	}
@@ -240,35 +260,26 @@ public class QueryImplOtimizada4 {
 		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
 		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
 		//
-		Map<Object, ObjetoHash> tabelaHash = new HashMap<Object, ObjetoHash>();
+		Map<Object, ObjetoHash> hashes = new HashMap<Object, ObjetoHash>();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			Object chave = null;
-			try {
-				chave = QueryUtils.getValorDoCampo(objeto1, operando1);
-			} catch (CampoInexistenteException e) {
-				continue;
-			}
+			Object chave = QueryUtils.getValorDoCampo(objeto1, operando1);
 			//
-			ObjetoHash objetoHash = tabelaHash.get(chave);
+			ObjetoHash objetoHash = hashes.get(chave);
 			if (objetoHash != null) {
 				ObjetoHash objetoHashNovo = new ObjetoHash(objeto1);
 				objetoHashNovo.proximo = objetoHash;
-				tabelaHash.put(chave, objetoHashNovo);
+				hashes.put(chave, objetoHashNovo);
 			} else {
 				objetoHash = new ObjetoHash(objeto1);
-				tabelaHash.put(chave, objetoHash);
+				hashes.put(chave, objetoHash);
 			}
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
-			Object chave = null;
-			try {
-				chave = QueryUtils.getValorDoCampo(objeto2, operando2);
-			} catch (CampoInexistenteException e) {
-				continue;
-			}
-			ObjetoHash objetoHash = tabelaHash.get(chave);
+			Object chave = QueryUtils.getValorDoCampo(objeto2, operando2);
+			//
+			ObjetoHash objetoHash = hashes.get(chave);
 			//
 			while (objetoHash != null) {
 				Object objeto = objetoHash.objeto;
@@ -282,19 +293,23 @@ public class QueryImplOtimizada4 {
 			}
 		}
 		//
+		relacaoEntrada1 = null;
+		relacaoEntrada2 = null;
+		//
 		return resultado;
 	}
 
 	/**
 	 * Algoritmo de busca linear
 	 * 
-	 * @param relacao
+	 * @param relacaoEntrada
 	 * @param restricao
 	 * @throws CampoNaoComparableException
 	 * @throws CampoInexistenteException
 	 * @author Douglas Matheus de Souza em 22/10/2011
 	 */
-	private ResultList buscaLinear(ResultList relacao, RestricaoSimples restricao) throws CampoNaoComparableException, CampoInexistenteException {
+	private ResultList buscaLinear(ResultList relacaoEntrada, RestricaoSimples restricao) throws CampoNaoComparableException,
+			CampoInexistenteException {
 		ResultList resultado = new ResultList();
 
 		/*Guarda os operandos e o operador da restricao*/
@@ -303,7 +318,7 @@ public class QueryImplOtimizada4 {
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
-		for (ResultObject objeto : relacao) {
+		for (ResultObject objeto : relacaoEntrada) {
 			Object valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
 
 			/*Se eh uma instrucao IS TRUE ou IS FALSE, compara logo de cara, uma vez que nao*/
@@ -356,6 +371,8 @@ public class QueryImplOtimizada4 {
 				continue;
 			}
 		}
+		//
+		relacaoEntrada = null;
 		//
 		return resultado;
 	}
