@@ -1,7 +1,7 @@
-from 	pessoas avo,
-		pessoas paiMae,
-		pessoas filho		
-where	(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
-		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)
-group by avo.nmPessoa, paiMae.nmPessoa, filho.nmPessoa
-order by avo.nmPessoa, paiMae.nmPessoa, filho.nmPessoa
+from	pessoas p1,
+		pessoas p2,
+		inteiros int
+where	p1.cdPessoa = int.intValue and
+		p2.cdPessoa = int.intValue and
+		p1.cdPessoa = p2.cdPessoa and
+		int.intValue = p1.cdPessoa

@@ -71,17 +71,17 @@ public class QueryImplOtimizada4 {
 		return resultList;
 	}
 
-	private Collection<ResultObject> agrupamento(Collection<ResultObject> resultList, Agrupamento agrupamento) throws CampoInexistenteException {
+	private Collection<ResultObject> agrupamento(Collection<ResultObject> relacaoEntrada, Agrupamento agrupamento) throws CampoInexistenteException {
 		Map<String, ResultObject> hashes = new HashMap<String, ResultObject>();
 		//
-		for (ResultObject objeto : resultList) {
+		for (ResultObject objeto : relacaoEntrada) {
 			String hash = hashAgrupamento(objeto, agrupamento);
 			/*Se hash nao existe na tabela, insere o objeto*/
 			if (!hashes.containsKey(hash))
 				hashes.put(hash, objeto);
 		}
 		//
-		resultList = null;
+		relacaoEntrada = null;
 		//
 		return hashes.values();
 	}
@@ -102,12 +102,13 @@ public class QueryImplOtimizada4 {
 		return hash;
 	}
 
-	private Collection<ResultObject> ordenacao(Collection<ResultObject> resultList, Ordenacao ordenacao) {
+	private Collection<ResultObject> ordenacao(Collection<ResultObject> relacaoEntrada, Ordenacao ordenacao) {
+		List<ResultObject> resultado = new ArrayList<ResultObject>(relacaoEntrada);
+		//
 		ResultListComparator comparator = new ResultListComparator(ordenacao);
-		List<ResultObject> resultado = new ArrayList<ResultObject>(resultList);
 		Collections.sort(resultado, comparator);
 		//
-		resultList = null;
+		relacaoEntrada = null;
 		//
 		return resultado;
 	}
@@ -156,24 +157,27 @@ public class QueryImplOtimizada4 {
 		//
 		if (operacao.getClass() == RestricaoSimples.class) {
 			RestricaoSimples restricao = (RestricaoSimples) operacao;
-			if (restricao.getTipoBusca() == TipoBusca.LINEAR) {
-				ResultList relacaoEntrada = restricao(no.getFilho());
+			//
+			TipoBusca tipoBusca = restricao.getTipoBusca();
+			NoArvore filho1 = no.getFilho();
+			NoArvore filho2 = filho1.getIrmao();
+			//
+			if (tipoBusca == TipoBusca.LINEAR) {
+				ResultList relacaoEntrada = restricao(filho1);
 				//
 				return buscaLinear(relacaoEntrada, restricao);
-			} else if (restricao.getTipoBusca() == TipoBusca.JUNCAO_HASH) {
-				ResultList relacaoEntrada1 = restricao(no.getFilho());
-				ResultList relacaoEntrada2;
-				if (no.getFilho().getIrmao() != null)
-					relacaoEntrada2 = restricao(no.getFilho().getIrmao());
-				else
-					relacaoEntrada2 = (ResultList) relacaoEntrada1.clone();
-				//
-				return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
 			} else {
-				ResultList relacaoEntrada1 = restricao(no.getFilho());
-				ResultList relacaoEntrada2 = restricao(no.getFilho().getIrmao());
+				ResultList relacaoEntrada1 = restricao(filho1);
+				if (filho2 != null) {
+					ResultList relacaoEntrada2 = restricao(filho2);
+					//
+					if (tipoBusca == TipoBusca.JUNCAO_HASH)
+						return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
+					else
+						return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
+				}
 				//
-				return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
+				return buscaLinear(relacaoEntrada1, restricao);
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
 			if (no.isFolha()) {
@@ -188,34 +192,6 @@ public class QueryImplOtimizada4 {
 		}
 		//
 		return null;
-	}
-
-	private ResultList juncaoLoopAninhado(ResultList relacaoEntrada1, ResultList relacaoEntrada2, RestricaoSimples restricao) throws Exception {
-		ResultList resultado = new ResultList();
-		//
-		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
-		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
-		//
-		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
-		//
-		for (ResultObject objeto1 : relacaoEntrada1) {
-			Comparable<Object> valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto1, operando1);
-			for (ResultObject objeto2 : relacaoEntrada2) {
-				Comparable<Object> valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto2, operando2);
-				//
-				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
-					ResultObject resultObject = new ResultObject();
-					resultObject.putAll(objeto1);
-					resultObject.putAll(objeto2);
-					resultado.add(resultObject);
-				}
-			}
-		}
-		//
-		relacaoEntrada1 = null;
-		relacaoEntrada2 = null;
-		//
-		return resultado;
 	}
 
 	/**
@@ -237,6 +213,34 @@ public class QueryImplOtimizada4 {
 		for (ResultObject objeto2 : relacaoEntrada2) {
 			if (hashes.get(objeto2) != null) {
 				resultado.add(objeto2);
+			}
+		}
+		//
+		relacaoEntrada1 = null;
+		relacaoEntrada2 = null;
+		//
+		return resultado;
+	}
+
+	private ResultList juncaoLoopAninhado(ResultList relacaoEntrada1, ResultList relacaoEntrada2, RestricaoSimples restricao) throws Exception {
+		ResultList resultado = new ResultList();
+		//
+		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
+		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
+		//
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
+		//
+		for (ResultObject objeto1 : relacaoEntrada1) {
+			Comparable<Object> valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto1, operando1);
+			for (ResultObject objeto2 : relacaoEntrada2) {
+				Comparable<Object> valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto2, operando2);
+				//
+				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
+					ResultObject resultObject = new ResultObject();
+					resultObject.putAll(objeto1);
+					resultObject.putAll(objeto2);
+					resultado.add(resultObject);
+				}
 			}
 		}
 		//
