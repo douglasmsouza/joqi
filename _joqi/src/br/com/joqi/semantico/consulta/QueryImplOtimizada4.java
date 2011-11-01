@@ -168,16 +168,12 @@ public class QueryImplOtimizada4 {
 				return buscaLinear(relacaoEntrada, restricao);
 			} else {
 				ResultList relacaoEntrada1 = restricao(filho1);
-				if (filho2 != null) {
-					ResultList relacaoEntrada2 = restricao(filho2);
-					//
-					if (tipoBusca == TipoBusca.JUNCAO_HASH)
-						return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
-					else
-						return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
+				ResultList relacaoEntrada2 = restricao(filho2);
+				if (tipoBusca == TipoBusca.JUNCAO_HASH) {
+					return juncaoHash(relacaoEntrada1, relacaoEntrada2, restricao);
+				} else {
+					return juncaoLoopAninhado(relacaoEntrada1, relacaoEntrada2, restricao);
 				}
-				//
-				return buscaLinear(relacaoEntrada1, restricao);
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
 			if (no.isFolha()) {
