@@ -6,4 +6,4 @@ where	p3.cdPessoa = p2.cdPessoa and
 		p2.cdPessoa = p3.cdPessoa and
 		p1.cdPessoa = p3.cdPessoa
 group by p1.nmPessoa
-order by p1.nmPessoa
+order by p1.nmPessoa desc
