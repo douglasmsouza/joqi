@@ -8,8 +8,4 @@ public interface IPossuiRestricoes {
 
 	public void addRestricao(Restricao restricao);
 
-	public Restricao getUltima();
-
-	public void remove(Restricao restricao);
-
 }
