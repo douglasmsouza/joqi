@@ -11,9 +11,6 @@ public class ItemOrdenacao {
 	private ProjecaoCampo campo;
 	private TipoOrdenacao tipoOrdenacao;
 
-	public ItemOrdenacao() {
-	}
-
 	public ItemOrdenacao(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
 		this.campo = campo;
 		this.tipoOrdenacao = tipoOrdenacao;
@@ -23,16 +20,8 @@ public class ItemOrdenacao {
 		return campo;
 	}
 
-	public void setCampo(ProjecaoCampo campo) {
-		this.campo = campo;
-	}
-
 	public TipoOrdenacao getTipoOrdenacao() {
 		return tipoOrdenacao;
-	}
-
-	public void setTipoOrdenacao(TipoOrdenacao tipoOrdenacao) {
-		this.tipoOrdenacao = tipoOrdenacao;
 	}
 
 	@Override

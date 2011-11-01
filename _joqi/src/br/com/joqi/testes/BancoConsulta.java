@@ -383,6 +383,5 @@ public class BancoConsulta {
 	public List<Integer> getCodigos() {
 		return codigos;
 	}
-	
-	
+
 }

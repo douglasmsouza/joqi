@@ -74,26 +74,12 @@ public class Query implements IPossuiRestricoes {
 		return restricoes;
 	}
 
-	@Override
-	public Restricao getUltima() {
-		try {
-			return restricoes.get(restricoes.size() - 1);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 	public void addItemOrdenacao(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
 		ordenacao.addItem(campo, tipoOrdenacao);
 	}
 
 	public void addCampoAgrupamento(ProjecaoCampo campo) {
 		agrupamento.addCampo(campo);
-	}
-
-	@Override
-	public void remove(Restricao restricao) {
-		restricoes.remove(restricao);
 	}
 
 	public void getResultado() {
