@@ -110,7 +110,7 @@ public class Query implements IPossuiRestricoes {
 			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
 			//
 			arvore.imprime();
-			/*double time = System.currentTimeMillis();
+			double time = System.currentTimeMillis();
 			Collection<ResultObject> resultado = queryImplOtimizada4.getResultList();
 			String[] colunas;
 			if (projecoes.size() == 0) {
@@ -129,7 +129,7 @@ public class Query implements IPossuiRestricoes {
 				}
 			}
 			time = System.currentTimeMillis() - time;
-			JoqiUtil.imprimeResultado(15, time, colunas, resultado);*/
+			JoqiUtil.imprimeResultado(15, time, colunas, resultado);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

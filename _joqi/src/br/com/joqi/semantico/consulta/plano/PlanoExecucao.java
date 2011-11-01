@@ -1,8 +1,10 @@
 package br.com.joqi.semantico.consulta.plano;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
@@ -28,6 +30,12 @@ import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.mensagem.MensagemErro;
 
 public class PlanoExecucao {
+
+	private class RelacionamentoFilhoJuncao {
+		boolean relacao1;
+		boolean relacao2;
+		boolean primeiraRelacaoJuncao;
+	}
 
 	private ArvoreConsulta arvore;
 	//
@@ -440,46 +448,22 @@ public class PlanoExecucao {
 				String relacaoJuncao1 = restricaoJuncao.getOperando1().getRelacao();
 				String relacaoJuncao2 = restricaoJuncao.getOperando2().getRelacao();
 				/*Uma vez encontrada a restricao, percorre os filhos e verifica 
-				 * qual nao tem relacao alguma com a mesma. Os filhos que nao 
-				 * fazem parte da juncao irao virar seus irmaos*/
+				  qual nao tem relacao alguma com a mesma. Os filhos que nao 
+				  tem relacao alguma com a juncao irao virar seus irmaos. 
+				  Para ter alguma relacao com a juncao, a subarvore do filho deve, em
+				  algum momento fazer referencia a alguma das duas relacoes de juncao.*/
 				NoArvore filho = raiz.getFilho();
 				while (filho != null) {
-					boolean transformarEmIrmao = false;
-					//
-					String relacaoFilho1 = null;
-					String relacaoFilho2 = null;
-					//
-					if (filho.getOperacao().getClass() == RestricaoSimples.class) {
-						RestricaoSimples restricaoFilho = (RestricaoSimples) filho.getOperacao();
-						if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
-							relacaoFilho1 = getRelacaoString((RestricaoSimples) filho.getOperacao());
-						} else {
-							relacaoFilho1 = restricaoFilho.getOperando1().getRelacao();
-							relacaoFilho2 = restricaoFilho.getOperando2().getRelacao();
-						}
-					} else {
-						relacaoFilho1 = ((Relacao) filho.getOperacao()).getNomeNaConsulta();
-					}
-					/*Verifica se deve transformar o no em irmao da juncao*/
-					if (!relacaoFilho1.equals(relacaoJuncao1) && !relacaoFilho1.equals(relacaoJuncao2)) {
-						if (relacaoFilho2 != null) {
-							if (!relacaoFilho2.equals(relacaoJuncao1) && !relacaoFilho2.equals(relacaoJuncao2)) {
-								transformarEmIrmao = true;
-							}
-						} else {
-							transformarEmIrmao = true;
-						}
-					}
-					//
-					/*Altera a ordem do filho. A ordem dos filhos deve ser a mesma que a ordem
-					 * dos operandos da juncao.*/
-					if (relacaoFilho1.equals(relacaoJuncao1) || (relacaoFilho2 != null && relacaoFilho2.equals(relacaoJuncao1))) {
+					RelacionamentoFilhoJuncao relacionamentoFilhoJuncao = getRelacionamentoFilhoJuncao(filho, relacaoJuncao1, relacaoJuncao2);
+					/*Caso o filho tenha relacionamento com a primeira relacao de juncao, deve
+					 virar o primeiro filho da juncao.*/
+					if (relacionamentoFilhoJuncao.primeiraRelacaoJuncao) {
 						raiz.removeFilho(filho);
 						raiz.addFilho(filho);
 					}
-					/*Caso o no nao tenha nenhuma relacao com a juncao, a juncao assume que ele
-					 * deve ser seu irmao*/
-					if (transformarEmIrmao) {
+					/*Caso o filho nao tenha nenhuma relacao com a juncao, a juncao deve assumir
+					 que ele ele eh seu irmao*/
+					if (!relacionamentoFilhoJuncao.relacao1 && !relacionamentoFilhoJuncao.relacao2) {
 						raiz.removeFilho(filho);
 						raiz.addIrmao(filho);
 					}
@@ -492,6 +476,60 @@ public class PlanoExecucao {
 			//
 			raiz = raiz.getIrmao();
 		}
+	}
+
+	private RelacionamentoFilhoJuncao getRelacionamentoFilhoJuncao(NoArvore no, String relacaoJuncao1, String relacaoJuncao2) {
+		RelacionamentoFilhoJuncao retorno = new RelacionamentoFilhoJuncao();
+		//
+		if (no != null) {
+			retorno = getRelacionamentoFilhoJuncaoAux(no, relacaoJuncao1, relacaoJuncao2);
+			//
+			NoArvore filho = no.getFilho();
+			while (filho != null) {
+				NoArvore irmao = filho.getIrmao();
+				while (irmao != null) {
+					RelacionamentoFilhoJuncao temRelacaoIrmao = getRelacionamentoFilhoJuncaoAux(irmao, relacaoJuncao1, relacaoJuncao2);
+					retorno.relacao1 = retorno.relacao1 || temRelacaoIrmao.relacao1;
+					retorno.relacao2 = retorno.relacao2 || temRelacaoIrmao.relacao2;
+					retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || temRelacaoIrmao.primeiraRelacaoJuncao;
+					//
+					irmao = irmao.getIrmao();
+				}
+				RelacionamentoFilhoJuncao temRelacaoFilho = getRelacionamentoFilhoJuncaoAux(filho, relacaoJuncao1, relacaoJuncao2);
+				retorno.relacao1 = retorno.relacao1 || temRelacaoFilho.relacao1;
+				retorno.relacao2 = retorno.relacao2 || temRelacaoFilho.relacao2;
+				retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || temRelacaoFilho.primeiraRelacaoJuncao;
+				//
+				filho = filho.getFilho();
+			}
+		}
+		//
+		return retorno;
+	}
+
+	private RelacionamentoFilhoJuncao getRelacionamentoFilhoJuncaoAux(NoArvore no, String relacaoJuncao1, String relacaoJuncao2) {
+		RelacionamentoFilhoJuncao retorno = new RelacionamentoFilhoJuncao();
+		//
+		String relacaoFilho1 = null;
+		String relacaoFilho2 = null;
+		//
+		if (no.getOperacao().getClass() == RestricaoSimples.class) {
+			RestricaoSimples restricaoFilho = (RestricaoSimples) no.getOperacao();
+			if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
+				relacaoFilho1 = getRelacaoString((RestricaoSimples) no.getOperacao());
+			} else {
+				relacaoFilho1 = restricaoFilho.getOperando1().getRelacao();
+				relacaoFilho2 = restricaoFilho.getOperando2().getRelacao();
+			}
+		} else {
+			relacaoFilho1 = ((Relacao) no.getOperacao()).getNomeNaConsulta();
+		}
+		//
+		retorno.relacao1 = relacaoFilho1.equals(relacaoJuncao1) || relacaoFilho1.equals(relacaoJuncao2);
+		retorno.relacao2 = relacaoFilho2 != null && (relacaoFilho2.equals(relacaoJuncao1) || relacaoFilho2.equals(relacaoJuncao2));
+		retorno.primeiraRelacaoJuncao = relacaoFilho1.equals(relacaoJuncao1) || (relacaoFilho2 != null && relacaoFilho2.equals(relacaoJuncao1));
+		//
+		return retorno;
 	}
 
 	/**
