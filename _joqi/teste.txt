@@ -3,5 +3,4 @@ from	pessoas p1,
 		pessoas p3,
 		inteiros int
 where	p1.cdPessoa = int.intValue and
-		p2.cdPessoa = p3.cdPessoa and
-		p1.cdPessoa = p3.cdPessoa 
+		p2.cdPessoa = p3.cdPessoa
