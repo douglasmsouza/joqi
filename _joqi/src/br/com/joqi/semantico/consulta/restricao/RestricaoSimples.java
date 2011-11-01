@@ -60,6 +60,7 @@ public class RestricaoSimples extends Restricao {
 		if (isNegacao())
 			s.append("not ");
 		s.append(operando1.getProjecaoStr()).append(" ").append(operadorRelacional).append(" ").append(operando2.getProjecaoStr());
+		s.append("[").append(tipoBusca).append("]");
 		return s.toString();
 	}
 

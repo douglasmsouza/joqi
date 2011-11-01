@@ -1,10 +1,8 @@
 package br.com.joqi.semantico.consulta.plano;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
@@ -31,11 +29,19 @@ import br.com.joqi.semantico.exception.mensagem.MensagemErro;
 
 public class PlanoExecucao {
 
+	/**
+	 * Classe auxiliar que eh utilizada na organizacao das juncoes
+	 * 
+	 * @author Douglas Matheus de Souza em 01/11/2011
+	 */
 	private class RelacionamentoFilhoJuncao {
 		boolean relacao1;
 		boolean relacao2;
 		boolean primeiraRelacaoJuncao;
 	}
+
+	/*Lista auxiliar que guarda quais restricoes ja foram organizadas*/
+	private Set<RestricaoSimples> restricoesJaOrdenadas;
 
 	private ArvoreConsulta arvore;
 	//
@@ -70,9 +76,11 @@ public class PlanoExecucao {
 		/*Monta a parte das restricoes*/
 		if (restricoes.size() > 0) {
 			restricoesJaOrdenadas = new HashSet<RestricaoSimples>();
-			/*Insere e organiza as restricoes*/
+			/*Insere as restricoes*/
 			insereRestricoes(arvore, restricoes);
-			ordenaRestricoesLineares(arvore.getRaizRestricoes().getFilho());
+			/*Orgazina as restricoes simples*/
+			ordenaRestricoesSimples(arvore.getRaizRestricoes().getFilho());
+			/*Orgazina juncoes*/
 			ordenaRestricoesJuncoes(arvore.getRaizRestricoes().getFilho());
 		} else {
 			arvore.setRaizRestricoes(arvore.insere(new UniaoRestricoes()));
@@ -342,9 +350,6 @@ public class PlanoExecucao {
 		}
 	}
 
-	/*Lista auxiliar que guarda quais restricoes ja foram ordenadas*/
-	private Set<RestricaoSimples> restricoesJaOrdenadas;
-
 	/**
 	 * Ordena as restricoes que utilizam o algoritmo de busca linear para que
 	 * elas fiquem posicionadas na mesma subarvore da relacao sobre qual ira
@@ -353,11 +358,11 @@ public class PlanoExecucao {
 	 * @param raiz
 	 * @author Douglas Matheus de Souza em 13/10/2011
 	 */
-	private void ordenaRestricoesLineares(NoArvore raiz) {
+	private void ordenaRestricoesSimples(NoArvore raiz) {
 		if (raiz != null) {
 			Object operacao = raiz.getOperacao();
 			if (operacao.getClass() == ArvoreConsulta.class) {
-				ordenaRestricoesLineares(((ArvoreConsulta) operacao).getRaiz().getFilho());
+				ordenaRestricoesSimples(((ArvoreConsulta) operacao).getRaiz().getFilho());
 			} else {
 				if (operacao.getClass() == RestricaoSimples.class) {
 					RestricaoSimples restricao = (RestricaoSimples) operacao;
@@ -378,8 +383,8 @@ public class PlanoExecucao {
 				}
 			}
 			//
-			ordenaRestricoesLineares(raiz.getFilho());
-			ordenaRestricoesLineares(raiz.getIrmao());
+			ordenaRestricoesSimples(raiz.getFilho());
+			ordenaRestricoesSimples(raiz.getIrmao());
 		}
 	}
 
@@ -469,6 +474,11 @@ public class PlanoExecucao {
 					}
 					//
 					filho = filho.getIrmao();
+				}
+				/*Caso a raiz fique somente no fim do processo, eh porq ela consegue fazer
+				  a juncao com somente uma entrada. Sendo assim, pode efetuar busca linear.*/
+				if (raiz.getFilho().getIrmao() == null) {
+					((RestricaoSimples) raiz.getOperacao()).setTipoBusca(TipoBusca.LINEAR);
 				}
 				//
 				raiz = raiz.getPai();
