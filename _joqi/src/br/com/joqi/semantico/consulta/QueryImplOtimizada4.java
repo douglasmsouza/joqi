@@ -61,7 +61,7 @@ public class QueryImplOtimizada4 {
 		} else if (operacao.getClass() == Ordenacao.class) {
 			return ordenacao(executaOperacao(no.getFilho()), (Ordenacao) operacao);
 		} else if (operacao.getClass() == UniaoRestricoes.class) {
-			return executaRestricoes(no);
+			return resolveRestricoes(no);
 		}
 		//
 		return new ResultList();
@@ -113,7 +113,7 @@ public class QueryImplOtimizada4 {
 		return resultado;
 	}
 
-	private ResultList executaRestricoes(NoArvore raiz) throws Exception {
+	private ResultList resolveRestricoes(NoArvore raiz) throws Exception {
 		ResultList resultado = new ResultList();
 		//
 		NoArvore filho = raiz.getFilho();
@@ -177,10 +177,10 @@ public class QueryImplOtimizada4 {
 			}
 		} else if (operacao.getClass() == ArvoreConsulta.class) {
 			if (no.isFolha()) {
-				return executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				return resolveRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 			} else {
 				ResultList relacaoEntrada1 = produtoCartesiano(no);
-				ResultList relacaoEntrada2 = executaRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
+				ResultList relacaoEntrada2 = resolveRestricoes(((ArvoreConsulta) no.getOperacao()).getRaizRestricoes());
 				return interseccao(relacaoEntrada1, relacaoEntrada2);
 			}
 		} else if (no.isFolha()) {
