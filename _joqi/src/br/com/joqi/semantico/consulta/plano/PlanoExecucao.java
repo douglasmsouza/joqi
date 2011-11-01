@@ -478,27 +478,35 @@ public class PlanoExecucao {
 		}
 	}
 
+	/**
+	 * Verifica qual o relacionamento de um no com uma juncao
+	 * 
+	 * @param no
+	 * @param relacaoJuncao1
+	 * @param relacaoJuncao2
+	 * @author Douglas Matheus de Souza em 01/11/2011
+	 */
 	private RelacionamentoFilhoJuncao getRelacionamentoFilhoJuncao(NoArvore no, String relacaoJuncao1, String relacaoJuncao2) {
 		RelacionamentoFilhoJuncao retorno = new RelacionamentoFilhoJuncao();
 		//
 		if (no != null) {
 			retorno = getRelacionamentoFilhoJuncaoAux(no, relacaoJuncao1, relacaoJuncao2);
-			//
+			/*Percore a subarvore para verificar se existe algum relacionamento*/
 			NoArvore filho = no.getFilho();
 			while (filho != null) {
 				NoArvore irmao = filho.getIrmao();
 				while (irmao != null) {
-					RelacionamentoFilhoJuncao temRelacaoIrmao = getRelacionamentoFilhoJuncaoAux(irmao, relacaoJuncao1, relacaoJuncao2);
-					retorno.relacao1 = retorno.relacao1 || temRelacaoIrmao.relacao1;
-					retorno.relacao2 = retorno.relacao2 || temRelacaoIrmao.relacao2;
-					retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || temRelacaoIrmao.primeiraRelacaoJuncao;
+					RelacionamentoFilhoJuncao relacionamentoIrmao = getRelacionamentoFilhoJuncaoAux(irmao, relacaoJuncao1, relacaoJuncao2);
+					retorno.relacao1 = retorno.relacao1 || relacionamentoIrmao.relacao1;
+					retorno.relacao2 = retorno.relacao2 || relacionamentoIrmao.relacao2;
+					retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || relacionamentoIrmao.primeiraRelacaoJuncao;
 					//
 					irmao = irmao.getIrmao();
 				}
-				RelacionamentoFilhoJuncao temRelacaoFilho = getRelacionamentoFilhoJuncaoAux(filho, relacaoJuncao1, relacaoJuncao2);
-				retorno.relacao1 = retorno.relacao1 || temRelacaoFilho.relacao1;
-				retorno.relacao2 = retorno.relacao2 || temRelacaoFilho.relacao2;
-				retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || temRelacaoFilho.primeiraRelacaoJuncao;
+				RelacionamentoFilhoJuncao relacionamentoFilho = getRelacionamentoFilhoJuncaoAux(filho, relacaoJuncao1, relacaoJuncao2);
+				retorno.relacao1 = retorno.relacao1 || relacionamentoFilho.relacao1;
+				retorno.relacao2 = retorno.relacao2 || relacionamentoFilho.relacao2;
+				retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || relacionamentoFilho.primeiraRelacaoJuncao;
 				//
 				filho = filho.getFilho();
 			}
