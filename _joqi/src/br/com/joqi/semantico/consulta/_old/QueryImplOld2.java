@@ -1,13 +1,18 @@
-package br.com.joqi.semantico.consulta;
+package br.com.joqi.semantico.consulta._old;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import br.com.joqi.semantico.consulta.Query;
+import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -15,6 +20,8 @@ import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoConjunto;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
+import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
+import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
@@ -32,7 +39,7 @@ import br.com.joqi.semantico.exception.OperandosIncompativeisException;
  * 
  * @author Douglas Matheus de Souza em 26/07/2011
  */
-public class QueryImplOtimizada2 {
+public class QueryImplOld2 {
 
 	private class Tupla extends ResultObject {
 	}
@@ -41,9 +48,8 @@ public class QueryImplOtimizada2 {
 	private Object objetoConsulta;
 	//
 	private Map<String, Collection<Object>> relacoes;
-	private ResultSet resultado;
 
-	public QueryImplOtimizada2(Query query, Object objetoConsulta) {
+	public QueryImplOld2(Query query, Object objetoConsulta) {
 		this.query = query;
 		this.objetoConsulta = objetoConsulta;
 	}
@@ -83,23 +89,38 @@ public class QueryImplOtimizada2 {
 		 * sejam executadas primeiro e as juncoes sejam executadas depois*/
 		Collections.sort(possuiRestricoes.getRestricoes());
 		//
-		System.out.println("Ordem de execução das restrições: ");
+		OperadorLogico operadorLogico = null;
 		//
 		for (int i = 0; i < possuiRestricoes.getRestricoes().size(); i++) {
 			Restricao r = possuiRestricoes.getRestricoes().get(i);
-			System.out.println("\t" + r);
-			//
 			if (r.getClass() == RestricaoSimples.class) {
 				RestricaoSimples restricao = (RestricaoSimples) r;
 				//
 				verificaRestricao(restricao);
 				//
+				Map<String, Collection<Object>> where;
 				if (restricao.isJuncao()) {
-					juncao(relacoesResultantes, restricao);
-				} else if (restricao.isProdutoCartesiano()) {
-
+					where = juncao(relacoesResultantes, restricao);
+				} else if (restricao.isConstante()) {
+					where = where(relacoesResultantes, restricao);
 				} else {
-					where(relacoesResultantes, restricao);
+					where = where(relacoesResultantes, restricao);
+				}
+				//
+				/*Restringe a Collection com base na colecao produzida pela restricao e na 
+				 * colecao produzida pela restricao anterior*/
+				Iterator<Entry<String, Collection<Object>>> iterator = where.entrySet().iterator();
+				do {
+					Entry<String, Collection<Object>> relacaoWhere = iterator.next();
+					Entry<String, Collection<Object>> relacao = iterator.next();
+					restringeCollection(relacoesResultantes, operadorLogico, relacaoWhere.getKey(), relacao.getValue(), relacaoWhere.getValue());
+				} while (iterator.hasNext());
+				//
+				operadorLogico = restricao.getOperadorLogico();
+				if (operadorLogico == null) {
+					if (i < possuiRestricoes.getRestricoes().size() - 1) {
+						operadorLogico = possuiRestricoes.getRestricoes().get(i + 1).getOperadorLogico();
+					}
 				}
 			} else {
 				RestricaoConjunto restricaoConjunto = (RestricaoConjunto) r;
@@ -108,67 +129,96 @@ public class QueryImplOtimizada2 {
 				relacoesResultantes.putAll(where(restricaoConjunto));
 			}
 		}
-		System.out.println();
 		//
 		return relacoesResultantes;
 	}
 
-	private void juncao(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
-		Collection<Object> resultListTemp = new ArrayList<Object>();
+	private void restringeCollection(Map<String, Collection<Object>> relacoesResultantes, OperadorLogico operadorLogico, String nomeRelacao,
+			Collection<Object> relacao, Collection<Object> where) {
+		Collection<Object> colecao1 = new ArrayList<Object>(where);
+		if (relacao == null) {
+			relacoesResultantes.put(nomeRelacao, colecao1);
+		} else {
+			if (operadorLogico != null) {
+				Collection<Object> colecao2 = new ArrayList<Object>(relacao);
+				//
+				if (operadorLogico.getClass() == OperadorLogicoAnd.class) {
+					/*Se nao eh a primeira restricao (operador logico <> null) ou tem um 
+					 * operador logico AND, entao usa o metodo retainAll para fazer a restricao*/
+					colecao2.retainAll(colecao1);
+				} else {
+					/*Se tem um operador logico OU, usa o addAll*/
+					colecao2.addAll(colecao1);
+				}
+				//
+				relacoesResultantes.put(nomeRelacao, colecao2);
+			} else {
+				relacoesResultantes.put(nomeRelacao, colecao1);
+			}
+		}
+	}
+
+	private Map<String, Collection<Object>> juncao(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+		Collection<Object> resultListTemp1 = new ArrayList<Object>();
+		Collection<Object> resultListTemp2 = new ArrayList<Object>();
 		//
 		String nomeRelacao1 = restricao.getOperando1().getRelacao();
 		String nomeRelacao2 = restricao.getOperando2().getRelacao();
+		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
-		Collection<Object> relacao1 = relacoes.get(nomeRelacao1);
-		Collection<Object> relacao2 = relacoes.get(nomeRelacao2);
+		Collection<Object> relacao1 = relacoesResultantes.get(nomeRelacao1);
+		if (relacao1 == null) {
+			relacao1 = relacoes.get(nomeRelacao1);
+		}
+		Collection<Object> relacao2 = relacoesResultantes.get(nomeRelacao2);
+		if (relacao2 == null) {
+			relacao2 = relacoes.get(nomeRelacao2);
+		}
 		//
 		Map<Object, List<Object>> hashTable = new HashMap<Object, List<Object>>();
 		/*Insere as tupla da relacao1 em uma tabela hash (representada por um HashMap)*/
-		for (Object objeto1 : relacao1) {
+		for (Object tupla : relacao1) {
 			Object campo = restricao.getOperando1().getValor();
-			Object objeto1Temp = objeto1;
-			if (objeto1Temp.getClass() == Tupla.class) {
-				objeto1Temp = ((Tupla) objeto1).get(nomeRelacao1);
-			}
-			Object valor = QueryUtils.getValorDoCampo(objeto1Temp, campo.toString());
+			Object valor = QueryUtils.getValorDoCampo(tupla, campo.toString());
 			List<Object> objetos = hashTable.get(valor);
 			if (objetos == null) {
 				objetos = new ArrayList<Object>();
 			}
-			objetos.add(objeto1);
+			objetos.add(tupla);
 			hashTable.put(valor, objetos);
 		}
 		//
-		for (Object objeto2 : relacao2) {
+		for (Object tupla2 : relacao2) {
 			Object campo = restricao.getOperando2().getValor();
-			Object objeto2Temp = objeto2;
-			if (objeto2Temp.getClass() == Tupla.class) {
-				objeto2Temp = ((Tupla) objeto2).get(nomeRelacao1);
-			}
-			Object valor = QueryUtils.getValorDoCampo(objeto2Temp, campo.toString());
-			List<Object> objetos1 = hashTable.get(valor);
+			Object valor = QueryUtils.getValorDoCampo(tupla2, campo.toString());
+			List<Object> tupla1 = hashTable.get(valor);
 			//
-			if (verificaCondicao(objetos1 != null, restricao)) {
-				for (Object objeto1 : objetos1) {
-					Tupla tupla = new Tupla();
-					if (objeto1.getClass() == Tupla.class) {
-						tupla.putAll((Tupla) objeto1);
-					} else {
-						tupla.put(nomeRelacao1, objeto1);
-					}
-					tupla.put(nomeRelacao2, objeto2);
-					resultListTemp.add(tupla);
-				}
+			/*A condicao para que a restricao esteja OK eh que a tupla recuperada da hashTable exista*/
+			boolean condicao = tupla1 != null;
+			if (operadorRelacional.getClass() == Diferente.class) {
+				/*Se for um operador relacional "DIFERENTE", a condicao passa a ser o contrario*/
+				condicao = tupla1 == null;
+			}
+			//
+			if (verificaCondicao(condicao, restricao)) {
+				resultListTemp1.addAll(tupla1);
+				resultListTemp2.add(tupla2);
 			}
 		}
 		//
-		relacoesResultantes.put(nomeRelacao1, resultListTemp);
-		relacoesResultantes.put(nomeRelacao2, resultListTemp);
+		Map<String, Collection<Object>> retorno = new LinkedHashMap<String, Collection<Object>>();
+		retorno.put(nomeRelacao1, resultListTemp1);
+		retorno.put(nomeRelacao1 + "Anterior", relacao1);
+		retorno.put(nomeRelacao2, resultListTemp2);
+		retorno.put(nomeRelacao2 + "Anterior", relacao2);
+		return retorno;
 	}
 
-	private void where(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
+	private Map<String, Collection<Object>> where(Map<String, Collection<Object>> relacoesResultantes, RestricaoSimples restricao) throws Exception {
 		/*Nome da relacao*/
 		String nomeRelacao = getRelacaoString(restricao);
+		/*Busca na lista de relacoes resultantes a que teve o nome descoberto anteriormente*/
+		Collection<Object> relacaoAnterior = relacoesResultantes.get(nomeRelacao);
 		/*Relacao que sera pesquisada*/
 		Collection<?> relacao = getRelacaoCollection(restricao);
 
@@ -259,7 +309,12 @@ public class QueryImplOtimizada2 {
 				continue;
 			}
 		}
-		relacoesResultantes.put(nomeRelacao, resultListTemp);
+		/*A relacao resultante deste where + a ultima relacao resultante do ultimo where*/
+		Map<String, Collection<Object>> retorno = new LinkedHashMap<String, Collection<Object>>();
+		retorno.put(nomeRelacao, resultListTemp);
+		retorno.put(nomeRelacao + "Anterior", relacaoAnterior);
+		//
+		return retorno;
 	}
 
 	private void verificaRestricao(RestricaoSimples restricao) throws ClausulaWhereException {
