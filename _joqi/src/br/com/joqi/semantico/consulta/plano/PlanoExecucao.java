@@ -10,6 +10,7 @@ import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.produtocartesiano.ProdutoCartesiano;
+import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -62,7 +63,7 @@ public class PlanoExecucao {
 	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 30/10/2011
 	 */
-	public ArvoreConsulta montaArvore(List<Projecao<?>> projecoes, List<Restricao> restricoes, Set<Relacao> relacoes, Agrupamento agrupamento,
+	public ArvoreConsulta montaArvore(ListaProjecoes projecoes, List<Restricao> restricoes, Set<Relacao> relacoes, Agrupamento agrupamento,
 			Ordenacao ordenacao) throws Exception {
 		this.arvore = new ArvoreConsulta();
 		//
@@ -98,10 +99,12 @@ public class PlanoExecucao {
 	 * @throws Exception
 	 * @author Douglas Matheus de Souza em 28/10/2011
 	 */
-	private void insereProjecoes(ArvoreConsulta arvore, List<Projecao<?>> projecoes) throws Exception {
-		for (Projecao<?> projecao : projecoes) {
-			verificaSemanticaOperando(projecao, null, "select", ClausulaSelectException.class);
-			arvore.insere(projecao);
+	private void insereProjecoes(ArvoreConsulta arvore, ListaProjecoes projecoes) throws Exception {
+		if (projecoes.size() > 0) {
+			for (Projecao<?> projecao : projecoes) {
+				verificaSemanticaOperando(projecao, null, "select", ClausulaSelectException.class);
+			}
+			arvore.insere(projecoes);
 		}
 	}
 

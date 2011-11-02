@@ -26,6 +26,6 @@ public class ItemOrdenacao {
 
 	@Override
 	public String toString() {
-		return campo.getProjecaoStr() + " " + tipoOrdenacao;
+		return campo + " " + tipoOrdenacao;
 	}
 }

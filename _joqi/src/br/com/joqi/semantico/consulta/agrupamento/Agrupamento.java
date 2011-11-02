@@ -26,7 +26,7 @@ public class Agrupamento {
 		StringBuilder sb = new StringBuilder();
 		sb.append("GROUP BY ");
 		for (ProjecaoCampo campo : campos) {
-			sb.append(campo.getProjecaoStr()).append(", ");
+			sb.append(campo).append(", ");
 		}
 		return sb.delete(sb.length() - 2, sb.length()).toString();
 	}

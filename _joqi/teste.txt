@@ -1,8 +1,12 @@
-from	pessoas pai,
-		pessoas filho,
-		pessoas	irmao
-where	pai.cdPessoa = filho.cdPai and
-		pai.cdPessoa = irmao.cdPai and
-		irmao.cdPessoa <> filho.cdPessoa
-group by filho.nmPessoa
-		
+select	avo.nmPessoa nomeAvo,
+		avo.vlIdade idadeAvo,
+		paiMae.nmPessoa nomePaiMae,
+		paiMae.vlIdade idadePaiMae,
+		filho.nmPessoa nomeFilho,
+		filho.vlIdade idadeFilho,
+		count(filho.cdPessoa) qtFilhos
+from 	pessoas avo,
+		pessoas paiMae,
+		pessoas filho		
+where	(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
+		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		

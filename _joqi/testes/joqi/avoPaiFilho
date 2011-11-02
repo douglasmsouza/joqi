@@ -1,3 +1,6 @@
+select	avo.nmPessoa avo,
+		paiMae.nmPessoa paiMae,
+		filho.nmPessoa filho
 from 	pessoas avo,
 		pessoas paiMae,
 		pessoas filho		

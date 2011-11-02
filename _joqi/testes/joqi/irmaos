@@ -1,9 +1,10 @@
-from	pessoas p1,
-		pessoas p2,
-		inteiros int
-where	p1.cdPessoa = int.intValue and
-		p2.cdPessoa = int.intValue and
-		p1.vlIdade = 22 or
-		p1.vlIdade > 0
-		
+select	pai.nmPessoa pai,
+		filho.nmPessoa filho,
+		irmao.nmPessoa irmao
+from	pessoas pai,
+		pessoas filho,
+		pessoas	irmao
+where	pai.cdPessoa = filho.cdPai and
+		pai.cdPessoa = irmao.cdPai and
+		irmao.cdPessoa <> filho.cdPessoa
 		

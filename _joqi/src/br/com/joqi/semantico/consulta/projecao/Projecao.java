@@ -59,11 +59,6 @@ public abstract class Projecao<T> {
 
 	@Override
 	public String toString() {
-		StringBuilder s = new StringBuilder("SELECT ");
-		return s.append(getProjecaoStr()).toString();
-	}
-
-	public String getProjecaoStr() {
 		StringBuilder s = new StringBuilder();
 		if (relacao != null)
 			s.append(relacao).append(".");
@@ -83,9 +78,9 @@ public abstract class Projecao<T> {
 	@Override
 	public int hashCode() {
 		int hashCode = super.hashCode();
-		if(valor != null)
+		if (valor != null)
 			hashCode += valor.hashCode();
-		if(relacao != null)
+		if (relacao != null)
 			hashCode += relacao.hashCode();
 		return hashCode;
 	}
