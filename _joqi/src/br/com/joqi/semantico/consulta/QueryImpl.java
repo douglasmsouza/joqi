@@ -13,6 +13,7 @@ import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.ordenacao.ResultListComparator;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.NoArvore;
+import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -64,8 +65,8 @@ public class QueryImpl {
 	private Collection<ResultObject> executaOperacao(NoArvore no) throws Exception {
 		Object operacao = no.getOperacao();
 		//
-		if (operacao instanceof Projecao) {
-			return projecao(executaOperacao(no.getFilho()), (Projecao<?>) operacao);
+		if (operacao.getClass() == ListaProjecoes.class) {
+			return projecao(executaOperacao(no.getFilho()), (ListaProjecoes) operacao);
 		} else if (operacao.getClass() == Agrupamento.class) {
 			return agrupamento(executaOperacao(no.getFilho()), (Agrupamento) operacao);
 		} else if (operacao.getClass() == Ordenacao.class) {
@@ -77,8 +78,30 @@ public class QueryImpl {
 		return new ResultList();
 	}
 
-	private Collection<ResultObject> projecao(Collection<ResultObject> resultList, Projecao<?> projecao) {
-		return resultList;
+	private Collection<ResultObject> projecao(Collection<ResultObject> resultList, ListaProjecoes projecoes) throws CampoInexistenteException {
+		if (projecoes.size() == 0) {
+			return resultList;
+		} else {
+			ResultList resultado = new ResultList();
+			//
+			for (ResultObject objeto : resultList) {
+				ResultObject objetoNovo = new ResultObject();
+				for (Projecao<?> projecao : projecoes) {
+					Object valorProjecao = getValorProjecao(projecao, objeto);
+					objetoNovo.put(projecao.getNomeNaConsulta(), valorProjecao);
+				}
+				resultado.add(objetoNovo);
+			}
+			//
+			return resultado;
+		}
+	}
+
+	private Object getValorProjecao(Projecao<?> projecao, ResultObject objeto) throws CampoInexistenteException {
+		if (projecao.getClass() == ProjecaoCampo.class) {
+			return QueryUtils.getValorDoCampo(objeto, (ProjecaoCampo) projecao);
+		}
+		return projecao.getValor();
 	}
 
 	/**

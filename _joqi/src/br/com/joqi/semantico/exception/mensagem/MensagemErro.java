@@ -9,7 +9,7 @@ public class MensagemErro {
 	}
 
 	public static String getNomeRelacaoObrigatorio(Projecao<?> campo, Object operacao, String clausula) {
-		String exception = "Nome da relação obrigatório em \"" + campo.getProjecaoStr() + "\" na cláusula " + clausula.toUpperCase();
+		String exception = "Nome da relação obrigatório em \"" + campo + "\" na cláusula " + clausula.toUpperCase();
 		if (operacao != null)
 			exception += " (" + operacao + ")";
 		return exception;

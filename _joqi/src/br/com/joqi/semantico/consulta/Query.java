@@ -11,6 +11,7 @@ import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
+import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
@@ -26,7 +27,7 @@ public class Query implements IPossuiRestricoes {
 
 	private BancoConsulta objetoConsulta;
 	//
-	private List<Projecao<?>> projecoes;
+	private ListaProjecoes projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
 	private Ordenacao ordenacao;
@@ -35,7 +36,7 @@ public class Query implements IPossuiRestricoes {
 	public Query() {
 		objetoConsulta = new BancoConsulta();
 		//
-		projecoes = new ArrayList<Projecao<?>>();
+		projecoes = new ListaProjecoes();
 		relacoes = new LinkedHashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
 		ordenacao = new Ordenacao();
@@ -61,7 +62,7 @@ public class Query implements IPossuiRestricoes {
 		restricoes.add(restricao);
 	}
 
-	public List<Projecao<?>> getProjecoes() {
+	public ListaProjecoes getProjecoes() {
 		return projecoes;
 	}
 

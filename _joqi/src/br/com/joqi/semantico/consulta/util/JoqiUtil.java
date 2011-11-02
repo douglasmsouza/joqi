@@ -37,7 +37,12 @@ public class JoqiUtil {
 	}
 
 	public static void imprimeResultado(int tamanhoColuna, double tempo, String[] headers, Collection<ResultObject> resultSet) {
-		System.out.println("--------------------------------------------------------------------");
+		for (String x : headers) {
+			for (int i = 0; i < tamanhoColuna; i++)
+				System.out.print("-");
+		}
+		System.out.println();
+
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];
 			Arrays.fill(header, ' ');
@@ -50,27 +55,41 @@ public class JoqiUtil {
 		}
 		//
 		System.out.println();
-		System.out.println("--------------------------------------------------------------------");
+		for (String x : headers) {
+			for (int i = 0; i < tamanhoColuna; i++)
+				System.out.print("-");
+		}
+		System.out.println();
 		//
 		for (ResultObject objeto : resultSet) {
 			for (String c : headers) {
 				Object o = objeto.get(c);
 				char[] campo = new char[tamanhoColuna];
 				Arrays.fill(campo, ' ');
-				String valor = o.toString();
-				if (valor == null) {
+				if (o == null) {
 					campo[0] = 'N';
 					campo[1] = 'U';
 					campo[2] = 'L';
 					campo[3] = 'L';
 					for (int i = 4; i < tamanhoColuna; i++) {
 						campo[i] = ' ';
-					}					
+					}
 				} else {
-					int i = 0;
-					while (i < tamanhoColuna && i < valor.length()) {
-						campo[i] = valor.charAt(i);
-						i++;
+					String valor = o.toString();
+					if (valor == null) {
+						campo[0] = 'N';
+						campo[1] = 'U';
+						campo[2] = 'L';
+						campo[3] = 'L';
+						for (int i = 4; i < tamanhoColuna; i++) {
+							campo[i] = ' ';
+						}
+					} else {
+						int i = 0;
+						while (i < tamanhoColuna && i < valor.length()) {
+							campo[i] = valor.charAt(i);
+							i++;
+						}
 					}
 				}
 				System.out.print(campo);
@@ -78,9 +97,18 @@ public class JoqiUtil {
 			System.out.println();
 		}
 
-		System.out.println("--------------------------------------------------------------------");
+		for (String x : headers) {
+			for (int i = 0; i < tamanhoColuna; i++)
+				System.out.print("-");
+		}
+		System.out.println();
+
 		System.out.println("Registros...: " + resultSet.size());
 		System.out.println("Tempo total : " + tempo + " ms");
-		System.out.println("--------------------------------------------------------------------");
+		
+		for (String x : headers) {
+			for (int i = 0; i < tamanhoColuna; i++)
+				System.out.print("-");
+		}
 	}
 }
