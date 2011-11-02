@@ -18,8 +18,6 @@ import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples.TipoBusca;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Diferente;
-import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Igual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
@@ -27,8 +25,8 @@ import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
-import br.com.joqi.semantico.exception.CampoNaoComparableException;
-import br.com.joqi.semantico.exception.OperandosIncompativeisException;
+import br.com.joqi.semantico.exception.TiposIncompativeisException;
+import br.com.joqi.semantico.exception.ValorInvalidoException;
 
 public class QueryImpl {
 
@@ -38,6 +36,18 @@ public class QueryImpl {
 
 		ObjetoHash(Object objeto) {
 			this.objeto = objeto;
+		}
+	}
+
+	private class ValorNulo implements Comparable<ValorNulo> {
+		@Override
+		public int hashCode() {
+			return 0;
+		}
+
+		@Override
+		public int compareTo(ValorNulo o) {
+			return 0;
 		}
 	}
 
@@ -71,6 +81,14 @@ public class QueryImpl {
 		return resultList;
 	}
 
+	/**
+	 * Realiza o agrupamento de uma relacao
+	 * 
+	 * @param relacaoEntrada
+	 * @param agrupamento
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private Collection<ResultObject> agrupamento(Collection<ResultObject> relacaoEntrada, Agrupamento agrupamento) throws CampoInexistenteException {
 		Map<String, ResultObject> hashes = new HashMap<String, ResultObject>();
 		//
@@ -87,7 +105,7 @@ public class QueryImpl {
 	}
 
 	/**
-	 * Metodo para gera o hash do agrupamento
+	 * Metodo para gera o hash do agrupamento com base nos campos de agrupamento
 	 * 
 	 * @param objeto
 	 * @param agrupamento
@@ -97,11 +115,18 @@ public class QueryImpl {
 	private String hashAgrupamento(ResultObject objeto, Agrupamento agrupamento) throws CampoInexistenteException {
 		String hash = "";
 		for (ProjecaoCampo campo : agrupamento.getCampos()) {
-			hash += QueryUtils.getValorDoCampo(objeto, campo).hashCode();
+			hash += getValorCampo(campo, objeto);
 		}
 		return hash;
 	}
 
+	/**
+	 * Ordena uma relacao usando um comparator
+	 * 
+	 * @param relacaoEntrada
+	 * @param ordenacao
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private Collection<ResultObject> ordenacao(Collection<ResultObject> relacaoEntrada, Ordenacao ordenacao) {
 		List<ResultObject> resultado = new ArrayList<ResultObject>(relacaoEntrada);
 		//
@@ -113,6 +138,13 @@ public class QueryImpl {
 		return resultado;
 	}
 
+	/**
+	 * Resolve as restricoes que estao ligadas a um determinado no
+	 * 
+	 * @param raiz
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private ResultList resolveRestricoes(NoArvore raiz) throws Exception {
 		ResultList resultado = new ResultList();
 		//
@@ -125,6 +157,13 @@ public class QueryImpl {
 		return resultado;
 	}
 
+	/**
+	 * Faz o produto cartesiano com os filhos de um no da arvore de consulta
+	 * 
+	 * @param no
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private ResultList produtoCartesiano(NoArvore no) throws Exception {
 		ResultList resultado = new ResultList();
 		//
@@ -152,6 +191,14 @@ public class QueryImpl {
 		return resultado;
 	}
 
+	/**
+	 * Resolve as restricoes recursivamente. A relacao resultante de cada
+	 * restricao resolvida serve de entrada para a restricao anterior.
+	 * 
+	 * @param no
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private ResultList restricao(NoArvore no) throws Exception {
 		Object operacao = no.getOperacao();
 		//
@@ -218,6 +265,15 @@ public class QueryImpl {
 		return resultado;
 	}
 
+	/**
+	 * Efetua a juncao entre duas relacoes utilizando loops aninhados.
+	 * 
+	 * @param relacaoEntrada1
+	 * @param relacaoEntrada2
+	 * @param restricao
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private ResultList juncaoLoopAninhado(ResultList relacaoEntrada1, ResultList relacaoEntrada2, RestricaoSimples restricao) throws Exception {
 		ResultList resultado = new ResultList();
 		//
@@ -227,11 +283,32 @@ public class QueryImpl {
 		OperadorRelacional operadorRelacional = restricao.getOperadorRelacional();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
-			Comparable<Object> valor1 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto1, operando1);
+			/*Retorna o valor do primeiro operando*/
+			Object valor1 = getValorCampo(operando1, objeto1);
+			if (!(valor1 instanceof Comparable))
+				continue;
+
 			for (ResultObject objeto2 : relacaoEntrada2) {
-				Comparable<Object> valor2 = (Comparable<Object>) QueryUtils.getValorDoCampo(objeto2, operando2);
+				/*Retorna o valor do segundo operando*/
+				Object valor2 = getValorCampo(operando2, objeto2);
+				if (!(valor2 instanceof Comparable))
+					continue;
+
+				/*Neste ponto, verifica se os valores de juncao sao do mesmo tipo de dado. 
+				Caso nao sejam, uma excecao eh lancada e o processo deve continuar na proxima tupla*/
+				try {
+					valor1 = verificaTiposOperandos(valor1, valor2);
+					valor2 = verificaTiposOperandos(valor2, valor1);
+				} catch (TiposIncompativeisException e) {
+					continue;
+				}
+
+				/*Converte os valores dos operando para Comparable para que seja possivel
+				efetuar a comparacao*/
+				Comparable<Object> valor1Comp = (Comparable<Object>) valor1;
+				Comparable<Object> valor2Comp = (Comparable<Object>) valor2;
 				//
-				if (verificaCondicao(operadorRelacional.compara(valor1, valor2, null), restricao)) {
+				if (verificaCondicao(operadorRelacional.compara(valor1Comp, valor2Comp, null), restricao)) {
 					ResultObject resultObject = new ResultObject();
 					resultObject.putAll(objeto1);
 					resultObject.putAll(objeto2);
@@ -304,12 +381,11 @@ public class QueryImpl {
 	 * 
 	 * @param relacaoEntrada
 	 * @param restricao
-	 * @throws CampoNaoComparableException
+	 * @throws ValorInvalidoException
 	 * @throws CampoInexistenteException
 	 * @author Douglas Matheus de Souza em 22/10/2011
 	 */
-	private ResultList buscaLinear(ResultList relacaoEntrada, RestricaoSimples restricao) throws CampoNaoComparableException,
-			CampoInexistenteException {
+	private ResultList buscaLinear(ResultList relacaoEntrada, RestricaoSimples restricao) throws CampoInexistenteException {
 		ResultList resultado = new ResultList();
 
 		/*Guarda os operandos e o operador da restricao*/
@@ -319,7 +395,9 @@ public class QueryImpl {
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
 		for (ResultObject objeto : relacaoEntrada) {
-			Object valorOperando1 = getValorOperandoBuscaLinear(operando1, objeto);
+			Object valorOperando1 = getValorOperando(operando1, objeto);
+			if (!(valorOperando1 instanceof Comparable))
+				continue;
 
 			/*Se eh uma instrucao IS TRUE ou IS FALSE, compara logo de cara, uma vez que nao*/
 			/*existem outros operandos na restricao*/
@@ -332,32 +410,20 @@ public class QueryImpl {
 
 			/*Se eh uma instrucao IS NULL, segue o mesmo caminho das instrucoes IS TRUE e IS FALSE*/
 			if (operadorRelacional.getClass() == Nulo.class) {
-				if (verificaCondicao(valorOperando1 == null, restricao)) {
+				if (verificaCondicao(valorOperando1.getClass() == ValorNulo.class, restricao)) {
 					resultado.add(objeto);
 				}
 				continue;
 			}
 
-			Object valorOperando2 = getValorOperandoBuscaLinear(operando2, objeto);
-
-			/*Caso o valor do campo na tupla seja NULL, eh um caso "especial" */
-			if (valorOperando1 == null || valorOperando2 == null) {
-				if (operadorRelacional.getClass() == Igual.class) {
-					if (restricao.isNegacao()) {
-						resultado.add(objeto);
-					}
-				} else if (operadorRelacional.getClass() == Diferente.class) {
-					if (!restricao.isNegacao()) {
-						resultado.add(objeto);
-					}
-				}
+			Object valorOperando2 = getValorOperando(operando2, objeto);
+			if (!(valorOperando2 instanceof Comparable))
 				continue;
-			}
 
 			try {
-				valorOperando1 = getValorOperandoTiposCompativeis(valorOperando1, valorOperando2);
-				valorOperando2 = getValorOperandoTiposCompativeis(valorOperando2, valorOperando1);
-			} catch (OperandosIncompativeisException e) {
+				valorOperando1 = verificaTiposOperandos(valorOperando1, valorOperando2);
+				valorOperando2 = verificaTiposOperandos(valorOperando2, valorOperando1);
+			} catch (TiposIncompativeisException e) {
 				continue;
 			}
 
@@ -377,38 +443,72 @@ public class QueryImpl {
 		return resultado;
 	}
 
+	/**
+	 * Verifica a condicao de uma restricao
+	 * 
+	 * @param comparacao
+	 * @param restricao
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
 	private boolean verificaCondicao(boolean comparacao, RestricaoSimples restricao) {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
 	}
 
-	private Object getValorOperandoBuscaLinear(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException,
-			CampoNaoComparableException {
-		Object valor = operando.getValor();
+	/**
+	 * Retorna o valor de um operando de uma restricao
+	 * 
+	 * @param operando
+	 * @param resultObject
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
+	private Object getValorOperando(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
 		if (operando.getClass() == ProjecaoCampo.class) {
-			valor = QueryUtils.getValorDoCampo(resultObject, (ProjecaoCampo) operando);
-			if (!(valor instanceof Comparable<?>))
-				throw new CampoNaoComparableException("O valor \"" + operando.getValor() + "\" deve implementar a interface Comparable.");
+			return getValorCampo((ProjecaoCampo) operando, resultObject);
+		}
+		return operando.getValor();
+	}
+
+	/**
+	 * Retorna o valor de um atributo de um objeto
+	 * 
+	 * @param operando
+	 * @param resultObject
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
+	private Object getValorCampo(ProjecaoCampo operando, ResultObject resultObject) throws CampoInexistenteException {
+		Object valor = QueryUtils.getValorDoCampo(resultObject, operando);
+		if (valor == null) {
+			return new ValorNulo();
 		}
 		return valor;
 	}
 
-	private Object getValorOperandoTiposCompativeis(Object valor1, Object valor2) throws OperandosIncompativeisException {
+	/**
+	 * Verifica se os tipos de dados de dois valores sao compativeis
+	 * 
+	 * @param valor1
+	 * @param valor2
+	 * @throws TiposIncompativeisException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
+	private Object verificaTiposOperandos(Object valor1, Object valor2) throws TiposIncompativeisException {
 		if (valor1.getClass() != valor2.getClass()) {
-			/*Valores numericos podem ser de classes diferentes, uma vez que serao comparados
-			 * sempre como Double. Entao*/
+			/*Valores numericos podem ser de classes diferentes (Double, Integer, Float...), 
+			uma vez que serao comparados sempre como Double. Entao, caso somente um dos dois 
+			seja numerico, lanca excecao*/
 			if (valor1 instanceof Number ^ valor2 instanceof Number)
-				throw new OperandosIncompativeisException();
+				throw new TiposIncompativeisException();
+
+			if (valor1 instanceof ValorNulo ^ valor2 instanceof ValorNulo)
+				throw new TiposIncompativeisException();
 		}
 		//
 		if (valor1 instanceof String) {
-			/*Para Strings, os valores sao convertidos para minusculo para que fiquem iguais*/
+			/*Para Strings, os valores sao convertidos para minusculo e sem acentuacao para que fiquem iguais*/
 			return JoqiUtil.retiraAcentuacao(((String) valor1).toLowerCase());
 		} else if (valor1 instanceof Number) {
-			/*Se comparacao for entre um numero e um "nao numero", eh invalida*/
-			if (!(valor2 instanceof Number)) {
-				throw new OperandosIncompativeisException();
-			}
-
 			/*Para valores numericos a comparacao eh feita sempre em Double*/
 			return ((Number) valor1).doubleValue();
 		}

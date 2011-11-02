@@ -27,7 +27,7 @@ import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
-import br.com.joqi.semantico.exception.OperandosIncompativeisException;
+import br.com.joqi.semantico.exception.TiposIncompativeisException;
 
 /**
  * Implementacao das clausulas da query
@@ -247,7 +247,7 @@ public class QueryImplOld3 {
 				valorOperando1 = getValorOperando(valorOperando1, valorOperando2, valorOperandoAux);
 				valorOperando2 = getValorOperando(valorOperando2, valorOperando1, valorOperandoAux);
 				valorOperandoAux = getValorOperando(valorOperandoAux, valorOperando1, valorOperando2);
-			} catch (OperandosIncompativeisException e) {
+			} catch (TiposIncompativeisException e) {
 			}
 
 			/*Converte os valores dos operando para Comparable para que seja possivel*/
@@ -325,11 +325,11 @@ public class QueryImplOld3 {
 		} else if (valorOperando instanceof Number) {
 			/*Se comparacao for entre um numero e um "nao numero", eh invalida*/
 			if (!(valorOperandoOutro1 instanceof Number)) {
-				throw new OperandosIncompativeisException();
+				throw new TiposIncompativeisException();
 			}
 			if (valorOperandoOutro2 != null) {
 				if (!(valorOperandoOutro2 instanceof Number))
-					throw new OperandosIncompativeisException();
+					throw new TiposIncompativeisException();
 			}
 			/*Para valores numericos a comparacao eh feita sempre em Double*/
 			return ((Number) valorOperando).doubleValue();

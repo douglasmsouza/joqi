@@ -11,7 +11,11 @@ public class Pessoa {
 	private int cdMae;
 	private boolean apareceNaConsulta;
 	private Date dtNascimento;
-
+	private Pessoa irmao;
+	
+	public Pessoa() {
+	}
+	
 	public Pessoa(int cdPessoa, String nmPessoa, int vlIdade, int cdPai, int cdMae, boolean apareceNaConsulta) {
 		this(cdPessoa, nmPessoa, vlIdade, cdPai, cdMae, apareceNaConsulta, null);
 	}
@@ -23,7 +27,7 @@ public class Pessoa {
 		this.cdPai = cdPai;
 		this.cdMae = cdMae;
 		this.apareceNaConsulta = apareceNaConsulta;
-		this.dtNascimento = dtNascimento;
+		this.dtNascimento = dtNascimento; 
 	}
 
 	public int getCdPessoa() {
@@ -80,6 +84,14 @@ public class Pessoa {
 
 	public void setDtNascimento(Date dtNascimento) {
 		this.dtNascimento = dtNascimento;
+	}
+
+	public Pessoa getIrmao() {
+		return irmao;
+	}
+
+	public void setIrmao(Pessoa irmao) {
+		this.irmao = irmao;
 	}
 
 	@Override

@@ -1,9 +1,8 @@
-from	pessoas p1,
-		pessoas p2,
-		pessoas p3,
-		inteiros int
-where	p3.cdPessoa = p2.cdPessoa and
-		p2.cdPessoa = p3.cdPessoa and
-		p1.cdPessoa = p3.cdPessoa
-group by p1.nmPessoa
-order by p1.nmPessoa desc
+from	pessoas pai,
+		pessoas filho,
+		pessoas	irmao
+where	pai.cdPessoa = filho.cdPai and
+		pai.cdPessoa = irmao.cdPai and
+		irmao.cdPessoa <> filho.cdPessoa
+group by filho.nmPessoa
+		
