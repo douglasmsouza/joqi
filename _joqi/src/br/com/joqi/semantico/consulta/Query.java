@@ -84,16 +84,9 @@ public class Query implements IPossuiRestricoes {
 
 	public void getResultado() {
 		try {
-			/*QueryImpl queryImpl = new QueryImpl(this, new BancoConsulta());*/
-			/*QueryImplOtimizada queryImpl = new QueryImplOtimizada(this, new BancoConsulta());*/
-			/*QueryImplOtimizada2 queryImpl = new QueryImplOtimizada2(this, new BancoConsulta());*/
-			/*QueryImplOtimizada3 queryImpl = new QueryImplOtimizada3(this, new BancoConsulta());			
-			queryImpl.getResultSet();*/
-			//
-			//
 			PlanoExecucao planoExecucao = new PlanoExecucao();
 			ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
-			QueryImplOtimizada4 queryImplOtimizada4 = new QueryImplOtimizada4(arvore);
+			QueryImpl queryImplOtimizada4 = new QueryImpl(arvore);
 			//
 			arvore.imprime();
 			double time = System.currentTimeMillis();
