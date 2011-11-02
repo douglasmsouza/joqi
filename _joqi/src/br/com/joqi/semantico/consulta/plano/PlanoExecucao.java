@@ -37,7 +37,7 @@ public class PlanoExecucao {
 	private class RelacionamentoFilhoJuncao {
 		boolean relacao1;
 		boolean relacao2;
-		boolean primeiraRelacaoJuncao;
+		boolean ladoEsquerdoJuncao;
 	}
 
 	/*Lista auxiliar que guarda quais restricoes ja foram organizadas*/
@@ -422,7 +422,11 @@ public class PlanoExecucao {
 
 	/**
 	 * Arranja as juncoes de maneira que fiquem ligadas as suas duas relacoes de
-	 * entrada.
+	 * entrada. O algoritmo parte da raiz das restricoes e desce na arvore ate
+	 * encontrar a ultima juncao. Ao encontrar esta ultima juncao, vai
+	 * transformando em seus irmaos todos os filhos cuja subarvore nao possuem
+	 * nenhum relacionamento com a propria juncao. O processo vai subindo na
+	 * arvore ate que a ultima juncao seja visitada.
 	 * 
 	 * @author Douglas Matheus de Souza em 19/10/2011
 	 */
@@ -430,7 +434,7 @@ public class PlanoExecucao {
 		while (raiz != null) {
 			raiz = raiz.getFilho();
 
-			/*Ordena as juncoes nas subarvores*/
+			/*Caso encontra uma subarvore (restricao entre parenteses), esta subarvore eh resolvida*/
 			while (raiz != null && raiz.getOperacao().getClass() == ArvoreConsulta.class) {
 				ordenaRestricoesJuncoes(((ArvoreConsulta) raiz.getOperacao()).getRaizRestricoes().getFilho());
 				raiz = raiz.getFilho();
@@ -439,7 +443,7 @@ public class PlanoExecucao {
 			if (raiz == null)
 				break;
 
-			/*Vai descendo na arvore arvore ateh achar a ultima restricao que faz juncao*/
+			/*Vai descendo na arvore arvore ateh acha a ultima juncao*/
 			while (raiz.getOperacao().getClass() == RestricaoSimples.class
 					&& ((RestricaoSimples) raiz.getOperacao()).getTipoBusca() != TipoBusca.LINEAR) {
 				raiz = raiz.getFilho();
@@ -461,13 +465,13 @@ public class PlanoExecucao {
 				while (filho != null) {
 					RelacionamentoFilhoJuncao relacionamentoFilhoJuncao = getRelacionamentoFilhoJuncao(filho, relacaoJuncao1, relacaoJuncao2);
 					/*Caso o filho tenha relacionamento com a primeira relacao de juncao, deve
-					 virar o primeiro filho da juncao.*/
-					if (relacionamentoFilhoJuncao.primeiraRelacaoJuncao) {
+					 virar o primeiro filho da juncao. Os filhos devem seguir a mesma ordem das
+					 relacoes que irao fazer a juncao*/
+					if (relacionamentoFilhoJuncao.ladoEsquerdoJuncao) {
 						raiz.removeFilho(filho);
 						raiz.addFilho(filho);
 					}
-					/*Caso o filho nao tenha nenhuma relacao com a juncao, a juncao deve assumir
-					 que ele ele eh seu irmao*/
+					/*Caso o filho nao tenha nenhuma relacao com a juncao, deve virar um de seus irmaos*/
 					if (!relacionamentoFilhoJuncao.relacao1 && !relacionamentoFilhoJuncao.relacao2) {
 						raiz.removeFilho(filho);
 						raiz.addIrmao(filho);
@@ -475,12 +479,13 @@ public class PlanoExecucao {
 					//
 					filho = filho.getIrmao();
 				}
-				/*Caso a raiz fique somente no fim do processo, eh porq ela consegue fazer
-				  a juncao com somente uma entrada. Sendo assim, pode efetuar busca linear.*/
+				/*Se no fim do processamento da juncao ela possuir somente um filho,significa que ela
+				  consegue efetuar a juncao com um unica relacao de entrada. Neste caso, deve-se utilizar
+				  o algoritmo de busca linear para resolver a restricao*/
 				if (raiz.getFilho().getIrmao() == null) {
 					((RestricaoSimples) raiz.getOperacao()).setTipoBusca(TipoBusca.LINEAR);
 				}
-				//
+				/*Sobe uma restricao na arvore*/
 				raiz = raiz.getPai();
 			}
 			//
@@ -489,7 +494,10 @@ public class PlanoExecucao {
 	}
 
 	/**
-	 * Verifica qual o relacionamento de um no com uma juncao
+	 * Verifica qual o relacionamento de um no com uma juncao. Este metodo serve
+	 * para verificar se uma subarvore que esta ligada a uma juncao realmente
+	 * serve de entrada para esta juncao, ou seja, se nesta subarvore uma ou
+	 * ambas as relacoes da juncao sao calculadas em algum momento.
 	 * 
 	 * @param no
 	 * @param relacaoJuncao1
@@ -500,52 +508,39 @@ public class PlanoExecucao {
 		RelacionamentoFilhoJuncao retorno = new RelacionamentoFilhoJuncao();
 		//
 		if (no != null) {
-			retorno = getRelacionamentoFilhoJuncaoAux(no, relacaoJuncao1, relacaoJuncao2);
+			String relacaoFilho1 = null;
+			String relacaoFilho2 = null;
+			/*Busca quais relacoes sao usadas nos filhos, dependendo do tipo de operacao*/
+			if (no.getOperacao().getClass() == RestricaoSimples.class) {
+				RestricaoSimples restricaoFilho = (RestricaoSimples) no.getOperacao();
+				if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
+					relacaoFilho1 = getRelacaoString((RestricaoSimples) no.getOperacao());
+				} else {
+					relacaoFilho1 = restricaoFilho.getOperando1().getRelacao();
+					relacaoFilho2 = restricaoFilho.getOperando2().getRelacao();
+				}
+			} else {
+				relacaoFilho1 = ((Relacao) no.getOperacao()).getNomeNaConsulta();
+			}
+			//
+			retorno.relacao1 = relacaoFilho1.equals(relacaoJuncao1) || relacaoFilho1.equals(relacaoJuncao2);
+			retorno.relacao2 = relacaoFilho2 != null && (relacaoFilho2.equals(relacaoJuncao1) || relacaoFilho2.equals(relacaoJuncao2));
+			retorno.ladoEsquerdoJuncao = relacaoFilho1.equals(relacaoJuncao1) || (relacaoFilho2 != null && relacaoFilho2.equals(relacaoJuncao1));
+
 			/*Percore a subarvore para verificar se existe algum relacionamento*/
 			NoArvore filho = no.getFilho();
-			while (filho != null) {
-				NoArvore irmao = filho.getIrmao();
-				while (irmao != null) {
-					RelacionamentoFilhoJuncao relacionamentoIrmao = getRelacionamentoFilhoJuncaoAux(irmao, relacaoJuncao1, relacaoJuncao2);
-					retorno.relacao1 = retorno.relacao1 || relacionamentoIrmao.relacao1;
-					retorno.relacao2 = retorno.relacao2 || relacionamentoIrmao.relacao2;
-					retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || relacionamentoIrmao.primeiraRelacaoJuncao;
-					//
-					irmao = irmao.getIrmao();
-				}
-				RelacionamentoFilhoJuncao relacionamentoFilho = getRelacionamentoFilhoJuncaoAux(filho, relacaoJuncao1, relacaoJuncao2);
-				retorno.relacao1 = retorno.relacao1 || relacionamentoFilho.relacao1;
-				retorno.relacao2 = retorno.relacao2 || relacionamentoFilho.relacao2;
-				retorno.primeiraRelacaoJuncao = retorno.primeiraRelacaoJuncao || relacionamentoFilho.primeiraRelacaoJuncao;
+			if (filho != null) {
+				RelacionamentoFilhoJuncao relacionamentoSubarvore = getRelacionamentoFilhoJuncao(filho, relacaoJuncao1, relacaoJuncao2);
+				retorno.relacao1 = retorno.relacao1 || relacionamentoSubarvore.relacao1;
+				retorno.relacao2 = retorno.relacao2 || relacionamentoSubarvore.relacao2;
+				retorno.ladoEsquerdoJuncao = retorno.ladoEsquerdoJuncao || relacionamentoSubarvore.ladoEsquerdoJuncao;
 				//
-				filho = filho.getFilho();
+				relacionamentoSubarvore = getRelacionamentoFilhoJuncao(filho.getIrmao(), relacaoJuncao1, relacaoJuncao2);
+				retorno.relacao1 = retorno.relacao1 || relacionamentoSubarvore.relacao1;
+				retorno.relacao2 = retorno.relacao2 || relacionamentoSubarvore.relacao2;
+				retorno.ladoEsquerdoJuncao = retorno.ladoEsquerdoJuncao || relacionamentoSubarvore.ladoEsquerdoJuncao;
 			}
 		}
-		//
-		return retorno;
-	}
-
-	private RelacionamentoFilhoJuncao getRelacionamentoFilhoJuncaoAux(NoArvore no, String relacaoJuncao1, String relacaoJuncao2) {
-		RelacionamentoFilhoJuncao retorno = new RelacionamentoFilhoJuncao();
-		//
-		String relacaoFilho1 = null;
-		String relacaoFilho2 = null;
-		//
-		if (no.getOperacao().getClass() == RestricaoSimples.class) {
-			RestricaoSimples restricaoFilho = (RestricaoSimples) no.getOperacao();
-			if (restricaoFilho.getTipoBusca() == TipoBusca.LINEAR) {
-				relacaoFilho1 = getRelacaoString((RestricaoSimples) no.getOperacao());
-			} else {
-				relacaoFilho1 = restricaoFilho.getOperando1().getRelacao();
-				relacaoFilho2 = restricaoFilho.getOperando2().getRelacao();
-			}
-		} else {
-			relacaoFilho1 = ((Relacao) no.getOperacao()).getNomeNaConsulta();
-		}
-		//
-		retorno.relacao1 = relacaoFilho1.equals(relacaoJuncao1) || relacaoFilho1.equals(relacaoJuncao2);
-		retorno.relacao2 = relacaoFilho2 != null && (relacaoFilho2.equals(relacaoJuncao1) || relacaoFilho2.equals(relacaoJuncao2));
-		retorno.primeiraRelacaoJuncao = relacaoFilho1.equals(relacaoJuncao1) || (relacaoFilho2 != null && relacaoFilho2.equals(relacaoJuncao1));
 		//
 		return retorno;
 	}
