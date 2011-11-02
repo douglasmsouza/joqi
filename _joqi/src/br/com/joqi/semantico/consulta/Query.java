@@ -2,7 +2,7 @@ package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +36,7 @@ public class Query implements IPossuiRestricoes {
 		objetoConsulta = new BancoConsulta();
 		//
 		projecoes = new ArrayList<Projecao<?>>();
-		relacoes = new HashSet<Relacao>();
+		relacoes = new LinkedHashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
 		ordenacao = new Ordenacao();
 		agrupamento = new Agrupamento();

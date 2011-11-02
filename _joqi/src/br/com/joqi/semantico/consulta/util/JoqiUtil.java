@@ -41,8 +41,10 @@ public class JoqiUtil {
 		for (String h : headers) {
 			char[] header = new char[tamanhoColuna];
 			Arrays.fill(header, ' ');
-			for (int i = 0; i < h.length(); i++) {
+			int i = 0;
+			while (i < tamanhoColuna && i < h.length()) {
 				header[i] = h.charAt(i);
+				i++;
 			}
 			System.out.print(header);
 		}
@@ -52,11 +54,24 @@ public class JoqiUtil {
 		//
 		for (ResultObject objeto : resultSet) {
 			for (String c : headers) {
+				Object o = objeto.get(c);
 				char[] campo = new char[tamanhoColuna];
 				Arrays.fill(campo, ' ');
-				String valor = objeto.get(c).toString();
-				for (int i = 0; i < valor.length(); i++) {
-					campo[i] = valor.charAt(i);
+				String valor = o.toString();
+				if (valor == null) {
+					campo[0] = 'N';
+					campo[1] = 'U';
+					campo[2] = 'L';
+					campo[3] = 'L';
+					for (int i = 4; i < tamanhoColuna; i++) {
+						campo[i] = ' ';
+					}					
+				} else {
+					int i = 0;
+					while (i < tamanhoColuna && i < valor.length()) {
+						campo[i] = valor.charAt(i);
+						i++;
+					}
 				}
 				System.out.print(campo);
 			}
