@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
@@ -141,8 +139,8 @@ public class QueryImpl {
 			//
 			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
 				Object valor = getValorCampo(funcao.getCampo(), objeto);
-				FuncaoAgregacao funcaoObjetoCorrente = (FuncaoAgregacao) hashes.get(hash).get(funcao.toString());
-				funcaoObjetoCorrente.atualizaResultado(valor);
+				FuncaoAgregacao funcaoObjeto = (FuncaoAgregacao) hashes.get(hash).get(funcao.toString());
+				funcaoObjeto.atualizaResultado(valor);
 			}
 		}
 		//
