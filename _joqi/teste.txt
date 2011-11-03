@@ -1,8 +1,4 @@
 select	avoPaterno.nmPessoa avoPaterno,
-		count(neto.nmPessoa) countNetos,
-		sum(neto.vlIdade) sumIdadeNetos,
-		min(neto.vlIdade) minIdadeNetos,
-		max(neto.vlIdade) maxIdadeNetos,
 		avg(neto.vlIdade) avgIdadeNetos
 from	pessoas avoPaterno,
 		pessoas pai,

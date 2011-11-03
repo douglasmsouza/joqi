@@ -139,6 +139,7 @@ public class QueryImpl {
 			//
 			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
 				Object valor = getValorCampo(funcao.getCampo(), objeto);
+				//
 				FuncaoAgregacao funcaoObjeto = (FuncaoAgregacao) hashes.get(hash).get(funcao.toString());
 				funcaoObjeto.atualizaResultado(valor);
 			}
