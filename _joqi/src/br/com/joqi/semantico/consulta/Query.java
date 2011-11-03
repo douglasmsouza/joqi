@@ -14,6 +14,7 @@ import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoFuncaoAgregacao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
@@ -45,6 +46,10 @@ public class Query implements IPossuiRestricoes {
 
 	public void addProjecao(Projecao<?> projecao) {
 		projecoes.add(projecao);
+		//
+		if (projecao instanceof ProjecaoFuncaoAgregacao) {
+			agrupamento.addFuncaoAgregacao(((ProjecaoFuncaoAgregacao) projecao).getValor());
+		}
 	}
 
 	public void addRelacao(Relacao relacao) throws RelacaoInexistenteException, ClausulaFromException {

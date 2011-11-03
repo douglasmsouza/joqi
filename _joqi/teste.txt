@@ -1,16 +1,9 @@
-select	avo.nmPessoa avo,
-		pai.nmPessoa pai,			
-		mae.nmPessoa mae,
-		filho.nmPessoa filho		
-from 	pessoas avo,
+select	avoPaterno.nmPessoa avoPaterno,
+		sum(neto.vlIdade) qtNetos
+from	pessoas avoPaterno,
 		pessoas pai,
-		pessoas mae,
-		pessoas filho
-where	filho.cdPai = pai.cdPessoa and
-		pai.cdPai = avo.cdPessoa and
-		mae.cdPessoa = filho.cdMae		
-order by avo.nmPessoa, 
-		 pai.nmPessoa, 
-		 mae.nmPessoa, 
-		 filho.nmPessoa					
-				
+		pessoas neto
+where	avoPaterno.cdPessoa = pai.cdPai and
+		neto.cdPai = pai.cdPessoa
+group by avoPaterno.cdPessoa		
+order by avoPaterno.nmPessoa

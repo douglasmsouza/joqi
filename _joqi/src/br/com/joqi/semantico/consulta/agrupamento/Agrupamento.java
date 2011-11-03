@@ -1,16 +1,20 @@
 package br.com.joqi.semantico.consulta.agrupamento;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 
 public class Agrupamento {
 
 	private Set<ProjecaoCampo> campos;
+	private Set<FuncaoAgregacao> funcoesAgregacao;
 
 	public Agrupamento() {
 		this.campos = new LinkedHashSet<ProjecaoCampo>();
+		this.funcoesAgregacao = new HashSet<FuncaoAgregacao>();
 	}
 
 	public Set<ProjecaoCampo> getCampos() {
@@ -19,6 +23,14 @@ public class Agrupamento {
 
 	public void addCampo(ProjecaoCampo campo) {
 		campos.add(campo);
+	}
+
+	public void addFuncaoAgregacao(FuncaoAgregacao funcao) {
+		funcoesAgregacao.add(funcao);
+	}
+
+	public Set<FuncaoAgregacao> getFuncoesAgregacao() {
+		return funcoesAgregacao;
 	}
 
 	@Override
