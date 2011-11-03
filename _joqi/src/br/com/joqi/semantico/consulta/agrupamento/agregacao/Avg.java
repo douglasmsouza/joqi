@@ -1,9 +1,12 @@
 package br.com.joqi.semantico.consulta.agrupamento.agregacao;
 
-public class Avg extends FuncaoAgregacao {
+public class Avg extends Sum {
+
+	private int qtRegistros;
 
 	public Avg() {
-		super(0);
+		super();
+		this.qtRegistros = 0;
 	}
 
 	@Override
@@ -20,7 +23,12 @@ public class Avg extends FuncaoAgregacao {
 
 	@Override
 	public void atualizaResultado(Object valor) {
-		
+		super.atualizaResultado(valor);
+		this.qtRegistros++;
 	}
 
+	@Override
+	public Number getResultado() {
+		return super.getResultado().doubleValue() / qtRegistros;
+	}
 }
