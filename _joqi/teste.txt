@@ -1,12 +1,16 @@
-select	avo.nmPessoa nomeAvo,
-		avo.vlIdade idadeAvo,
-		paiMae.nmPessoa nomePaiMae,
-		paiMae.vlIdade idadePaiMae,
-		filho.nmPessoa nomeFilho,
-		filho.vlIdade idadeFilho,
-		count(filho.cdPessoa) qtFilhos
+select	avo.nmPessoa avo,
+		pai.nmPessoa pai,			
+		mae.nmPessoa mae,
+		filho.nmPessoa filho		
 from 	pessoas avo,
-		pessoas paiMae,
-		pessoas filho		
-where	(paiMae.cdPessoa = filho.cdPai or paiMae.cdPessoa = filho.cdMae) and
-		(avo.cdPessoa = paiMae.cdPai or avo.cdPessoa = paiMae.cdMae)		
+		pessoas pai,
+		pessoas mae,
+		pessoas filho
+where	filho.cdPai = pai.cdPessoa and
+		pai.cdPai = avo.cdPessoa and
+		mae.cdPessoa = filho.cdMae		
+order by avo.nmPessoa, 
+		 pai.nmPessoa, 
+		 mae.nmPessoa, 
+		 filho.nmPessoa					
+				
