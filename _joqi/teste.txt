@@ -1,9 +1,13 @@
 select	avoPaterno.nmPessoa avoPaterno,
-		sum(neto.vlIdade) qtNetos
+		count(neto.nmPessoa) countNetos,
+		sum(neto.vlIdade) sumIdadeNetos,
+		min(neto.vlIdade) minIdadeNetos,
+		max(neto.vlIdade) maxIdadeNetos,
+		avg(neto.vlIdade) avgIdadeNetos
 from	pessoas avoPaterno,
 		pessoas pai,
 		pessoas neto
 where	avoPaterno.cdPessoa = pai.cdPai and
-		neto.cdPai = pai.cdPessoa
-group by avoPaterno.cdPessoa		
+		neto.cdPai = pai.cdPessoa	
+group by avoPaterno.nmPessoa
 order by avoPaterno.nmPessoa

@@ -139,6 +139,8 @@ public class PlanoExecucao {
 				verificaSemanticaOperando(campo, null, "group by", ClausulaGroupByException.class);
 			}
 			arvore.insere(agrupamento);
+		} else if (agrupamento.getFuncoesAgregacao().size() > 0) {
+			throw new ClausulaSelectException("Para utilizar funções de agregação (COUNT(), SUM(), MIN()...) a cláusula GROUP BY deve ser declarada");
 		}
 	}
 
