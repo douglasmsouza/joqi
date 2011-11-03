@@ -102,7 +102,7 @@ public class PlanoExecucao {
 	private void insereProjecoes(ArvoreConsulta arvore, ListaProjecoes projecoes) throws Exception {
 		if (projecoes.size() > 0) {
 			for (Projecao<?> projecao : projecoes) {
-				verificaSemanticaOperando(projecao, null, "select", ClausulaSelectException.class);
+				verificaSemanticaOperando(projecao, projecao, "select", ClausulaSelectException.class);
 			}
 			arvore.insere(projecoes);
 		}

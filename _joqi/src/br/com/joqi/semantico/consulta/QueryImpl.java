@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
+import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
 import br.com.joqi.semantico.consulta.ordenacao.ResultListComparator;
@@ -16,6 +19,7 @@ import br.com.joqi.semantico.consulta.plano.NoArvore;
 import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoFuncaoAgregacao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples.TipoBusca;
@@ -87,7 +91,15 @@ public class QueryImpl {
 			for (ResultObject objeto : resultList) {
 				ResultObject objetoNovo = new ResultObject();
 				for (Projecao<?> projecao : projecoes) {
-					Object valorProjecao = getValorProjecao(projecao, objeto);
+					Object valorProjecao = null;
+					//
+					if (projecao.getClass() == ProjecaoFuncaoAgregacao.class) {
+						FuncaoAgregacao funcao = ((ProjecaoFuncaoAgregacao) projecao).getValor();
+						valorProjecao = ((FuncaoAgregacao) objeto.get(funcao.toString())).getResultado();
+					} else {
+						valorProjecao = getValorProjecao(projecao, objeto);
+					}
+					//
 					objetoNovo.put(projecao.getNomeNaConsulta(), valorProjecao);
 				}
 				resultado.add(objetoNovo);
@@ -117,9 +129,21 @@ public class QueryImpl {
 		//
 		for (ResultObject objeto : relacaoEntrada) {
 			String hash = hashAgrupamento(objeto, agrupamento);
+
 			/*Se hash nao existe na tabela, insere o objeto*/
-			if (!hashes.containsKey(hash))
+			if (!hashes.containsKey(hash)) {
+				for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
+					objeto.put(funcao.toString(), funcao.copia());
+				}
+				//
 				hashes.put(hash, objeto);
+			}
+			//
+			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
+				Object valor = getValorCampo(funcao.getCampo(), objeto);
+				FuncaoAgregacao funcaoObjetoCorrente = (FuncaoAgregacao) hashes.get(hash).get(funcao.toString());
+				funcaoObjetoCorrente.atualizaResultado(valor);
+			}
 		}
 		//
 		relacaoEntrada = null;

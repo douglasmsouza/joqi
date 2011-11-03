@@ -1,0 +1,2 @@
+select	avo.nmPessoa
+from	pessoas
