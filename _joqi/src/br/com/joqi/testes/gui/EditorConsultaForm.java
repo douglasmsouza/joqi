@@ -33,24 +33,24 @@ public class EditorConsultaForm extends javax.swing.JFrame {
 		btnExecutar = new JButton("Executar");
 		btnExecutar.setBounds(109, 11, 89, 23);
 		getContentPane().add(btnExecutar);
-		
+
 		splitPane = new JSplitPane();
 		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		splitPane.setBounds(10, 45, 772, 485);
 		getContentPane().add(splitPane);
-		
-				JScrollPane scrollPane = new JScrollPane();
-				scrollPane.setMinimumSize(new Dimension(23, 150));
-				splitPane.setLeftComponent(scrollPane);
-				
-						textAreaQuery = new JTextArea();
-						scrollPane.setViewportView(textAreaQuery);
-						
-								JScrollPane scrollPane_1 = new JScrollPane();
-								splitPane.setRightComponent(scrollPane_1);
-								
-										tableResultado = new JTable();
-										scrollPane_1.setViewportView(tableResultado);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setMinimumSize(new Dimension(23, 150));
+		splitPane.setLeftComponent(scrollPane);
+
+		textAreaQuery = new JTextArea();
+		scrollPane.setViewportView(textAreaQuery);
+
+		JScrollPane scrollPane_1 = new JScrollPane();
+		splitPane.setRightComponent(scrollPane_1);
+
+		tableResultado = new JTable();
+		scrollPane_1.setViewportView(tableResultado);
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Editor de consultas");
