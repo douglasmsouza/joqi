@@ -96,15 +96,19 @@ public class Query implements IPossuiRestricoes {
 
 	public Collection<ResultObject> getResultList(String query) throws Exception {
 		tempoExecucao = System.currentTimeMillis();
-		//
+
+		/*Executa os analisares lexico e sintatico*/
 		new Parser(this, query).executa();
-		//
+
+		/*Monta a arvore de consulta*/
 		PlanoExecucao planoExecucao = new PlanoExecucao();
 		ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
+
+		/*Executa a consulta com base na arvore montada*/
 		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultList();
-		//
+
 		tempoExecucao = System.currentTimeMillis() - tempoExecucao;
-		//
+
 		return resultado;
 	}
 }
