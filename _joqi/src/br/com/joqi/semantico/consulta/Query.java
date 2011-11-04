@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.com.joqi.parser.ParseException;
 import br.com.joqi.parser.Parser;
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;

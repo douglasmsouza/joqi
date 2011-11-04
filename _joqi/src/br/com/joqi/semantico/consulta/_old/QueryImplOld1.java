@@ -24,8 +24,8 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.IgualBooleano;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
-import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.exception.ClausulaWhereException;
 import br.com.joqi.semantico.exception.TiposIncompativeisException;
 
@@ -107,8 +107,8 @@ public class QueryImplOld1 {
 		//
 		for (ResultObject objeto : resultado) {
 			System.out.println(objeto);
-		}		
-		System.out.println("-------------------------------");		
+		}
+		System.out.println("-------------------------------");
 		System.out.println("Tempo total : " + time + " ms");
 		System.out.println("Registro....: " + resultado.size());
 		System.out.println("-------------------------------");

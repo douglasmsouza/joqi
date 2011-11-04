@@ -6,5 +6,5 @@ public class IgualBooleano extends Igual {
 	public String toString() {
 		return "is";
 	}
-	
+
 }

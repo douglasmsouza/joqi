@@ -1,6 +1,5 @@
 package br.com.joqi.semantico.consulta.restricao.operadorrelacional;
 
-
 public class MenorIgual extends OperadorRelacional {
 
 	@Override
