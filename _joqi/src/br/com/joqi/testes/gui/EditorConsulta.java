@@ -49,19 +49,23 @@ public class EditorConsulta extends EditorConsultaForm {
 						Collection<ResultObject> collection = query.getResultList(queryString);
 						//
 						getLbStatus().setText("Registros: " + collection.size() + "           Tempo: " + query.getTempoExecucao() + " ms");
-						getTableResultado().setModel(new EditorConsultaTableModel(collection));
-						if (query.getProjecoes().size() == 0) {
-							int i = 0;
-							for (Relacao r : query.getRelacoes()) {
-								getTableResultado().getColumnModel().getColumn(i).setHeaderValue(r.getNomeNaConsulta());
-								i++;
+						if (collection.size() > 0) {
+							getTableResultado().setModel(new EditorConsultaTableModel(collection));
+							if (query.getProjecoes().size() == 0) {
+								int i = 0;
+								for (Relacao r : query.getRelacoes()) {
+									getTableResultado().getColumnModel().getColumn(i).setHeaderValue(r.getNomeNaConsulta());
+									i++;
+								}
+							} else {
+								int i = 0;
+								for (Projecao<?> p : query.getProjecoes()) {
+									getTableResultado().getColumnModel().getColumn(i).setHeaderValue(p.getNomeNaConsulta());
+									i++;
+								}
 							}
 						} else {
-							int i = 0;
-							for (Projecao<?> p : query.getProjecoes()) {
-								getTableResultado().getColumnModel().getColumn(i).setHeaderValue(p.getNomeNaConsulta());
-								i++;
-							}
+							JOptionPane.showMessageDialog(null, "Nenhum resultado encontrado");
 						}
 					}
 				} catch (Exception e) {

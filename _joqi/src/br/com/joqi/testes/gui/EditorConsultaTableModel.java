@@ -24,14 +24,13 @@ public class EditorConsultaTableModel extends AbstractTableModel {
 	}
 
 	public EditorConsultaTableModel(Collection<ResultObject> objetos) {
-		this.objetos = objetos.toArray(new ResultObject[0]);
+		this.objetos = objetos.toArray(new ResultObject[]{});
 	}
 
 	@Override
 	public int getColumnCount() {
-		if (objetos != null) {
-			if (objetos.length > 0)
-				return objetos[0].keySet().size();
+		if (objetos != null && objetos.length > 0) {
+			return objetos[0].keySet().size();
 		}
 		return 0;
 	}
@@ -46,7 +45,7 @@ public class EditorConsultaTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		if (objetos != null) {
+		if (objetos != null && objetos.length > 0) {
 			Object[] entries = objetos[rowIndex].entrySet().toArray();
 			return ((Entry<String, Object>) entries[columnIndex]).getValue();
 		}
