@@ -14,6 +14,4 @@ public class ProjecaoBooleana extends Projecao<Boolean> {
 		super(apelido, valor);
 	}
 
-	
-	
 }

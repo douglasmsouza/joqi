@@ -105,7 +105,7 @@ public class JoqiUtil {
 
 		System.out.println("Registros...: " + resultSet.size());
 		System.out.println("Tempo total : " + tempo + " ms");
-		
+
 		for (String x : headers) {
 			for (int i = 0; i < tamanhoColuna; i++)
 				System.out.print("-");

@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import br.com.joqi.semantico.consulta.Query;
 import br.com.joqi.semantico.consulta.projecao.Projecao;

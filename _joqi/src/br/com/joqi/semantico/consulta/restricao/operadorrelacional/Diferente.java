@@ -1,6 +1,5 @@
 package br.com.joqi.semantico.consulta.restricao.operadorrelacional;
 
-
 public class Diferente extends OperadorRelacional {
 
 	@Override
