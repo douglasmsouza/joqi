@@ -22,6 +22,17 @@ public class EditorConsulta extends EditorConsultaForm {
 		//
 		getTableResultado().setModel(new EditorConsultaTableModel());
 		getBtnExecutar().addActionListener(btnExecutarClick());
+		getBtnLimpar().addActionListener(btnLimparClick());
+	}
+
+	private ActionListener btnLimparClick() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				getTextAreaQuery().setText("");
+				getTextAreaQuery().requestFocus();
+			}
+		};
 	}
 
 	private ActionListener btnExecutarClick() {
