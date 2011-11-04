@@ -24,7 +24,7 @@ public class EditorConsultaTableModel extends AbstractTableModel {
 	}
 
 	public EditorConsultaTableModel(Collection<ResultObject> objetos) {
-		this.objetos = objetos.toArray(new ResultObject[]{});
+		this.objetos = objetos.toArray(new ResultObject[] {});
 	}
 
 	@Override
