@@ -1,0 +1,7 @@
+select	pai.nmPessoa,
+	count(filho.cdPessoa) filhos
+from	pessoas pai,
+	pessoas filho
+where	pai.cdPessoa = filho.cdPai
+group by pai.cdPessoa
+order by pai.nmPessoa
