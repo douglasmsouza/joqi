@@ -60,18 +60,11 @@ public class EditorConsulta extends EditorConsultaForm {
 						getLbStatus().setText("Registros: " + collection.size() + "           Tempo: " + query.getTempoExecucao() + " ms");
 						if (collection.size() > 0) {
 							getTableResultado().setModel(new EditorConsultaTableModel(collection));
-							if (query.getProjecoes().size() == 0) {
-								int i = 0;
-								for (Relacao r : query.getRelacoes()) {
-									getTableResultado().getColumnModel().getColumn(i).setHeaderValue(r.getNomeNaConsulta());
-									i++;
-								}
-							} else {
-								int i = 0;
-								for (Projecao<?> p : query.getProjecoes()) {
-									getTableResultado().getColumnModel().getColumn(i).setHeaderValue(p.getNomeNaConsulta());
-									i++;
-								}
+							ResultObject objeto = collection.iterator().next();
+							int i = 0;
+							for (String s : objeto.keySet()) {
+								getTableResultado().getColumnModel().getColumn(i).setHeaderValue(s);
+								i++;
 							}
 						} else {
 							JOptionPane.showMessageDialog(null, "Nenhum resultado encontrado");
