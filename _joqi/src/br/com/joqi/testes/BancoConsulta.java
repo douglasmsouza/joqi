@@ -2,7 +2,13 @@ package br.com.joqi.testes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Vector;
 
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.testes.modelo.Pessoa;
@@ -10,11 +16,11 @@ import br.com.joqi.testes.modelo.Pessoa;
 public class BancoConsulta {
 
 	private List<Pessoa> pessoas;
-	private List<Integer> inteiros;
-	private List<String> strings;
-	private List<Float> floats;
-	private List<Object> todos;
-	private List<Integer> codigos;
+	private Set<Integer> inteiros;
+	private Vector<String> strings;
+	private Float[] floats;
+	private Collection<Object> todos;
+	private Queue<Integer> codigos;
 
 	public BancoConsulta() {
 		pessoas = criaListaPessoas();
@@ -25,21 +31,21 @@ public class BancoConsulta {
 		codigos = criaListaCodigos();
 	}
 
-	private List<Integer> criaListaCodigos() {
-		return new ArrayList<Integer>(Arrays.asList(2, 4, 6, 9, 7, 20, 36, 54));
+	private Queue<Integer> criaListaCodigos() {
+		return new LinkedList<Integer>(Arrays.asList(2, 4, 6, 9, 7, 20, 36, 54));
 	}
 
 	private List<Object> criaListaTodos() {
 		List<Object> list = new ArrayList<Object>();
-		list.addAll(criaListaFloats());
+		list.addAll(Arrays.asList(criaListaFloats()));
 		list.addAll(criaListaInteiros());
 		list.addAll(criaListaStrings());
 		list.addAll(criaListaPessoas());
 		return list;
 	}
 
-	private List<Float> criaListaFloats() {
-		return new ArrayList<Float>(Arrays.asList(1.4291108f, 29.935354f, 94.613106f, 6.0628295f, 42.810368f, 24.656958f, 70.30145f, 16.618633f,
+	private Float[] criaListaFloats() {
+		return new Float[] { 1.4291108f, 29.935354f, 94.613106f, 6.0628295f, 42.810368f, 24.656958f, 70.30145f, 16.618633f,
 				16.544987f, 61.666973f, 21.010345f, 88.59421f, 6.853187f, 3.804469f, 1.348269f, 94.00414f, 78.97231f, 66.82582f, 83.576675f,
 				56.05551f, 79.167915f, 11.363501f, 90.98175f, 23.928648f, 60.164463f, 5.1635323f, 83.64953f, 61.945107f, 45.799732f, 24.365997f,
 				35.020733f, 60.313797f, 58.143764f, 7.373333f, 85.6522f, 14.278102f, 84.39436f, 94.222626f, 60.962875f, 43.30566f, 97.16539f,
@@ -48,11 +54,11 @@ public class BancoConsulta {
 				29.598595f, 67.60458f, 63.06038f, 27.018421f, 36.094944f, 34.831738f, 26.480871f, 21.57551f, 85.272835f, 18.970972f, 72.65681f,
 				52.19031f, 60.06651f, 92.54235f, 24.565262f, 0.95137954f, 15.617472f, 37.02659f, 51.365738f, 21.480537f, 6.848174f, 65.27435f,
 				27.093489f, 13.533127f, 60.507107f, 70.9133f, 52.547085f, 55.74544f, 82.01025f, 24.178337f, 6.235653f, 15.771127f, 77.981766f,
-				43.906086f, 80.83203f, 47.384064f, 74.11108f));
+				43.906086f, 80.83203f, 47.384064f, 74.11108f };
 	}
 
-	private List<String> criaListaStrings() {
-		return new ArrayList<String>(Arrays.asList(
+	private Vector<String> criaListaStrings() {
+		return new Vector<String>(Arrays.asList(
 				"a",
 				"b",
 				"c",
@@ -82,8 +88,8 @@ public class BancoConsulta {
 				));
 	}
 
-	private List<Integer> criaListaInteiros() {
-		return new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+	private Set<Integer> criaListaInteiros() {
+		return new HashSet<Integer>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
 				27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
 				60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92,
 				93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
@@ -365,23 +371,23 @@ public class BancoConsulta {
 		return pessoas;
 	}
 
-	public List<Integer> getInteiros() {
+	public Set<Integer> getInteiros() {
 		return inteiros;
 	}
 
-	public List<String> getStrings() {
+	public Vector<String> getStrings() {
 		return strings;
 	}
 
-	public List<Float> getFloats() {
+	public Float[] getFloats() {
 		return floats;
 	}
 
-	public List<Object> getTodos() {
+	public Collection<Object> getTodos() {
 		return todos;
 	}
 
-	public List<Integer> getCodigos() {
+	public Queue<Integer> getCodigos() {
 		return codigos;
 	}
 

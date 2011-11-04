@@ -17,6 +17,7 @@ public class EditorConsultaTableModel extends AbstractTableModel {
 
 	public void setObjetos(ResultObject[] objetos) {
 		this.objetos = objetos;
+		fireTableDataChanged();
 	}
 
 	public EditorConsultaTableModel() {

@@ -40,7 +40,10 @@ public class EditorConsulta extends EditorConsultaForm {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
+					((EditorConsultaTableModel) getTableResultado().getModel()).setObjetos(null);
+
 					String queryString = getTextAreaQuery().getText();
+
 					if (queryString != null && !queryString.isEmpty()) {
 						Query query = new Query(bancoConsulta);
 						Collection<ResultObject> collection = query.getResultList(queryString);
