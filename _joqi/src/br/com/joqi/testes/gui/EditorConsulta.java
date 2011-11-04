@@ -10,8 +10,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import br.com.joqi.semantico.consulta.Query;
-import br.com.joqi.semantico.consulta.projecao.Projecao;
-import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.testes.BancoConsulta;
 
