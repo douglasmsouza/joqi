@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
+import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
 import br.com.joqi.semantico.consulta.disjuncao.UniaoRestricoes;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
@@ -137,6 +138,9 @@ public class PlanoExecucao {
 		if (agrupamento.getCampos().size() > 0) {
 			for (ProjecaoCampo campo : agrupamento.getCampos()) {
 				verificaSemanticaOperando(campo, null, "group by", ClausulaGroupByException.class);
+			}
+			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
+				verificaSemanticaOperando(funcao.getCampo(), null, "select", ClausulaGroupByException.class);
 			}
 			arvore.insere(agrupamento);
 		} else if (agrupamento.getFuncoesAgregacao().size() > 0) {

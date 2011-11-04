@@ -1,2 +1,9 @@
-select	avo.nmPessoa
-from	pessoas
+select	avoPaterno.nmPessoa avoPaterno,
+		count(neto.cdPessoa) avgIdadeNetos
+from	pessoas avoPaterno,
+		pessoas pai,
+		pessoas neto
+where	avoPaterno.cdPessoa = pai.cdPai and
+		neto.cdPai = pai.cdPessoa	
+group by avoPaterno.nmPessoa
+order by avoPaterno.nmPessoa

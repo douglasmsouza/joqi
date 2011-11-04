@@ -6,11 +6,8 @@ public abstract class FuncaoAgregacao {
 
 	private ProjecaoCampo campo;
 	private Number resultado;
-	//
-	private Number resultadoInicial;
 
 	public FuncaoAgregacao(Number resultado) {
-		this.resultadoInicial = resultado;
 		this.resultado = resultado;
 	}
 
@@ -28,10 +25,6 @@ public abstract class FuncaoAgregacao {
 
 	public void setResultado(Number resultado) {
 		this.resultado = resultado;
-	}
-
-	public void zerarResultado() {
-		this.resultado = resultadoInicial;
 	}
 
 	public abstract void atualizaResultado(Object valor);

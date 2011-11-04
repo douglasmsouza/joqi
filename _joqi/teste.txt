@@ -1,5 +1,5 @@
 select	avoPaterno.nmPessoa avoPaterno,
-		avg(neto.vlIdade) avgIdadeNetos
+		count(neto.cdPessoa) avgIdadeNetos
 from	pessoas avoPaterno,
 		pessoas pai,
 		pessoas neto
