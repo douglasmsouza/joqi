@@ -1,5 +1,14 @@
+------------------------------------------------------------------------------------
+Para a primeira versão
+------------------------------------------------------------------------------------
+- Operador de renomeação
+- Ordenação por funções de agregação
+- Implementação da cláusula HAVING
+
+------------------------------------------------------------------------------------
+Para versões futuras (Verificar possibilidade de implementar na primeira versão)
+------------------------------------------------------------------------------------
 - Implementação de expressões aritméticas com uso de atributos
 - Implementação de outras funções além de count, sum, min, max e avg
 - Permitir consultar atributos além dos atributos da própria instância da classe (Ex: pessoa.irmao.nome = 'joaozinho')
-- Implementação da cláusula HAVING
 - Otimizar projeções, colocando-as junto com as restrições quando possível
