@@ -3,6 +3,7 @@ package br.com.joqi.semantico.consulta;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
@@ -62,8 +63,13 @@ public class QueryUtils {
 				//
 				throw new TipoGenericoException("Tipo genérico não declarado na coleção \"" + nome + "\"");
 			}*/
+
 			if (valor instanceof Collection) {
 				return (Collection<Object>) valor;
+			}
+
+			if (valor instanceof Object[]) {
+				return Arrays.asList((Object[]) valor);
 			}
 			//
 			throw new RelacaoInexistenteException("O objeto \"" + nome + "\" deve implementar a interface Collection");
