@@ -2,6 +2,8 @@ package br.com.joqi.testes.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Collection;
 
 import javax.swing.JOptionPane;
@@ -23,6 +25,13 @@ public class EditorConsulta extends EditorConsultaForm {
 		getTableResultado().setModel(new EditorConsultaTableModel());
 		getBtnExecutar().addActionListener(btnExecutarClick());
 		getBtnLimpar().addActionListener(btnLimparClick());
+		//
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowActivated(WindowEvent e) {
+				getTextAreaQuery().requestFocus();
+			}
+		});
 	}
 
 	private ActionListener btnLimparClick() {
@@ -71,6 +80,8 @@ public class EditorConsulta extends EditorConsultaForm {
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(null, e.toString());
 				}
+				//
+				getTextAreaQuery().requestFocus();
 			}
 		};
 	}

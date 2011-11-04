@@ -1,2 +1,5 @@
-- Permitir uso de nome de campo em expressões aritméticas
-- Implementar funções de agregação (count, max, min, sum, etc...)  	  				   
+- Implementação de expressões aritméticas com uso de atributos
+- Implementação de outras funções além de count, sum, min, max e avg
+- Permitir consultar atributos além dos atributos da própria instância da classe (Ex: pessoa.irmao.nome = 'joaozinho')
+- Implementação da cláusula HAVING
+- Otimizar projeções, colocando-as junto com as restrições quando possível

@@ -1,13 +1,14 @@
 package br.com.joqi.testes.gui;
 
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JSplitPane;
 
 public class EditorConsultaForm extends javax.swing.JFrame {
 
@@ -27,10 +28,12 @@ public class EditorConsultaForm extends javax.swing.JFrame {
 		getContentPane().add(lbStatus);
 
 		btnLimpar = new JButton("Limpar");
+		btnLimpar.setMnemonic(KeyEvent.VK_0);
 		btnLimpar.setBounds(10, 11, 89, 23);
 		getContentPane().add(btnLimpar);
 
 		btnExecutar = new JButton("Executar");
+		btnExecutar.setMnemonic(KeyEvent.VK_F9);
 		btnExecutar.setBounds(109, 11, 89, 23);
 		getContentPane().add(btnExecutar);
 
