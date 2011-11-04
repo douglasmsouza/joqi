@@ -8,7 +8,8 @@ public class Count extends FuncaoAgregacao {
 
 	@Override
 	public void atualizaResultado(Object valor) {
-		super.setResultado(getResultado().intValue() + 1);
+		if (valor != null)
+			super.setResultado(getResultado().intValue() + 1);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
+import br.com.joqi.testes.modelo.Pessoa;
 
 public class BancoConsulta {
 

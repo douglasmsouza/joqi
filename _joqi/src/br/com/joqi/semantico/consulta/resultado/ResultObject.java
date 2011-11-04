@@ -1,9 +1,9 @@
 package br.com.joqi.semantico.consulta.resultado;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ResultObject extends HashMap<String, Object> {
+public class ResultObject extends LinkedHashMap<String, Object> {
 
 	public ResultObject(Map<String, Object> m) {
 		super(m);

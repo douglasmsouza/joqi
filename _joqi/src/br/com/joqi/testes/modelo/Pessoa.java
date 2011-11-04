@@ -1,4 +1,4 @@
-package br.com.joqi.testes;
+package br.com.joqi.testes.modelo;
 
 import java.util.Date;
 

@@ -9,7 +9,7 @@ public class Sum extends FuncaoAgregacao {
 	@Override
 	public void atualizaResultado(Object valor) {
 		if (valor instanceof Number) {
-			super.setResultado(getResultado().intValue() + ((Number) valor).intValue());
+			super.setResultado(super.getResultado().intValue() + ((Number) valor).intValue());
 		}
 	}
 

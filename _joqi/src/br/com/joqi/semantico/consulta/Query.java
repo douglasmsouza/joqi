@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.joqi.parser.ParseException;
+import br.com.joqi.parser.Parser;
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
 import br.com.joqi.semantico.consulta.ordenacao.Ordenacao;
@@ -19,29 +21,30 @@ import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
 import br.com.joqi.semantico.consulta.restricao.Restricao;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
-import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.ClausulaFromException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
-import br.com.joqi.testes.BancoConsulta;
 
 public class Query implements IPossuiRestricoes {
 
-	private BancoConsulta objetoConsulta;
+	private Object objetoConsulta;
 	//
 	private ListaProjecoes projecoes;
 	private Set<Relacao> relacoes;
 	private List<Restricao> restricoes;
 	private Ordenacao ordenacao;
 	private Agrupamento agrupamento;
+	//
+	private double tempoExecucao;
 
-	public Query() {
-		objetoConsulta = new BancoConsulta();
+	public Query(Object objetoConsulta) {
+		this.objetoConsulta = objetoConsulta;
 		//
 		projecoes = new ListaProjecoes();
 		relacoes = new LinkedHashSet<Relacao>();
 		restricoes = new ArrayList<Restricao>();
 		ordenacao = new Ordenacao();
 		agrupamento = new Agrupamento();
+		tempoExecucao = 0;
 	}
 
 	public void addProjecao(Projecao<?> projecao) {
@@ -88,35 +91,21 @@ public class Query implements IPossuiRestricoes {
 		agrupamento.addCampo(campo);
 	}
 
-	public void getResultado() {
-		try {
-			PlanoExecucao planoExecucao = new PlanoExecucao();
-			ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
-			QueryImpl queryImplOtimizada4 = new QueryImpl(arvore);
-			//
-			arvore.imprime();
-			double time = System.currentTimeMillis();
-			Collection<ResultObject> resultado = queryImplOtimizada4.getResultList();
-			String[] colunas;
-			if (projecoes.size() == 0) {
-				colunas = new String[relacoes.size()];
-				int i = 0;
-				for (Relacao r : relacoes) {
-					colunas[i] = r.getNomeNaConsulta();
-					i++;
-				}
-			} else {
-				colunas = new String[projecoes.size()];
-				int i = 0;
-				for (Projecao<?> projecao : projecoes) {
-					colunas[i] = projecao.getNomeNaConsulta();
-					i++;
-				}
-			}
-			time = System.currentTimeMillis() - time;
-			JoqiUtil.imprimeResultado(15, time, colunas, resultado);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public double getTempoExecucao() {
+		return tempoExecucao;
+	}
+
+	public Collection<ResultObject> getResultList(String query) throws Exception {
+		tempoExecucao = System.currentTimeMillis();
+		//
+		new Parser(this, query).executa();
+		//
+		PlanoExecucao planoExecucao = new PlanoExecucao();
+		ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
+		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultList();
+		//
+		tempoExecucao = System.currentTimeMillis() - tempoExecucao;
+		//
+		return resultado;
 	}
 }
