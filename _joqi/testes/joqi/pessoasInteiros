@@ -1,9 +1,0 @@
-from	pessoas p1,
-		pessoas p2,
-		inteiros int
-where	p1.cdPessoa = int.intValue and
-		p2.cdPessoa = int.intValue and
-		p1.vlIdade = 22 or
-		p1.vlIdade > 0
-		
-		
