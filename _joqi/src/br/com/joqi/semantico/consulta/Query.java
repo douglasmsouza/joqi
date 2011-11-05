@@ -94,7 +94,7 @@ public class Query implements IPossuiRestricoes {
 		return tempoExecucao;
 	}
 
-	public Collection<ResultObject> getResultList(String query) throws Exception {
+	public Collection<ResultObject> getResultCollection(String query) throws Exception {
 		tempoExecucao = System.currentTimeMillis();
 
 		/*Executa os analisares lexico e sintatico*/
