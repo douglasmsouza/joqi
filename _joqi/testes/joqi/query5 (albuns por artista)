@@ -1,0 +1,7 @@
+select	art.nmArtista,
+	count(alb.nrAlbum)
+from	albuns alb,
+	artistas art
+where	alb.cdArtista = art.cdArtista
+group by art.cdArtista
+order by art.nmArtista

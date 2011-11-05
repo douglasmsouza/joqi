@@ -1,24 +1,24 @@
 package br.com.joqi.testes.modelo;
 
-public class Disco {
+public class Album {
 
 	private int cdArtista;
-	private int nrDisco;
+	private int nrAlbum;
 	private String nmDisco;
 
-	public Disco(int cdArtista, int nrDisco, String nmDisco) {
+	public Album(int cdArtista, int nrDisco, String nrAlbum) {
 		super();
 		this.cdArtista = cdArtista;
-		this.nrDisco = nrDisco;
-		this.nmDisco = nmDisco;
+		this.nrAlbum = nrDisco;
+		this.nmDisco = nrAlbum;
 	}
 
-	public int getNrDisco() {
-		return nrDisco;
+	public int getNrAlbum() {
+		return nrAlbum;
 	}
 
-	public void setNrDisco(int nrDisco) {
-		this.nrDisco = nrDisco;
+	public void setNrAlbum(int nrAlbum) {
+		this.nrAlbum = nrAlbum;
 	}
 
 	public int getCdArtista() {
