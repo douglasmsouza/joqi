@@ -1,0 +1,6 @@
+select	art.nmArtista,
+	gen.dsGenero
+from	artistas art,
+	generos gen
+where	art.cdGenero = gen.cdGenero
+order by art.nmArtista
