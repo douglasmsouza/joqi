@@ -1,0 +1,5 @@
+select	dis.nmDisco
+from	artistas art,
+	discos dis
+where	art.cdArtista = dis.cdArtista and
+	art.nmArtista like 'ozzy%'
