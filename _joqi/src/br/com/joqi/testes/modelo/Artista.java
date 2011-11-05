@@ -3,13 +3,13 @@ package br.com.joqi.testes.modelo;
 public class Artista {
 
 	private int cdArtista;
-	private String dsArtista;
+	private String nmArtista;
 	private int cdGenero;
 
-	public Artista(int cdArtista, String dsArtista, int cdGenero) {
+	public Artista(int cdArtista, String nmArtista, int cdGenero) {
 		super();
 		this.cdArtista = cdArtista;
-		this.dsArtista = dsArtista;
+		this.nmArtista = nmArtista;
 		this.cdGenero = cdGenero;
 	}
 
@@ -29,12 +29,12 @@ public class Artista {
 		this.cdGenero = cdGenero;
 	}
 
-	public String getDsArtista() {
-		return dsArtista;
+	public String getNmArtista() {
+		return nmArtista;
 	}
 
-	public void setDsArtista(String dsArtista) {
-		this.dsArtista = dsArtista;
+	public void setNmArtista(String nmArtista) {
+		this.nmArtista = nmArtista;
 	}
 
 }
