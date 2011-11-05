@@ -1,0 +1,8 @@
+select	gen.dsGenero,
+	count(alb.nrAlbum)
+from	albuns alb,
+	generos gen,
+	artistas art
+where	alb.cdArtista = art.cdArtista and
+	art.cdGenero = gen.cdGenero
+group by gen.cdGenero

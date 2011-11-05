@@ -1,5 +1,5 @@
-select	dis.nmDisco
+select	alb.nmDisco
 from	artistas art,
-	discos dis
-where	art.cdArtista = dis.cdArtista and
+	albuns alb
+where	art.cdArtista = alb.cdArtista and
 	art.nmArtista like 'ozzy%'
