@@ -1,5 +1,6 @@
 package br.com.joqi.semantico.consulta.resultado;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,6 +29,14 @@ public class ResultObject extends LinkedHashMap<String, Object> {
 		}
 	}
 
+	public short getShort(String name) {
+		try {
+			return (Short) get(name);
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 	public double getDouble(String name) {
 		try {
 			return (Double) get(name);
@@ -41,6 +50,22 @@ public class ResultObject extends LinkedHashMap<String, Object> {
 			return (Float) get(name);
 		} catch (Exception e) {
 			return 0;
+		}
+	}
+
+	public boolean getBoolean(String name) {
+		try {
+			return (Boolean) get(name);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public Date getDate(String name) {
+		try {
+			return (Date) get(name);
+		} catch (Exception e) {
+			return null;
 		}
 	}
 
