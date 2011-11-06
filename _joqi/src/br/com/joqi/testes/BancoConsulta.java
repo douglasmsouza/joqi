@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import br.com.joqi.testes.modelo.Artista;
 import br.com.joqi.testes.modelo.Album;
+import br.com.joqi.testes.modelo.Artista;
 import br.com.joqi.testes.modelo.Genero;
 
 public class BancoConsulta {
@@ -16,8 +16,32 @@ public class BancoConsulta {
 
 	public BancoConsulta() {
 		albuns = criaListaAlbuns();
-		artistas = criaListaColecoes();
+		artistas = criaListaArtistas();
 		generos = criaListaGeneros();
+	}
+
+	public List<Album> getAlbuns() {
+		return albuns;
+	}
+
+	public void setAlbuns(List<Album> albuns) {
+		this.albuns = albuns;
+	}
+
+	public List<Artista> getArtistas() {
+		return artistas;
+	}
+
+	public void setArtistas(List<Artista> artistas) {
+		this.artistas = artistas;
+	}
+
+	public List<Genero> getGeneros() {
+		return generos;
+	}
+
+	public void setGeneros(List<Genero> generos) {
+		this.generos = generos;
 	}
 
 	private List<Genero> criaListaGeneros() {
@@ -27,7 +51,7 @@ public class BancoConsulta {
 				));
 	}
 
-	private List<Artista> criaListaColecoes() {
+	private List<Artista> criaListaArtistas() {
 		return new ArrayList<Artista>(Arrays.asList(
 				new Artista(1, "Black Sabbath", 1),
 				new Artista(2, "Iron Maiden", 1),

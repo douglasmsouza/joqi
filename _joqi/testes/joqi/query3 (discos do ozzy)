@@ -1,4 +1,4 @@
-select	alb.nmDisco
+select	alb.nmAlbum
 from	artistas art,
 	albuns alb
 where	art.cdArtista = alb.cdArtista and

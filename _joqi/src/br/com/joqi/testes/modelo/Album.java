@@ -4,13 +4,13 @@ public class Album {
 
 	private int cdArtista;
 	private int nrAlbum;
-	private String nmDisco;
+	private String nmAlbum;
 
-	public Album(int cdArtista, int nrDisco, String nrAlbum) {
+	public Album(int cdArtista, int nrDisco, String nmAlbum) {
 		super();
 		this.cdArtista = cdArtista;
 		this.nrAlbum = nrDisco;
-		this.nmDisco = nrAlbum;
+		this.nmAlbum = nmAlbum;
 	}
 
 	public int getNrAlbum() {
@@ -29,12 +29,12 @@ public class Album {
 		this.cdArtista = cdArtista;
 	}
 
-	public String getNmDisco() {
-		return nmDisco;
+	public String getNmAlbum() {
+		return nmAlbum;
 	}
 
-	public void setNmDisco(String nmDisco) {
-		this.nmDisco = nmDisco;
+	public void setNmAlbum(String nmAlbum) {
+		this.nmAlbum = nmAlbum;
 	}
 
 }

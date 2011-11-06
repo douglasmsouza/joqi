@@ -105,6 +105,8 @@ public class Query implements IPossuiRestricoes {
 		ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
 		// arvore.imprime();
 
+		tempoExecucao = System.currentTimeMillis();
+		
 		/*Executa a consulta com base na arvore montada*/
 		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultList();
 
