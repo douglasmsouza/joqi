@@ -78,16 +78,7 @@ public class QueryImpl {
 			for (ResultObject objeto : resultList) {
 				ResultObject objetoNovo = new ResultObject();
 				for (Projecao<?> projecao : projecoes) {
-					Object valorProjecao = null;
-					//
-					if (projecao.getClass() == ProjecaoFuncaoAgregacao.class) {
-						FuncaoAgregacao funcao = ((ProjecaoFuncaoAgregacao) projecao).getValor();
-						valorProjecao = ((FuncaoAgregacao) objeto.get(funcao.toString())).getResultado();
-					} else {
-						valorProjecao = getValorProjecao(projecao, objeto);
-					}
-					//
-					objetoNovo.put(projecao.getNomeNaConsulta(), valorProjecao);
+					objetoNovo.put(projecao.getNomeNaConsulta(), getValorProjecao(projecao, objeto));
 				}
 				resultado.add(objetoNovo);
 			}
@@ -99,6 +90,10 @@ public class QueryImpl {
 	private Object getValorProjecao(Projecao<?> projecao, ResultObject objeto) throws CampoInexistenteException {
 		if (projecao.getClass() == ProjecaoCampo.class) {
 			return QueryUtils.getValorDoCampo(objeto, (ProjecaoCampo) projecao);
+		}
+		if (projecao.getClass() == ProjecaoFuncaoAgregacao.class) {
+			FuncaoAgregacao funcao = ((ProjecaoFuncaoAgregacao) projecao).getValor();
+			return ((FuncaoAgregacao) objeto.get(funcao.toString())).getResultado();
 		}
 		return projecao.getValor();
 	}

@@ -1,0 +1,7 @@
+select	art.nmArtista nome,
+	count(alb.nrAlbum) quant
+from	albuns alb,
+	artistas art
+where	alb.cdArtista = art.cdArtista
+group by nome
+order by quant
