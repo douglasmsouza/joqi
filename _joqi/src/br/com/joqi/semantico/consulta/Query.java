@@ -86,7 +86,7 @@ public class Query implements IPossuiRestricoes {
 		ordenacao.addItem(campo, tipoOrdenacao);
 	}
 
-	public void addCampoAgrupamento(ProjecaoCampo campo) {
+	public void addCampoAgrupamento(Projecao<?> campo) {
 		agrupamento.addCampo(campo);
 	}
 

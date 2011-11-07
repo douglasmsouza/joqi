@@ -149,8 +149,8 @@ public class QueryImpl {
 	 */
 	private String hashAgrupamento(ResultObject objeto, Agrupamento agrupamento) throws CampoInexistenteException {
 		String hash = "";
-		for (ProjecaoCampo campo : agrupamento.getCampos()) {
-			hash += QueryUtils.getValorDoCampoNaoNulo(objeto, campo);
+		for (Projecao<?> campo : agrupamento.getCampos()) {
+			hash += QueryUtils.getValorOperando(objeto, campo);
 		}
 		return hash;
 	}

@@ -5,23 +5,23 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 
 public class Agrupamento {
 
-	private Set<ProjecaoCampo> campos;
+	private Set<Projecao<?>> campos;
 	private Set<FuncaoAgregacao> funcoesAgregacao;
 
 	public Agrupamento() {
-		this.campos = new LinkedHashSet<ProjecaoCampo>();
+		this.campos = new LinkedHashSet<Projecao<?>>();
 		this.funcoesAgregacao = new HashSet<FuncaoAgregacao>();
 	}
 
-	public Set<ProjecaoCampo> getCampos() {
+	public Set<Projecao<?>> getCampos() {
 		return campos;
 	}
 
-	public void addCampo(ProjecaoCampo campo) {
+	public void addCampo(Projecao<?> campo) {
 		campos.add(campo);
 	}
 
@@ -37,7 +37,7 @@ public class Agrupamento {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("GROUP BY ");
-		for (ProjecaoCampo campo : campos) {
+		for (Projecao<?> campo : campos) {
 			sb.append(campo).append(", ");
 		}
 		return sb.delete(sb.length() - 2, sb.length()).toString();
