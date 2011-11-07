@@ -295,7 +295,7 @@ public class PlanoExecucao {
 	private void verificaSemanticaOperando(Projecao<?> operando, Object operacao, String clausula,
 			Class<? extends Exception> classeExcecao) throws Exception {
 		if (operando != null) {
-			//
+			/*Verifica se eh o apelido de algum projecao*/
 			verificaSeEhApelido(operando);
 			//
 			/*Se eh o operando eh referencia a atributo, verifica se existe o nome da relacao*/
@@ -319,6 +319,14 @@ public class PlanoExecucao {
 		}
 	}
 
+	/**
+	 * Funcao que verifica se um operando eh um apelido de alguma projecao da
+	 * clausula SELECT. Caso seja verificado que eh um apelido, o operando
+	 * recebe os atributos da projecao cujo apelido eh o informado.
+	 * 
+	 * @param operando
+	 * @author Douglas Matheus de Souza em 07/11/2011
+	 */
 	private void verificaSeEhApelido(Projecao operando) {
 		Projecao<?> projecaoMapeada = apelidosProjecoes.get(operando.getValor());
 		if (projecaoMapeada != null) {
