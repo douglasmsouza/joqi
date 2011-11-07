@@ -147,7 +147,7 @@ public class PlanoExecucao {
 	 */
 	private void insereAgrupamento(ArvoreConsulta arvore, Agrupamento agrupamento) throws Exception {
 		if (agrupamento.getCampos().size() > 0) {
-			for (ProjecaoCampo campo : agrupamento.getCampos()) {
+			for (Projecao<?> campo : agrupamento.getCampos()) {
 				verificaSemanticaOperando(campo, null, "group by", ClausulaGroupByException.class);
 			}
 			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
