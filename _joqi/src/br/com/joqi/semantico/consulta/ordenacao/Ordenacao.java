@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 
 public class Ordenacao {
 
@@ -18,7 +18,7 @@ public class Ordenacao {
 		return itens;
 	}
 
-	public void addItem(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
+	public void addItem(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
 		itens.add(new ItemOrdenacao(campo, tipoOrdenacao));
 	}
 

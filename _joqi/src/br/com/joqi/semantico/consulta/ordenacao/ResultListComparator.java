@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import br.com.joqi.semantico.consulta.QueryUtils;
 import br.com.joqi.semantico.consulta.ordenacao.ItemOrdenacao.TipoOrdenacao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
@@ -32,35 +32,28 @@ public class ResultListComparator implements Comparator<ResultObject> {
 		//
 		if (iterator.hasNext()) {
 			ItemOrdenacao item = iterator.next();
-			ProjecaoCampo campo = item.getCampo();
+			Projecao<?> campo = item.getCampo();
 			//
 			Object valor1;
 			Object valor2;
 			if (item.getTipoOrdenacao() == TipoOrdenacao.ASC) {
-				valor1 = QueryUtils.getValorDoCampo(o1, campo);
-				valor2 = QueryUtils.getValorDoCampo(o2, campo);
+				valor1 = QueryUtils.getValorOperando(o1, campo);
+				valor2 = QueryUtils.getValorOperando(o2, campo);
 			} else {
-				valor1 = QueryUtils.getValorDoCampo(o2, campo);
-				valor2 = QueryUtils.getValorDoCampo(o1, campo);
+				valor1 = QueryUtils.getValorOperando(o2, campo);
+				valor2 = QueryUtils.getValorOperando(o1, campo);
 			}
-			if (valor1 != null && valor2 != null) {
-				if (valor1 instanceof String) {
-					valor1 = JoqiUtil.retiraAcentuacao((String) valor1).toLowerCase();
-				}
-				if (valor2 instanceof String) {
-					valor2 = JoqiUtil.retiraAcentuacao((String) valor2).toLowerCase();
-				}
-				//
-				retornoComparacao = ((Comparable) valor1).compareTo((Comparable) valor2);
-				if (retornoComparacao == 0) {
-					return efetuaComparacao(o1, o2, iterator);
-				}
-			} else if (valor1 == null && valor2 != null) {
-				return -1;
-			} else if (valor1 != null && valor2 == null) {
-				return 1;
-			} else {
-				return 0;
+			//
+			if (valor1 instanceof String) {
+				valor1 = JoqiUtil.retiraAcentuacao((String) valor1).toLowerCase();
+			}
+			if (valor2 instanceof String) {
+				valor2 = JoqiUtil.retiraAcentuacao((String) valor2).toLowerCase();
+			}
+			//
+			retornoComparacao = ((Comparable) valor1).compareTo((Comparable) valor2);
+			if (retornoComparacao == 0) {
+				return efetuaComparacao(o1, o2, iterator);
 			}
 		}
 		return retornoComparacao;
