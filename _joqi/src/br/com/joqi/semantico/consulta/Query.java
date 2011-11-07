@@ -14,7 +14,6 @@ import br.com.joqi.semantico.consulta.plano.ArvoreConsulta;
 import br.com.joqi.semantico.consulta.plano.PlanoExecucao;
 import br.com.joqi.semantico.consulta.projecao.ListaProjecoes;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoFuncaoAgregacao;
 import br.com.joqi.semantico.consulta.relacao.Relacao;
 import br.com.joqi.semantico.consulta.restricao.IPossuiRestricoes;
@@ -106,7 +105,7 @@ public class Query implements IPossuiRestricoes {
 		// arvore.imprime();
 
 		tempoExecucao = System.currentTimeMillis();
-		
+
 		/*Executa a consulta com base na arvore montada*/
 		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultList();
 
