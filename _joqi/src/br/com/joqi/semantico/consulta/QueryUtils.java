@@ -6,8 +6,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.agrupamento.agregacao.FuncaoAgregacao;
 import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoFuncaoAgregacao;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
@@ -142,6 +144,10 @@ public class QueryUtils {
 	public static Object getValorOperando(ResultObject resultObject, Projecao<?> operando) throws CampoInexistenteException {
 		if (operando.getClass() == ProjecaoCampo.class) {
 			return getValorDoCampoNaoNulo(resultObject, (ProjecaoCampo) operando);
+		}
+		if (operando.getClass() == ProjecaoFuncaoAgregacao.class) {
+			FuncaoAgregacao funcao = ((ProjecaoFuncaoAgregacao) operando).getValor();
+			return ((FuncaoAgregacao) resultObject.get(funcao.toString())).getResultado();
 		}
 		return operando.getValor();
 	}

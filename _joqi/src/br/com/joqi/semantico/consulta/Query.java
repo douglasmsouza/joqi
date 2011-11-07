@@ -2,8 +2,10 @@ package br.com.joqi.semantico.consulta;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import br.com.joqi.parser.Parser;
@@ -32,6 +34,8 @@ public class Query implements IPossuiRestricoes {
 	private Ordenacao ordenacao;
 	private Agrupamento agrupamento;
 	//
+	private Map<String, Projecao<?>> apelidosProjecoes;
+	//
 	private double tempoExecucao;
 	//
 	private int min;
@@ -45,10 +49,29 @@ public class Query implements IPossuiRestricoes {
 		restricoes = new ArrayList<Restricao>();
 		ordenacao = new Ordenacao();
 		agrupamento = new Agrupamento();
+		apelidosProjecoes = new HashMap<String, Projecao<?>>();
 		tempoExecucao = 0;
 	}
 
+	private Projecao getProjecaoMapeada(Projecao projecao) {
+		Projecao projecaoMapeada = apelidosProjecoes.get(projecao.getValor());
+		if (projecaoMapeada != null) {
+			try {
+				projecao = projecaoMapeada.getClass().newInstance();
+				projecao.setValor(projecaoMapeada.getValor());
+				projecao.setApelido(projecaoMapeada.getApelido());
+				projecao.setRelacao(projecaoMapeada.getRelacao());
+			} catch (Exception e) {
+			}
+		}
+		return projecao;
+	}
+
 	public void addProjecao(Projecao<?> projecao) {
+		if (projecao.getApelido() != null) {
+			apelidosProjecoes.put(projecao.getApelido(), projecao);
+		}
+		//
 		projecoes.add(projecao);
 		//
 		if (projecao instanceof ProjecaoFuncaoAgregacao) {
@@ -72,11 +95,11 @@ public class Query implements IPossuiRestricoes {
 	}
 
 	public void addItemOrdenacao(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
-		ordenacao.addItem(campo, tipoOrdenacao);
+		ordenacao.addItem(getProjecaoMapeada(campo), tipoOrdenacao);
 	}
 
 	public void addCampoAgrupamento(Projecao<?> campo) {
-		agrupamento.addCampo(campo);
+		agrupamento.addCampo(getProjecaoMapeada(campo));
 	}
 
 	public ListaProjecoes getProjecoes() {
