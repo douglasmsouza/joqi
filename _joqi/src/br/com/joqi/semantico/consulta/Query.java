@@ -33,6 +33,9 @@ public class Query implements IPossuiRestricoes {
 	private Agrupamento agrupamento;
 	//
 	private double tempoExecucao;
+	//
+	private int min;
+	private int max;
 
 	public Query(Object objetoConsulta) {
 		this.objetoConsulta = objetoConsulta;
@@ -68,6 +71,14 @@ public class Query implements IPossuiRestricoes {
 		restricoes.add(restricao);
 	}
 
+	public void addItemOrdenacao(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
+		ordenacao.addItem(campo, tipoOrdenacao);
+	}
+
+	public void addCampoAgrupamento(Projecao<?> campo) {
+		agrupamento.addCampo(campo);
+	}
+
 	public ListaProjecoes getProjecoes() {
 		return projecoes;
 	}
@@ -81,16 +92,16 @@ public class Query implements IPossuiRestricoes {
 		return restricoes;
 	}
 
-	public void addItemOrdenacao(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
-		ordenacao.addItem(campo, tipoOrdenacao);
-	}
-
-	public void addCampoAgrupamento(Projecao<?> campo) {
-		agrupamento.addCampo(campo);
-	}
-
 	public double getTempoExecucao() {
 		return tempoExecucao;
+	}
+
+	public void setMin(int min) {
+		this.min = min;
+	}
+
+	public void setMax(int max) {
+		this.max = max;
 	}
 
 	public Collection<ResultObject> getResultCollection(String query) throws Exception {
@@ -111,6 +122,22 @@ public class Query implements IPossuiRestricoes {
 
 		tempoExecucao = System.currentTimeMillis() - tempoExecucao;
 
-		return resultado;
+		if (min > 0 || max > 0)
+			return subList(new ArrayList<ResultObject>(resultado), min, max);
+		else
+			return resultado;
+	}
+
+	private static <T> List<T> subList(List<T> lista, int inicio, int fim) {
+		if (inicio >= 0 && inicio < lista.size()) {
+			if (inicio < fim) {
+				if (fim <= lista.size())
+					lista = lista.subList(inicio, fim);
+				else {
+					lista = lista.subList(inicio, lista.size());
+				}
+			}
+		}
+		return lista;
 	}
 }
