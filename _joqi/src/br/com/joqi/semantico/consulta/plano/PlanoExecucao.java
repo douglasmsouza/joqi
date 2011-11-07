@@ -1,8 +1,10 @@
 package br.com.joqi.semantico.consulta.plano;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
@@ -44,10 +46,12 @@ public class PlanoExecucao {
 
 	/*Lista auxiliar que guarda quais restricoes ja foram organizadas*/
 	private Set<RestricaoSimples> restricoesJaOrdenadas;
-
+	/*Arvore de consulta que sera montada*/
 	private ArvoreConsulta arvore;
-	//
+	/*Relacoes da clausula FROM*/
 	private Set<Relacao> relacoes;
+	/*Mapeamento dos apelidos das projecoes da clausula SELECT*/
+	private Map<String, Projecao<?>> apelidosProjecoes;
 
 	public PlanoExecucao() {
 		arvore = new ArvoreConsulta();
@@ -69,6 +73,8 @@ public class PlanoExecucao {
 		this.arvore = new ArvoreConsulta();
 		//
 		this.relacoes = relacoes;
+		this.apelidosProjecoes = new HashMap<String, Projecao<?>>();
+		//
 		/*Insere as projecoes na arvore*/
 		insereProjecoes(arvore, projecoes);
 		/*Insere a ordenacao na arvore*/
@@ -103,6 +109,11 @@ public class PlanoExecucao {
 	private void insereProjecoes(ArvoreConsulta arvore, ListaProjecoes projecoes) throws Exception {
 		if (projecoes.size() > 0) {
 			for (Projecao<?> projecao : projecoes) {
+				/*Caso a projecao tenha um apelido, faz o mapeamento desta projecao com o apelido*/
+				if (projecao.getApelido() != null) {
+					apelidosProjecoes.put(projecao.getApelido(), projecao);
+				}
+				//
 				verificaSemanticaOperando(projecao, projecao, "select", ClausulaSelectException.class);
 			}
 			arvore.insere(projecoes);
@@ -284,6 +295,9 @@ public class PlanoExecucao {
 	private void verificaSemanticaOperando(Projecao<?> operando, Object operacao, String clausula,
 			Class<? extends Exception> classeExcecao) throws Exception {
 		if (operando != null) {
+			//
+			verificaSeEhApelido(operando);
+			//
 			/*Se eh o operando eh referencia a atributo, verifica se existe o nome da relacao*/
 			if (operando.getClass() == ProjecaoCampo.class) {
 				if (operando.getRelacao() == null) {
@@ -302,6 +316,14 @@ public class PlanoExecucao {
 					}
 				}
 			}
+		}
+	}
+
+	private void verificaSeEhApelido(Projecao operando) {
+		Projecao<?> projecaoMapeada = apelidosProjecoes.get(operando.getValor());
+		if (projecaoMapeada != null) {
+			operando.setValor(projecaoMapeada.getValor());
+			operando.setRelacao(projecaoMapeada.getRelacao());
 		}
 	}
 
