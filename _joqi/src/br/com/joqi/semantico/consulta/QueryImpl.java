@@ -27,21 +27,14 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelac
 import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
+import br.com.joqi.semantico.consulta.util.ObjetoHash;
+import br.com.joqi.semantico.consulta.util.TabelaHash;
 import br.com.joqi.semantico.consulta.util.ValorNulo;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.TiposIncompativeisException;
 import br.com.joqi.semantico.exception.ValorInvalidoException;
 
 public class QueryImpl {
-
-	private class ObjetoHash {
-		Object objeto;
-		ObjetoHash proximo;
-
-		ObjetoHash(Object objeto) {
-			this.objeto = objeto;
-		}
-	}
 
 	private ArvoreConsulta arvoreConsulta;
 
@@ -367,20 +360,21 @@ public class QueryImpl {
 		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
 		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
 		//
-		Map<Object, ObjetoHash> hashes = new HashMap<Object, ObjetoHash>();
+		TabelaHash hashes = new TabelaHash(relacaoEntrada1.size());
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			Object chave = QueryUtils.getValorDoCampo(objeto1, operando1);
 			//
-			ObjetoHash objetoHash = hashes.get(chave);
+			/*ObjetoHash objetoHash = hashes.get(chave);
 			if (objetoHash != null) {
 				ObjetoHash objetoHashNovo = new ObjetoHash(objeto1);
-				objetoHashNovo.proximo = objetoHash;
+				objetoHashNovo.setProximo(objetoHash);
 				hashes.put(chave, objetoHashNovo);
 			} else {
 				objetoHash = new ObjetoHash(objeto1);
 				hashes.put(chave, objetoHash);
-			}
+			}*/
+			hashes.put(chave, objeto1);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
@@ -389,14 +383,14 @@ public class QueryImpl {
 			ObjetoHash objetoHash = hashes.get(chave);
 			//
 			while (objetoHash != null) {
-				Object objeto = objetoHash.objeto;
+				Object objeto = objetoHash.getObjeto();
 				//
 				ResultObject tupla = new ResultObject();
 				tupla.putAll((ResultObject) objeto);
 				tupla.putAll((ResultObject) objeto2);
 				resultado.add(tupla);
 				//
-				objetoHash = objetoHash.proximo;
+				objetoHash = objetoHash.getProximo();
 			}
 		}
 		//

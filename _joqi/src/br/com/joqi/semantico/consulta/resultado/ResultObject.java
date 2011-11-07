@@ -69,7 +69,7 @@ public class ResultObject extends LinkedHashMap<String, Object> {
 		}
 	}
 
-	@Override
+	/*@Override
 	public Object get(Object key) {
 		Object value = super.get(key);
 		//
@@ -82,5 +82,5 @@ public class ResultObject extends LinkedHashMap<String, Object> {
 		}
 		//
 		return value;
-	}
+	}*/
 }
