@@ -27,6 +27,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelac
 import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
+import br.com.joqi.semantico.consulta.util.ValorNulo;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.TiposIncompativeisException;
 import br.com.joqi.semantico.exception.ValorInvalidoException;
@@ -39,18 +40,6 @@ public class QueryImpl {
 
 		ObjetoHash(Object objeto) {
 			this.objeto = objeto;
-		}
-	}
-
-	private class ValorNulo implements Comparable<ValorNulo> {
-		@Override
-		public int hashCode() {
-			return 0;
-		}
-
-		@Override
-		public int compareTo(ValorNulo o) {
-			return 0;
 		}
 	}
 
@@ -138,7 +127,7 @@ public class QueryImpl {
 			}
 			//
 			for (FuncaoAgregacao funcao : agrupamento.getFuncoesAgregacao()) {
-				Object valor = getValorCampo(funcao.getCampo(), objeto);
+				Object valor = QueryUtils.getValorDoCampoNaoNulo(objeto, funcao.getCampo());
 				//
 				FuncaoAgregacao funcaoObjeto = (FuncaoAgregacao) hashes.get(hash).get(funcao.toString());
 				funcaoObjeto.atualizaResultado(valor);
@@ -161,7 +150,7 @@ public class QueryImpl {
 	private String hashAgrupamento(ResultObject objeto, Agrupamento agrupamento) throws CampoInexistenteException {
 		String hash = "";
 		for (ProjecaoCampo campo : agrupamento.getCampos()) {
-			hash += getValorCampo(campo, objeto);
+			hash += QueryUtils.getValorDoCampoNaoNulo(objeto, campo);
 		}
 		return hash;
 	}
@@ -330,13 +319,13 @@ public class QueryImpl {
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			/*Retorna o valor do primeiro operando*/
-			Object valor1 = getValorCampo(operando1, objeto1);
+			Object valor1 = QueryUtils.getValorDoCampoNaoNulo(objeto1, operando1);
 			if (!(valor1 instanceof Comparable))
 				continue;
 
 			for (ResultObject objeto2 : relacaoEntrada2) {
 				/*Retorna o valor do segundo operando*/
-				Object valor2 = getValorCampo(operando2, objeto2);
+				Object valor2 = QueryUtils.getValorDoCampoNaoNulo(objeto2, operando2);
 				if (!(valor2 instanceof Comparable))
 					continue;
 
@@ -441,7 +430,7 @@ public class QueryImpl {
 
 		/*Percorre a relacao, eliminando os registros que nao satisfazem a condicao*/
 		for (ResultObject objeto : relacaoEntrada) {
-			Object valorOperando1 = getValorOperando(operando1, objeto);
+			Object valorOperando1 = QueryUtils.getValorOperando(objeto, operando1);
 			if (!(valorOperando1 instanceof Comparable))
 				continue;
 
@@ -462,7 +451,7 @@ public class QueryImpl {
 				continue;
 			}
 
-			Object valorOperando2 = getValorOperando(operando2, objeto);
+			Object valorOperando2 = QueryUtils.getValorOperando(objeto, operando2);
 			if (!(valorOperando2 instanceof Comparable))
 				continue;
 
@@ -498,37 +487,6 @@ public class QueryImpl {
 	 */
 	private boolean verificaCondicao(boolean comparacao, RestricaoSimples restricao) {
 		return (comparacao && !restricao.isNegacao()) || (!comparacao && restricao.isNegacao());
-	}
-
-	/**
-	 * Retorna o valor de um operando de uma restricao
-	 * 
-	 * @param operando
-	 * @param resultObject
-	 * @throws CampoInexistenteException
-	 * @author Douglas Matheus de Souza em 02/11/2011
-	 */
-	private Object getValorOperando(Projecao<?> operando, ResultObject resultObject) throws CampoInexistenteException {
-		if (operando.getClass() == ProjecaoCampo.class) {
-			return getValorCampo((ProjecaoCampo) operando, resultObject);
-		}
-		return operando.getValor();
-	}
-
-	/**
-	 * Retorna o valor de um atributo de um objeto
-	 * 
-	 * @param operando
-	 * @param resultObject
-	 * @throws CampoInexistenteException
-	 * @author Douglas Matheus de Souza em 02/11/2011
-	 */
-	private Object getValorCampo(ProjecaoCampo operando, ResultObject resultObject) throws CampoInexistenteException {
-		Object valor = QueryUtils.getValorDoCampo(resultObject, operando);
-		if (valor == null) {
-			return new ValorNulo();
-		}
-		return valor;
 	}
 
 	/**

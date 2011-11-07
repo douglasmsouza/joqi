@@ -1,6 +1,6 @@
 package br.com.joqi.semantico.consulta.ordenacao;
 
-import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 
 public class ItemOrdenacao {
 
@@ -8,15 +8,15 @@ public class ItemOrdenacao {
 		ASC, DESC
 	}
 
-	private ProjecaoCampo campo;
+	private Projecao<?> campo;
 	private TipoOrdenacao tipoOrdenacao;
 
-	public ItemOrdenacao(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
+	public ItemOrdenacao(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
 		this.campo = campo;
 		this.tipoOrdenacao = tipoOrdenacao;
 	}
 
-	public ProjecaoCampo getCampo() {
+	public Projecao<?> getCampo() {
 		return campo;
 	}
 

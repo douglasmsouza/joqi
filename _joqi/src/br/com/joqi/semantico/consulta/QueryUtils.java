@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 
+import br.com.joqi.semantico.consulta.projecao.Projecao;
 import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.RestricaoSimples;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogicoAnd;
@@ -13,6 +14,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Entre;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MaiorIgual;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.MenorIgual;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.consulta.util.ValorNulo;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.RelacaoInexistenteException;
 
@@ -126,6 +128,39 @@ public class QueryUtils {
 
 		/*Caso nao exista nenhum metodo, lanca excecao*/
 		throw new CampoInexistenteException("O campo/método \"" + nomeCampo + "\" não existe na classe \"" + objeto.getClass().getName() + "\"");
+	}
+
+	/**
+	 * Retorna o valor de um operando
+	 * 
+	 * @param resultObject
+	 * @param operando
+	 * 
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
+	public static Object getValorOperando(ResultObject resultObject, Projecao<?> operando) throws CampoInexistenteException {
+		if (operando.getClass() == ProjecaoCampo.class) {
+			return getValorDoCampoNaoNulo(resultObject, (ProjecaoCampo) operando);
+		}
+		return operando.getValor();
+	}
+
+	/**
+	 * Retorna o valor de um atributo de um objeto
+	 * 
+	 * @param resultObject
+	 * @param operando
+	 * 
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 02/11/2011
+	 */
+	public static Object getValorDoCampoNaoNulo(ResultObject resultObject, ProjecaoCampo operando) throws CampoInexistenteException {
+		Object valor = getValorDoCampo(resultObject, operando);
+		if (valor == null) {
+			return new ValorNulo();
+		}
+		return valor;
 	}
 
 	private static Method retornaMetodo(Class<?> classe, String nomeCampo) {

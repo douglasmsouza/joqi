@@ -82,7 +82,7 @@ public class Query implements IPossuiRestricoes {
 		return restricoes;
 	}
 
-	public void addItemOrdenacao(ProjecaoCampo campo, TipoOrdenacao tipoOrdenacao) {
+	public void addItemOrdenacao(Projecao<?> campo, TipoOrdenacao tipoOrdenacao) {
 		ordenacao.addItem(campo, tipoOrdenacao);
 	}
 
