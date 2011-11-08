@@ -152,6 +152,8 @@ public class Query implements IPossuiRestricoes {
 	}
 
 	private static <T> List<T> subList(List<T> lista, int inicio, int fim) {
+		inicio = inicio - 1;
+		//
 		if (inicio >= 0 && inicio < lista.size()) {
 			if (inicio < fim) {
 				if (fim <= lista.size())
@@ -161,6 +163,7 @@ public class Query implements IPossuiRestricoes {
 				}
 			}
 		}
+		//
 		return lista;
 	}
 }
