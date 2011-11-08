@@ -53,8 +53,8 @@ public class Query implements IPossuiRestricoes {
 		tempoExecucao = 0;
 	}
 
-	private Projecao getProjecaoMapeada(Projecao projecao) {
-		Projecao projecaoMapeada = apelidosProjecoes.get(projecao.getValor());
+	private Projecao<?> getProjecaoMapeada(Projecao projecao) {
+		Projecao<?> projecaoMapeada = apelidosProjecoes.get(projecao.getValor());
 		if (projecaoMapeada != null) {
 			try {
 				projecao = projecaoMapeada.getClass().newInstance();
