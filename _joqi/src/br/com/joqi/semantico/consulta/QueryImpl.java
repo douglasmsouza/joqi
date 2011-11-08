@@ -28,7 +28,6 @@ import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.consulta.util.ObjetoHash;
-import br.com.joqi.semantico.consulta.util.TabelaHash;
 import br.com.joqi.semantico.consulta.util.ValorNulo;
 import br.com.joqi.semantico.exception.CampoInexistenteException;
 import br.com.joqi.semantico.exception.TiposIncompativeisException;
@@ -42,7 +41,7 @@ public class QueryImpl {
 		this.arvoreConsulta = arvoreConsulta;
 	}
 
-	public Collection<ResultObject> getResultList() throws Exception {
+	public Collection<ResultObject> getResultCollection() throws Exception {
 		return executaOperacao(arvoreConsulta.getRaiz());
 	}
 
@@ -360,12 +359,13 @@ public class QueryImpl {
 		ProjecaoCampo operando1 = (ProjecaoCampo) restricao.getOperando1();
 		ProjecaoCampo operando2 = (ProjecaoCampo) restricao.getOperando2();
 		//
-		TabelaHash hashes = new TabelaHash(relacaoEntrada1.size());
+		// TabelaHash hashes = new TabelaHash(relacaoEntrada1.size());
+		Map<Object, ObjetoHash> hashes = new HashMap<Object, ObjetoHash>();
 		//
 		for (ResultObject objeto1 : relacaoEntrada1) {
 			Object chave = QueryUtils.getValorDoCampo(objeto1, operando1);
 			//
-			/*ObjetoHash objetoHash = hashes.get(chave);
+			ObjetoHash objetoHash = hashes.get(chave);
 			if (objetoHash != null) {
 				ObjetoHash objetoHashNovo = new ObjetoHash(objeto1);
 				objetoHashNovo.setProximo(objetoHash);
@@ -373,8 +373,8 @@ public class QueryImpl {
 			} else {
 				objetoHash = new ObjetoHash(objeto1);
 				hashes.put(chave, objetoHash);
-			}*/
-			hashes.put(chave, objeto1);
+			}
+			// hashes.put(chave, objeto1);
 		}
 		//
 		for (ResultObject objeto2 : relacaoEntrada2) {
