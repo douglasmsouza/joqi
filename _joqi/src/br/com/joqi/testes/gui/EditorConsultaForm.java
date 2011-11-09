@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JToolBar;
 
 public class EditorConsultaForm extends javax.swing.JFrame {
 
@@ -44,7 +43,7 @@ public class EditorConsultaForm extends javax.swing.JFrame {
 
 		splitPane = new JSplitPane();
 		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		splitPane.setBounds(10, 45, 772, 485);
+		splitPane.setBounds(10, 45, 764, 485);
 		getContentPane().add(splitPane);
 
 		JScrollPane scrollPane_1 = new JScrollPane();
