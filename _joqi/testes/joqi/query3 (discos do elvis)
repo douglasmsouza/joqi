@@ -2,4 +2,4 @@ select	alb.nmAlbum
 from	artistas art,
 	albuns alb
 where	art.cdArtista = alb.cdArtista and
-	art.nmArtista like 'ozzy%'
+	(art.nmArtista like '%elvis%' or art.nmArtista like '%presley%')

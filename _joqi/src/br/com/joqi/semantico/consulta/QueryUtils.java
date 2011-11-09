@@ -147,7 +147,8 @@ public class QueryUtils {
 		}
 		if (operando.getClass() == ProjecaoFuncaoAgregacao.class) {
 			FuncaoAgregacao funcao = ((ProjecaoFuncaoAgregacao) operando).getValor();
-			return ((FuncaoAgregacao) resultObject.get(funcao.toString())).getResultado();
+			FuncaoAgregacao funcaoObjeto = (FuncaoAgregacao) resultObject.get(funcao.toString()); 
+			return funcaoObjeto.getResultado();
 		}
 		return operando.getValor();
 	}

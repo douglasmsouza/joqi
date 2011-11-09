@@ -1,10 +1,8 @@
 package br.com.joqi.semantico.consulta;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
@@ -26,6 +24,7 @@ import br.com.joqi.semantico.consulta.restricao.operadorrelacional.Nulo;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 import br.com.joqi.semantico.consulta.resultado.ResultList;
 import br.com.joqi.semantico.consulta.resultado.ResultObject;
+import br.com.joqi.semantico.consulta.resultado.ResultSet;
 import br.com.joqi.semantico.consulta.util.JoqiUtil;
 import br.com.joqi.semantico.consulta.util.ObjetoHash;
 import br.com.joqi.semantico.consulta.util.ValorNulo;
@@ -61,13 +60,13 @@ public class QueryImpl {
 		return new ResultList();
 	}
 
-	private Collection<ResultObject> projecao(Collection<ResultObject> resultList, ListaProjecoes projecoes) throws CampoInexistenteException {
+	private Collection<ResultObject> projecao(Collection<ResultObject> relacaoEntrada, ListaProjecoes projecoes) throws CampoInexistenteException {
 		if (projecoes.size() == 0) {
-			return resultList;
+			return relacaoEntrada;
 		} else {
 			ResultList resultado = new ResultList();
 			//
-			for (ResultObject objeto : resultList) {
+			for (ResultObject objeto : relacaoEntrada) {
 				ResultObject objetoNovo = new ResultObject();
 				for (Projecao<?> projecao : projecoes) {
 					objetoNovo.put(projecao.getNomeNaConsulta(), getValorProjecao(projecao, objeto));
@@ -150,7 +149,7 @@ public class QueryImpl {
 	 * @author Douglas Matheus de Souza em 02/11/2011
 	 */
 	private Collection<ResultObject> ordenacao(Collection<ResultObject> relacaoEntrada, Ordenacao ordenacao) {
-		List<ResultObject> resultado = new ArrayList<ResultObject>(relacaoEntrada);
+		ResultList resultado = new ResultList(relacaoEntrada);
 		//
 		ResultListComparator comparator = new ResultListComparator(ordenacao);
 		Collections.sort(resultado, comparator);
@@ -168,7 +167,7 @@ public class QueryImpl {
 	 * @author Douglas Matheus de Souza em 02/11/2011
 	 */
 	private ResultList resolveRestricoes(NoArvore raiz) throws Exception {
-		ResultList resultado = new ResultList();
+		ResultSet resultado = new ResultSet();
 		//
 		NoArvore filho = raiz.getFilho();
 		while (filho != null) {
@@ -176,7 +175,7 @@ public class QueryImpl {
 			filho = filho.getIrmao();
 		}
 		//
-		return resultado;
+		return new ResultList(resultado);
 	}
 
 	/**
