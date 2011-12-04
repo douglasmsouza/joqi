@@ -1,6 +1,7 @@
 package br.com.joqi.semantico.consulta.restricao;
 
 import br.com.joqi.semantico.consulta.projecao.Projecao;
+import br.com.joqi.semantico.consulta.projecao.ProjecaoCampo;
 import br.com.joqi.semantico.consulta.restricao.operadorlogico.OperadorLogico;
 import br.com.joqi.semantico.consulta.restricao.operadorrelacional.OperadorRelacional;
 
@@ -77,9 +78,8 @@ public class RestricaoSimples extends Restricao {
 		return false;
 	}
 
-	@Deprecated
 	public boolean isConstante() {
-		return false;
+		return operando1.getClass() != ProjecaoCampo.class && operando2 != null && operando2.getClass() != ProjecaoCampo.class;
 	}
 
 	@Deprecated
