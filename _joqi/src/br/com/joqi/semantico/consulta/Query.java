@@ -136,34 +136,13 @@ public class Query implements IPossuiRestricoes {
 		/*Monta a arvore de consulta*/
 		PlanoExecucao planoExecucao = new PlanoExecucao();
 		ArvoreConsulta arvore = planoExecucao.montaArvore(projecoes, restricoes, relacoes, agrupamento, ordenacao);
-		arvore.imprime();
-
-		tempoExecucao = System.currentTimeMillis();
+		// arvore.imprime();
 
 		/*Executa a consulta com base na arvore montada*/
-		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultCollection();
+		Collection<ResultObject> resultado = new QueryImpl(arvore).getResultCollection(min, max);
 
 		tempoExecucao = System.currentTimeMillis() - tempoExecucao;
 
-		if (min > 0 || max > 0)
-			return subList(new ArrayList<ResultObject>(resultado), min, max);
-		else
-			return resultado;
-	}
-
-	private static <T> List<T> subList(List<T> lista, int inicio, int fim) {
-		inicio = inicio - 1;
-		//
-		if (inicio >= 0 && inicio < lista.size()) {
-			if (inicio < fim) {
-				if (fim <= lista.size())
-					lista = lista.subList(inicio, fim);
-				else {
-					lista = lista.subList(inicio, lista.size());
-				}
-			}
-		}
-		//
-		return lista;
+		return resultado;
 	}
 }

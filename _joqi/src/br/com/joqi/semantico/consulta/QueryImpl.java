@@ -1,8 +1,10 @@
 package br.com.joqi.semantico.consulta;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import br.com.joqi.semantico.consulta.agrupamento.Agrupamento;
@@ -40,10 +42,46 @@ public class QueryImpl {
 		this.arvoreConsulta = arvoreConsulta;
 	}
 
-	public Collection<ResultObject> getResultCollection() throws Exception {
-		return executaOperacao(arvoreConsulta.getRaiz());
+	public Collection<ResultObject> getResultCollection(int min, int max) throws Exception {
+		Collection<ResultObject> resultado = executaOperacao(arvoreConsulta.getRaiz());
+		//
+		if (min > 0 || max > 0)
+			return range(new ArrayList<ResultObject>(resultado), min, max);
+		else
+			return resultado;
 	}
 
+	/**
+	 * Trata a clausula RANGE fazendo o subList do resultado final
+	 * 
+	 * @param lista
+	 * @param inicio
+	 * @param fim
+	 * @author Douglas Matheus de Souza em 04/12/2011
+	 */
+	private static List<ResultObject> range(List<ResultObject> lista, int inicio, int fim) {
+		inicio = inicio - 1;
+		//
+		if (inicio >= 0 && inicio < lista.size()) {
+			if (inicio < fim) {
+				if (fim <= lista.size())
+					lista = lista.subList(inicio, fim);
+				else {
+					lista = lista.subList(inicio, lista.size());
+				}
+			}
+		}
+		//
+		return lista;
+	}
+
+	/**
+	 * Executa recursivamente cada operacao encontrada na arvore de consulta
+	 * 
+	 * @param no
+	 * @throws Exception
+	 * @author Douglas Matheus de Souza em 04/12/2011
+	 */
 	private Collection<ResultObject> executaOperacao(NoArvore no) throws Exception {
 		Object operacao = no.getOperacao();
 		//
@@ -60,6 +98,14 @@ public class QueryImpl {
 		return new ResultList();
 	}
 
+	/**
+	 * Projeta os campos declarados na clausula SELECT da consulta
+	 * 
+	 * @param relacaoEntrada
+	 * @param projecoes
+	 * @throws CampoInexistenteException
+	 * @author Douglas Matheus de Souza em 04/12/2011
+	 */
 	private Collection<ResultObject> projecao(Collection<ResultObject> relacaoEntrada, ListaProjecoes projecoes) throws CampoInexistenteException {
 		if (projecoes.size() == 0) {
 			return relacaoEntrada;
